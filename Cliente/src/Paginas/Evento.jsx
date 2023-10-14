@@ -37,9 +37,6 @@ export default function Evento() {
         const handleOk = () => {
             setIsModalOpen(false);
         };
-        const handleCancel = () => {
-            setIsModalOpen(false);
-        };
 
         const [previewOpen, setPreviewOpen] = useState(false);
         const [previewImage, setPreviewImage] = useState('');
@@ -72,11 +69,11 @@ export default function Evento() {
          //Mensaje de confirmacion al dar guardar en la parte de modal del evento
         const showConfirm = () => {
             confirm({
-            title: '¿Desea guardar este evento?',
+            title: '¿Esta seguro de guardar este evento?',
             icon: <ExclamationCircleFilled />,
-            content: 'Se registrarán los datos ingresados',
-            okText: "Aceptar",
-            cancelText: "Cancelar",
+            content: '',
+            okText: "Si",
+            cancelText: "No",
             centered: 'true',
             
             onOk() {
@@ -94,8 +91,8 @@ export default function Evento() {
             title: '¿Estás seguro de que deseas cancelar este evento?',
             icon: <ExclamationCircleFilled />,
             content: 'Los cambios no se guardarán',
-            okText: "Aceptar",
-            cancelText: "Cancelar",
+            okText: "Si",
+            cancelText: "No",
             centered: 'true',
             
             onOk() {
@@ -131,15 +128,15 @@ export default function Evento() {
           };
 
         //Eliminar evento
-        const eliminarEvento = (id) => {
-            axios.delete(`http://localhost:8000/api/evento/${id}`)
-              .then(() => {
-                obtenerDatos(); 
+        function eliminarEvento(key) {
+          axios.delete(`http://localhost:8000/api/evento/${key}`)
+              .then(response => {
+                obtenerDatos()
               })
-              .catch((error) => {
-                console.error(error);
+              .catch(error => {
+                 console.log(error)
               });
-          };
+        }
 
           const showDelete = (record) => {
             confirm({
@@ -152,13 +149,28 @@ export default function Evento() {
             
             onOk() {
                 handleOk()
+                console.log("dato: "+ record)
                 eliminarEvento(record)
             },
             onCancel() {
             },
             })
-
         }
+        //Guardar evento
+        const onFinish = (values) => {
+          console.log('Valores del formulario:', values);
+      
+          // Realiza la solicitud POST con Axios para guardar los datos en el servidor
+          axios.post('ttp://localhost:8000/api/evento', values)
+            .then((response) => {
+              console.log('Datos guardados con éxito', response.data);
+              // Realiza acciones adicionales después de guardar los datos
+            })
+            .catch((error) => {
+              console.error('Error al guardar los datos', error);
+              // Maneja errores si es necesario
+            });
+        };
 
     return(
         <div className='pagina-evento'>
@@ -167,8 +179,6 @@ export default function Evento() {
             <Modal  title="Registro de evento" 
                     className='modal-evento'
                     open={isModalOpen} 
-                    onOk={handleOk} 
-                    onCancel={handleCancel}
                     okText= "Guardar"
                     cancelText= "Cancelar"
                     footer={[
@@ -186,7 +196,7 @@ export default function Evento() {
                         form={form}
                         >
                     <Form.Item label="T&iacute;tulo"
-                                name="titulo"
+                                name="TUTULO"
                                 rules={[
                                     {
                                       required: true,
@@ -197,7 +207,7 @@ export default function Evento() {
                     </Form.Item>
 
                     <Form.Item label="Tipo"
-                                name="tipo"
+                                name="TIPO_EVENTO"
                                 rules={[
                                     {
                                       required: true,
@@ -244,7 +254,7 @@ export default function Evento() {
 
                     <div className='form-fecha-hora'>
                         <Form.Item  label="Fecha" 
-                                    name="fecha"
+                                    name="FECHA"
                                     rules={[
                                         {
                                         required: true,
@@ -255,7 +265,7 @@ export default function Evento() {
                         </Form.Item>
 
                         <Form.Item  label="Hora"
-                                    name="hora"
+                                    name="HORA"
                                     rules={[
                                         {
                                         required: true,
@@ -359,7 +369,7 @@ export default function Evento() {
                             <EditOutlined style={{  fontSize: '25px', color: '#3498DB'}} />
                         </Button>
                         {/* Boton para eliminar */}
-                        <Button type='link' onClick={() => showDelete(record.key)} >
+                        <Button type='link' onClick={() => showDelete(record.id)} >
                             <DeleteOutlined  style={{  fontSize: '25px', color: '#E51919'}} />
                         </Button >
                             
