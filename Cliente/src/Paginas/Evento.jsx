@@ -1,17 +1,18 @@
 import '../App.css'
 import { Button, Table, Space, Modal, Form, Input,
          Select, DatePicker,TimePicker, Upload, message } from 'antd'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {    DeleteOutlined,
             EditOutlined,
             PlusOutlined,
             ExclamationCircleFilled,
 } from '@ant-design/icons';
+import axios from 'axios'
+
 
     const { TextArea } = Input;
     const { confirm } = Modal;
     const { Column } = Table;
-    const format = 'HH:mm';
     
     const getBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -27,7 +28,7 @@ import {    DeleteOutlined,
       const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
       };
-
+      
 export default function Evento() {
         const [isModalOpen, setIsModalOpen] = useState(false);
         const showModal = () => {
@@ -80,6 +81,7 @@ export default function Evento() {
             
             onOk() {
                 handleOk()
+                form.resetFields();
                 message.success('El evento se registro correctamente')
             },
             onCancel() {
@@ -98,12 +100,65 @@ export default function Evento() {
             
             onOk() {
                 handleOk()
+                form.resetFields();
             },
             onCancel() {
             },
             })
+
         }
+        //Restringir las horas
+        const [form] = Form.useForm();
+        function disabledHours() {
+            return [0,1, 2, 3,4,5,6,7,21,22,23]; 
+          }
+
+        //Obtener datos de la base de datos
+        const [data, setData] = useState([]);
+
+        useEffect(() => {
+            obtenerDatos();
+          }, []);
         
+          const obtenerDatos = () => {
+            axios.get('http://localhost:8000/api/eventos')
+              .then((response) => {
+                setData(response.data);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          };
+
+        //Eliminar evento
+        const eliminarEvento = (id) => {
+            axios.delete(`http://localhost:8000/api/evento/${id}`)
+              .then(() => {
+                obtenerDatos(); 
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          };
+
+          const showDelete = (record) => {
+            confirm({
+            title: '¿Desea eliminar el evento?',
+            icon: <ExclamationCircleFilled />,
+            content: 'Se eliminará el evento',
+            okText: "Si",
+            cancelText: "No",
+            centered: 'true',
+            
+            onOk() {
+                handleOk()
+                eliminarEvento(record)
+            },
+            onCancel() {
+            },
+            })
+
+        }
 
     return(
         <div className='pagina-evento'>
@@ -128,6 +183,7 @@ export default function Evento() {
                         autoComplete="off"  
                         onFinish={onFinish}
                         onFinishFailed={onFinishFailed} 
+                        form={form}
                         >
                     <Form.Item label="T&iacute;tulo"
                                 name="titulo"
@@ -195,7 +251,7 @@ export default function Evento() {
                                         message: 'Por favor ingrese una fecha',
                                         },
                                     ]}>
-                            <DatePicker />
+                            <DatePicker style={{width: '175px'}} placeholder="Selecciona una fecha"/>
                         </Form.Item>
 
                         <Form.Item  label="Hora"
@@ -206,7 +262,11 @@ export default function Evento() {
                                         message: 'Por favor ingrese una hora',
                                         },
                                     ]}> 
-                            <TimePicker  format={format} />
+                            <TimePicker style={{width: '175px'}} 
+                                        placeholder='Seleccione una hora' 
+                                        format="HH:mm"
+                                        disabledHours={disabledHours}
+                                        showNow={false}/>
                         </Form.Item>
                     </div>
 
@@ -240,10 +300,11 @@ export default function Evento() {
                                     message: 'Por favor ingrese un organizador',
                                     },
                                 ]}>
-                        <Input placeholder='Ingrese el nombre del patrocinador'></Input>
+                        <Input placeholder='Ingrese el nombre del organizador'></Input>
                     </Form.Item>
 
-                    <Form.Item label="Patrocinador">
+                    <Form.Item label="Patrocinador"
+                                name="patrocinador">
                         <Input placeholder='Ingrese el nombre del patrocinador'></Input>
                     </Form.Item>
 
@@ -273,20 +334,21 @@ export default function Evento() {
             </Modal>
 
             <Table  className='tabla-eventos'
-                     pagination={false}
-                     locale={{
+                    dataSource={data}
+                    pagination={false}
+                    locale={{
                         emptyText: (
                           <div style={{ padding: '70px', textAlign: 'center' }}>
                             No hay datos disponibles.
                           </div>
                         ),
-                      }}
+                    }}
                      
             >
-                <Column title="T&iacute;tulo" />
-                <Column title="Tipo"  />
-                <Column title="Estado"   />
-                <Column title="Fecha"  />
+                <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo"/>
+                <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo"/>
+                <Column title="Estado"   dataIndex="ESTADO" key="estado"/>
+                <Column title="Fecha"  dataIndex="FECHA" key="estado"/>
                 <Column align='center' title="Opciones"  
                     key="accion"
                     render=
@@ -297,7 +359,7 @@ export default function Evento() {
                             <EditOutlined style={{  fontSize: '25px', color: '#3498DB'}} />
                         </Button>
                         {/* Boton para eliminar */}
-                        <Button type='link' >
+                        <Button type='link' onClick={() => showDelete(record.key)} >
                             <DeleteOutlined  style={{  fontSize: '25px', color: '#E51919'}} />
                         </Button >
                             
