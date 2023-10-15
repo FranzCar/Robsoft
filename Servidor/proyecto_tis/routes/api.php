@@ -13,3 +13,7 @@ Route::post('evento',[EventoController::class, 'store']);
 Route::get('evento/{id}',[EventoController::class, 'show']);
 Route::put('evento/{id}',[EventoController::class, 'update']);
 Route::delete('evento/{id}',[EventoController::class, 'destroy']);
+Route::get('eventos-no-mostrar', [EventoController::class, 'getEventosNoMostrar']);
+Route::get('eventos-mostrar', [EventoController::class, 'getEventosMostrar']);
+Route::patch('quitar-evento/{id}', [EventoController::class, 'QuitarEvento']);
+
