@@ -26,7 +26,7 @@ class EventoController extends Controller
             'UBICACION' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'DESCRIPCION' => 'required|string|min:5|max:300|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'ORGANIZADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            'PATROCINADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+            'PATROCINADOR' => 'string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
         // Puedes agregar las demás reglas de los otros campos aquí si es necesario
         ];
 

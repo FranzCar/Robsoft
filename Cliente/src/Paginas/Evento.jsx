@@ -6,9 +6,9 @@ import {    DeleteOutlined,
             EditOutlined,
             PlusOutlined,
             ExclamationCircleFilled,
+            InfoCircleOutlined,
 } from '@ant-design/icons';
 import axios from 'axios'
-
 
     const { TextArea } = Input;
     const { confirm } = Modal;
@@ -22,21 +22,29 @@ import axios from 'axios'
       reader.onerror = (error) => reject(error);
     });
 
-    const onFinish = (values) => {
-        console.log('Success:', values);
-      };
-      const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
-      };
+    const onFinishFailed = (errorInfo) => {
+       console.log('Failed:', errorInfo);
+    };
+
+    
       
 export default function Evento() {
-        const [isModalOpen, setIsModalOpen] = useState(false);
+
+        const [form] = Form.useForm();
+        const [visible, setVisible] = useState(false);
+
         const showModal = () => {
-            setIsModalOpen(true);
+          setVisible(true);
         };
         const handleOk = () => {
-            setIsModalOpen(false);
+          setVisible(false);
+          form.submit();
         };
+        const handleCancel = () => {
+          setVisible(false);
+        };
+
+        const [info, setInfo] = useState([]);
 
         const [previewOpen, setPreviewOpen] = useState(false);
         const [previewImage, setPreviewImage] = useState('');
@@ -67,7 +75,7 @@ export default function Evento() {
           );
 
          //Mensaje de confirmacion al dar guardar en la parte de modal del evento
-        const showConfirm = () => {
+        const showConfirm = (values) => {
             confirm({
             title: '¿Esta seguro de guardar este evento?',
             icon: <ExclamationCircleFilled />,
@@ -77,9 +85,9 @@ export default function Evento() {
             centered: 'true',
             
             onOk() {
-                handleOk()
+                confirmSave(values)
+                setVisible(false);
                 form.resetFields();
-                message.success('El evento se registro correctamente')
             },
             onCancel() {
             },
@@ -105,7 +113,6 @@ export default function Evento() {
 
         }
         //Restringir las horas
-        const [form] = Form.useForm();
         function disabledHours() {
             return [0,1, 2, 3,4,5,6,7,21,22,23]; 
           }
@@ -157,20 +164,52 @@ export default function Evento() {
             })
         }
         //Guardar evento
+
         const onFinish = (values) => {
-          console.log('Valores del formulario:', values);
-      
-          // Realiza la solicitud POST con Axios para guardar los datos en el servidor
-          axios.post('ttp://localhost:8000/api/evento', values)
+          showConfirm(values)
+        };
+        const confirmSave = (values) => {
+          const fecha = values.FECHA
+          const NUEVAFECHA = fecha.format('YYYY-MM-DD');
+          const hora = values.HORA
+          const NUEVAHORA = hora.format('HH:mm:ss');
+          const datos = {
+            TITULO: values.TITULO,
+            TIPO_EVENTO:values.TIPO_EVENTO ,
+            FECHA: NUEVAFECHA,
+            HORA:NUEVAHORA,
+            UBICACION: values.UBICACION,
+            DESCRIPCION: values.DESCRIPCION,
+            ORGANIZADOR: values.ORGANIZADOR,
+            PATROCINADOR: values.PATROCINADOR,
+            AFICHE: values.AFICHE,
+          }
+          console.log("Los nuevos datos son :", datos)
+          // Realizar la solicitud POST con Axios para guardar los datos en el servidor
+          axios.post('http://localhost:8000/api/evento',datos)
             .then((response) => {
               console.log('Datos guardados con éxito', response.data);
-              // Realiza acciones adicionales después de guardar los datos
+              obtenerDatos()
+              message.success('El evento se registró correctamente')
             })
             .catch((error) => {
               console.error('Error al guardar los datos', error);
-              // Maneja errores si es necesario
+              // Manejar errores si es necesario
             });
         };
+        
+
+        //Ver mas informacion de un evento
+        function showInfo(key) {
+          axios.get(`http://localhost:8000/api/evento/${key}`)
+              .then(response => {
+                setInfo(response.data)
+                console.log("Informacion obtenida de show ",info)
+              })
+              .catch(error => {
+                 console.log(error)
+              });
+        }
 
     return(
         <div className='pagina-evento'>
@@ -178,25 +217,26 @@ export default function Evento() {
 
             <Modal  title="Registro de evento" 
                     className='modal-evento'
-                    open={isModalOpen} 
+                    open={visible} 
                     okText= "Guardar"
                     cancelText= "Cancelar"
+                    onCancel={handleCancel}
                     footer={[
-                        <Form>
+                        <Form form={form} onFinish={onFinish}>
                             <Button onClick={showCancel} className='boton-cancelar-evento'>Cancelar</Button>
-                            <Button onClick={showConfirm} type='primary' className='boton-guardar-evento' >Guardar</Button>
+                            <Button htmlType="submit" type='primary' className='boton-guardar-evento' >Guardar</Button>
                         </Form>
                     ]}
             >
-                <Form layout='vertical'
+                <Form   layout='vertical'
                         className='form-evento'
+                        name='formulario_evento'
                         autoComplete="off"  
-                        onFinish={onFinish}
                         onFinishFailed={onFinishFailed} 
                         form={form}
                         >
                     <Form.Item label="T&iacute;tulo"
-                                name="TUTULO"
+                                name="TITULO"
                                 rules={[
                                     {
                                       required: true,
@@ -206,7 +246,7 @@ export default function Evento() {
                         <Input placeholder='Ingrese el titulo del evento'></Input>
                     </Form.Item>
 
-                    <Form.Item label="Tipo"
+                    <Form.Item  label="Tipo"
                                 name="TIPO_EVENTO"
                                 rules={[
                                     {
@@ -281,7 +321,7 @@ export default function Evento() {
                     </div>
 
                     <Form.Item label="Ubicaci&oacute;n"
-                                name="ubicacion"
+                                name="UBICACION"
                                 rules={[
                                     {
                                     required: true,
@@ -292,7 +332,7 @@ export default function Evento() {
                     </Form.Item>
 
                     <Form.Item label="Descripci&oacute;n"
-                                name="descripcion"
+                                name="DESCRIPCION"
                                 rules={[
                                     {
                                     required: true,
@@ -303,7 +343,7 @@ export default function Evento() {
                     </Form.Item>
 
                     <Form.Item label="Organizador"
-                                name="organizador"
+                                name="ORGANIZADOR"
                                 rules={[
                                     {
                                     required: true,
@@ -314,11 +354,11 @@ export default function Evento() {
                     </Form.Item>
 
                     <Form.Item label="Patrocinador"
-                                name="patrocinador">
+                                name="PATROCINADOR">
                         <Input placeholder='Ingrese el nombre del patrocinador'></Input>
                     </Form.Item>
 
-                    <Form.Item label="Afiche del evento">
+                    <Form.Item label="Afiche del evento" name="AFICHE">
                         <Upload
                             action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                             listType="picture-card"
@@ -364,6 +404,10 @@ export default function Evento() {
                     render=
                     {(record) =>(
                     <Space size="middle">
+                        {/* Boton para eliminar */}
+                        <Button type='link' onClick={() => showInfo(record.id)} >
+                            <InfoCircleOutlined style={{  fontSize: '25px', color: '#107710'}} />
+                        </Button >
                         {/* Boton para editar  */}
                         <Button type='link'>
                             <EditOutlined style={{  fontSize: '25px', color: '#3498DB'}} />
