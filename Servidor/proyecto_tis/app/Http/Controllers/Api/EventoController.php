@@ -40,43 +40,19 @@ class EventoController extends Controller
             'UBICACION' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'DESCRIPCION' => 'required|string|min:5|max:300|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'ORGANIZADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            'PATROCINADOR' => 'sometimes|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            'FECHA' => [
-                'required',
-                function ($attribute, $value, $fail) use ($request) {
-                    $exists = DB::table('eventos')
-                        ->where('FECHA', $value)
-                        ->where('HORA', $request->HORA)
-                        ->where('UBICACION', $request->UBICACION)
-                        ->exists();
-                    if ($exists) {
-                        $fail("Ya hay un evento registrado con la misma fecha, hora y ubicación.");
-                    }
-                },
-            ],
-            'HORA' => [
-                'required',
-                'regex:/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/',
-                function ($attribute, $value, $fail) {
-                    try {
-                        $time = Carbon::createFromFormat('H:i', $value);
-                        $start = Carbon::createFromFormat('H:i', '08:00');
-                        $end = Carbon::createFromFormat('H:i', '20:00');
-                        if ($time->lt($start) || $time->gt($end)) {
-                            $fail("El campo $attribute debe estar entre 08:00 y 20:00.");
-                        }
-                    } catch (\Carbon\Exceptions\InvalidFormatException $e) {
-                        $fail("El campo $attribute no tiene un formato válido.");
-                    }
-                }
-            ]
+            'PATROCINADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+        // Puedes agregar las demás reglas de los otros campos aquí si es necesario
         ];
-        // Mensajes de error personalizados
+
+        // Mensajes de error personalizados en español
         $messages = [
             'required' => 'El campo :attribute es obligatorio.',
             'min' => 'El campo :attribute debe tener al menos :min caracteres.',
             'max' => 'El campo :attribute debe tener como máximo :max caracteres.',
             'regex' => 'El campo :attribute contiene caracteres no permitidos.',
+            'image' => 'El campo :attribute debe ser una imagen.',
+            'mimes' => 'El campo :attribute debe ser de tipo .jpeg o .png.',
+            'dimensions' => 'El campo :attribute debe tener una resolución de al menos 400x600 y como máximo 1600x2400 píxeles.',
         ];
 
         // Aplicar la validación al request
@@ -93,6 +69,17 @@ class EventoController extends Controller
 
     public function guardarEvento(Request $request) {
         try {
+       /* if($request->hasFile('AFICHE')){
+
+            $imagen = $request->file('AFICHE');
+
+            if($imagen -> isValid()){
+
+                $imagenBinaria = file_get_contents($imagen->getRealPath());
+            }
+
+        }*/
+
             // Crear el evento
             $evento = new Evento();
             $evento->TITULO = $request->TITULO;
@@ -104,13 +91,15 @@ class EventoController extends Controller
             $evento->DESCRIPCION = $request->DESCRIPCION;
             $evento->ORGANIZADOR = $request->ORGANIZADOR;
             $evento->PATROCINADOR = $request->PATROCINADOR;
+            $evento->AFICHE = $request->AFICHE;
+
 
             $evento->save();
 
             // Devolver una respuesta exitosa al cliente
             return response()->json(['status' => 'success', 'message' => 'Evento guardado con éxito']);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Si hay un error, devolver un mensaje de error al cliente
             return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento'], 500);
         }
