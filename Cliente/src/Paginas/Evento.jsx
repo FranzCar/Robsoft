@@ -1,6 +1,6 @@
 import '../App.css'
 import { Button, Table, Space, Modal, Form, Input,
-         Select, DatePicker,TimePicker, Upload, message } from 'antd'
+         Select, DatePicker,TimePicker, Upload, message, Image } from 'antd'
 import React, { useState, useEffect } from 'react';
 import {    DeleteOutlined,
             EditOutlined,
@@ -53,6 +53,7 @@ export default function Evento() {
         };
 
         const [info, setInfo] = useState(null);
+        const [verImagen, setVerImagen] = React.useState('');
 
         const [previewOpen, setPreviewOpen] = useState(false);
         const [previewImage, setPreviewImage] = useState('');
@@ -133,7 +134,7 @@ export default function Evento() {
           }, []);
         
           const obtenerDatos = () => {
-            axios.get('http://localhost:8000/api/eventos')
+            axios.get('http://localhost:8000/api/eventos-mostrar')
               .then((response) => {
                 setData(response.data);
               })
@@ -144,9 +145,10 @@ export default function Evento() {
 
         //Eliminar evento
         function eliminarEvento(key) {
-          axios.delete(`http://localhost:8000/api/evento/${key}`)
+          axios.patch(`http://localhost:8000/api/quitar-evento/${key}`)
               .then(response => {
                 obtenerDatos()
+                setImageData(response.data);
               })
               .catch(error => {
                  console.log(error)
@@ -223,20 +225,14 @@ export default function Evento() {
           
         }
 
-        const validarTitulo = (rule, value, callback) => {
-          if (value && value.length < 5) {
-            callback('El campo debe tener al menos 5 caracteres.');
-          } else {
-            callback();
-          }
-        }
+        
 
         const confirmSave = (values) => {
           const datos = datosEvento(values)
 
           console.log("Los nuevos datos son :", datos)
           // Realizar la solicitud POST con Axios para guardar los datos en el servidor
-          axios.post('http://localhost:8000/api/evento',datos)
+          axios.post('http://localhost:8000/api/guardar-evento',datos)
           .then((response) => {
               console.log('Datos guardados con éxito', response.data);
               obtenerDatos();
@@ -259,6 +255,7 @@ export default function Evento() {
         
 
         //Ver mas informacion de un evento
+        const [loading, setLoading] = useState(false);
         const [componentDisabled, setComponentDisabled] = useState(true);
         const [isModalOpen, setIsModalOpen] = useState(false);
         const showModalInfo = () => {
@@ -266,27 +263,68 @@ export default function Evento() {
         };
         const handleOkInfo = () => {
           setIsModalOpen(false);
+          setInfo(null)
         };
         const handleCancelInfo = () => {
           setIsModalOpen(false);
+          setInfo(null)
+          show.resetFields();
         };
         const [show] = Form.useForm();
+
         function showInfo(key) {
           axios.get(`http://localhost:8000/api/evento/${key}`)
               .then(response => {
                 setInfo(response.data)
+                setVerImagen(response.data.AFICHE)
+                show.setFieldValue(response.data)
                 showModalInfo()
+                setLoading(false);
                 console.log("Informacion obtenida de show ",info)
               })
               .catch(error => {
                  console.log(error)
+                 setLoading(false);
               });
         }
 
         const cerrarInfor = () => {
-          setIsModalOpen(false)
-          show.resetFields()
+          show.resetFields();
+          setInfo(null);
+          setIsModalOpen(false);
         }
+
+        //Validaciones de los campos input
+        const validarMinimo = (_, value) => {
+          if (!value) {
+            return Promise.reject(new Error());
+          }
+          if (value.length < 5) {
+            return Promise.reject(new Error('El título debe tener al menos 5 caracteres'));
+          }
+          return Promise.resolve();
+        };
+        const [estadoFormulario, setEstadoFormulario] = useState(true);
+        const [imageData, setImageData] = useState('');
+        useEffect(() => {
+          // Simula la obtención de la cadena de imagen desde algún lugar (por ejemplo, una API)
+          // Reemplaza esta línea con tu lógica real para obtener la cadena de imagen.
+          const fetchImageData = async () => {
+            try {
+              const response = await fetch('URL_DE_TU_API_O_RUTA_DE_ARCHIVO');
+              const data = await response.text();
+              setImageData(data);
+            } catch (error) {
+              console.error('Error al obtener la imagen: ', error);
+            }
+          };
+      
+          fetchImageData();
+        }, []);
+      
+        const convertToImage = (imageData) => {
+          return `data:image/png;base64,${imageData}`; // Asegúrate de que la cadena esté en el formato correcto (puede ser diferente según el tipo de imagen).
+        };
 
     return(
         <div className='pagina-evento'>
@@ -315,14 +353,12 @@ export default function Evento() {
                     <Form.Item label="T&iacute;tulo"
                                 name="TITULO"
                                 rules={[
-                                    {
-                                      required: true,
-                                      message: 'Por favor ingrese un título',
-                                    },
-                                    { validator: validarTitulo }
+                                    { required: true,
+                                      message: 'Por favor ingrese un titulo'},
+                                    { validator: validarMinimo }
                                   ]}
                                   >
-                        <Input placeholder='Ingrese el titulo del evento'></Input>
+                        <Input  maxLength={20} minLength={5} placeholder='Ingrese el titulo del evento'></Input>
                     </Form.Item>
 
                     <Form.Item  label="Tipo"
@@ -405,9 +441,9 @@ export default function Evento() {
                                     {
                                     required: true,
                                     message: 'Por favor ingrese una ubicación',
-                                    },
+                                    },{validator: validarMinimo}
                                 ]}>
-                        <Input placeholder='Ingrese la ubicación del evento'></Input>
+                        <Input maxLength={20} minLength={5} placeholder='Ingrese la ubicación del evento'></Input>
                     </Form.Item>
 
                     <Form.Item label="Descripci&oacute;n"
@@ -416,9 +452,9 @@ export default function Evento() {
                                     {
                                     required: true,
                                     message: 'Por favor ingrese una descripción del evento',
-                                    },
+                                    },{validator : validarMinimo}
                                 ]}>
-                        <TextArea />
+                        <TextArea maxLength={300} minLength={5}/>
                     </Form.Item>
 
                     <Form.Item label="Organizador"
@@ -427,18 +463,24 @@ export default function Evento() {
                                     {
                                     required: true,
                                     message: 'Por favor ingrese un organizador',
-                                    },
+                                    },{validator : validarMinimo }
                                 ]}>
-                        <Input placeholder='Ingrese el nombre del organizador'></Input>
+                        <Input placeholder='Ingrese el nombre del organizador' maxLength={20} minLength={5}></Input>
                     </Form.Item>
 
                     <Form.Item label="Patrocinador"
-                                name="PATROCINADOR">
-                        <Input placeholder='Ingrese el nombre del patrocinador'></Input>
+                                name="PATROCINADOR"
+                                rules={[
+                                  {
+                                    validator: validarMinimo
+                                  }
+                                ]}>
+                        <Input placeholder='Ingrese el nombre del patrocinador' maxLength={20} minLength={5}></Input>
                     </Form.Item>
 
                     <Form.Item label="Afiche del evento" name="AFICHE">
                         <Upload
+                            name='AFICHE'
                             action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                             listType="picture-card"
                             onPreview={handlePreview}
@@ -512,17 +554,149 @@ export default function Evento() {
                   ]}
                     >
                 <Form   layout='vertical'
-                        className='form-show'
+                        className='form-evento'
                         name='formulario_informacion'
                         autoComplete="off" 
                         form={show} 
                         initialValues={info}
-                        disabled={componentDisabled}>
+                        >
                   <Form.Item  label="Titulo"
                               name="TITULO"
-                              >
-                    <Input ></Input>
+                              rules={[
+                                { required: true,
+                                  message: 'Por favor ingrese un titulo'},
+                                { validator: validarMinimo }
+                              ]}>
+                    <Input readOnly={estadoFormulario}></Input>
                   </Form.Item>
+                  <Form.Item  label="Tipo"
+                                name="TIPO_EVENTO"
+                                rules={[
+                                    {
+                                      required: true,
+                                      message: 'Por favor ingrese un tipo de evento',
+                                    },
+                                  ]} >
+                        <Select
+                            style={{
+                                width: 200,
+                            }}
+                            allowClear
+                            readOnly={estadoFormulario}
+                            options={[
+                                {
+                                value: '1',
+                                label: 'Estilo ICPC',
+                                },
+                                {
+                                value: '2',
+                                label: 'Estilo libre'
+                                },
+                                {
+                                value: '3',
+                                label: 'Taller de programación'    
+                                },
+                                {
+                                value: '4',
+                                label: 'Sesión de reclutamiento'    
+                                },
+                                {
+                                value: '5',
+                                label: 'Torneos de programación'    
+                                },
+                                {
+                                value: '6',
+                                label: 'Entrenamientos'    
+                                },
+                                {
+                                value: '7',
+                                label: 'Otros'
+                                }
+                            ]}
+                        />
+                    </Form.Item>
+
+                    <div className='form-fecha-hora'>
+                        <Form.Item  label="Fecha" 
+                                    name="FECHAs"
+                                    rules={[
+                                        {
+                                        required: true,
+                                        message: 'Por favor ingrese una fecha',
+                                        },
+                                    ]}>
+                            <DatePicker style={{width: '175px'}} placeholder="Selecciona una fecha"/>
+                        </Form.Item>
+
+                        <Form.Item  label="Hora"
+                                    name="HORAs"
+                                    rules={[
+                                        {
+                                        required: true,
+                                        message: 'Por favor ingrese una hora',
+                                        },
+                                    ]}> 
+                            <TimePicker style={{width: '175px'}} 
+                                        placeholder='Seleccione una hora' 
+                                        format="HH:mm"
+                                        disabledHours={disabledHours}
+                                        showNow={false}/>
+                        </Form.Item>
+                    </div>
+
+                    <Form.Item label="Ubicaci&oacute;n"
+                                name="UBICACION"
+                                rules={[
+                                    {
+                                    required: true,
+                                    message: 'Por favor ingrese una ubicación',
+                                    },{validator: validarMinimo}
+                                ]}>
+                        <Input readOnly={estadoFormulario} maxLength={20} minLength={5} placeholder='Ingrese la ubicación del evento'></Input>
+                    </Form.Item>
+
+                    <Form.Item label="Descripci&oacute;n"
+                                name="DESCRIPCION"
+                                rules={[
+                                    {
+                                    required: true,
+                                    message: 'Por favor ingrese una descripción del evento',
+                                    },{validator : validarMinimo}
+                                ]}>
+                        <TextArea readOnly={estadoFormulario} maxLength={300} minLength={5}/>
+                    </Form.Item>
+
+                    <Form.Item label="Organizador"
+                                name="ORGANIZADOR"
+                                rules={[
+                                    {
+                                    required: true,
+                                    message: 'Por favor ingrese un organizador',
+                                    },{validator : validarMinimo }
+                                ]}>
+                        <Input readOnly={estadoFormulario} placeholder='Ingrese el nombre del organizador' maxLength={20} minLength={5}></Input>
+                    </Form.Item>
+
+                    <Form.Item label="Patrocinador"
+                                name="PATROCINADOR"
+                                rules={[
+                                  {
+                                    validator: validarMinimo
+                                  }
+                                ]}>
+                        <Input readOnly={estadoFormulario} placeholder='Ingrese el nombre del patrocinador' maxLength={20} minLength={5}></Input>
+                    </Form.Item>
+
+                    <Form.Item label="Afiche del evento" name="AFICHE">
+                      
+                      <Image
+                        width={200}
+                        height={200}
+                        src={verImagen}
+                        fallback="info."
+                      />
+                      </Form.Item>
+            
                 </Form>
                       
               </Modal>
