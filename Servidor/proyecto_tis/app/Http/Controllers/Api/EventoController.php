@@ -27,6 +27,7 @@ class EventoController extends Controller
             'DESCRIPCION' => 'required|string|min:5|max:300|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'ORGANIZADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'PATROCINADOR' => 'string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+           // 'AFICHE' => 'sometimes|image|mimes:jpeg,png|dimensions:min_width=400,min_height=600,max_width=1600,max_height=2400',
         // Puedes agregar las demás reglas de los otros campos aquí si es necesario
         ];
 
@@ -36,10 +37,24 @@ class EventoController extends Controller
             'min' => 'El campo :attribute debe tener al menos :min caracteres.',
             'max' => 'El campo :attribute debe tener como máximo :max caracteres.',
             'regex' => 'El campo :attribute contiene caracteres no permitidos.',
+            'image' => 'El campo :attribute debe ser una imagen.',
+            'mimes' => 'El campo :attribute debe ser de tipo .jpeg o .png.',
+            'dimensions' => 'El campo :attribute debe tener una resolución de al menos 400x600 y como máximo 1600x2400 píxeles.',
         ];
 
         // Validar los datos de entrada
         $request->validate($rules, $messages);
+
+       /* if($request->hasFile('AFICHE')){
+
+            $imagen = $request->file('AFICHE');
+
+            if($imagen -> isValid()){
+
+                $imagenBinaria = file_get_contents($imagen->getRealPath());
+            }
+
+        }*/
 
         // Crear el evento
         $evento = new Evento();
@@ -52,6 +67,8 @@ class EventoController extends Controller
         $evento->DESCRIPCION = $request->DESCRIPCION;
         $evento->ORGANIZADOR = $request->ORGANIZADOR;
         $evento->PATROCINADOR = $request->PATROCINADOR;
+        $evento->AFICHE = $request->AFICHE;
+
 
         $evento->save();
 

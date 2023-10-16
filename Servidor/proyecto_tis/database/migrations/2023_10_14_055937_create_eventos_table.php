@@ -25,6 +25,7 @@ class CreateEventosTable extends Migration
             $table->string('ORGANIZADOR', 30)->nullable();
             $table->string('PATROCINADOR', 30)->nullable();
             $table->boolean('MOSTRAR')->default(true);
+            $table->longText('AFICHE')->nullable();
             $table->timestamps(); 
            
         });
