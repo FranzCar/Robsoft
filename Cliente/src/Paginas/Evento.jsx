@@ -44,7 +44,7 @@ export default function Evento() {
           setVisible(false);
         };
 
-        const [info, setInfo] = useState([]);
+        const [info, setInfo] = useState(null);
 
         const [previewOpen, setPreviewOpen] = useState(false);
         const [previewImage, setPreviewImage] = useState('');
@@ -168,22 +168,45 @@ export default function Evento() {
         const onFinish = (values) => {
           showConfirm(values)
         };
-        const confirmSave = (values) => {
+        const validarTipo =  (tipo) => {
+          if(tipo === '1')
+            return "Estilo ICPC"
+          if (tipo === '2')
+            return "Estilo Libre"
+          if (tipo === '3')
+            return "Taller de programación"
+          if (tipo === '4')
+            return "Sesión de reclutamiento"
+          if (tipo === '5')
+            return "Torneos de programación"
+          if (tipo === '6')
+            return "Entrenamientos"
+          if (tipo === '7')
+            return "Otros"
+
+        }
+
+        const datosEvento = (values) => {
           const fecha = values.FECHA
           const NUEVAFECHA = fecha.format('YYYY-MM-DD');
           const hora = values.HORA
           const NUEVAHORA = hora.format('HH:mm:ss');
+          const TIPO = validarTipo (values.TIPO_EVENTO)
           const datos = {
             TITULO: values.TITULO,
-            TIPO_EVENTO:values.TIPO_EVENTO ,
+            TIPO_EVENTO:TIPO ,
             FECHA: NUEVAFECHA,
             HORA:NUEVAHORA,
             UBICACION: values.UBICACION,
             DESCRIPCION: values.DESCRIPCION,
             ORGANIZADOR: values.ORGANIZADOR,
             PATROCINADOR: values.PATROCINADOR,
-            AFICHE: values.AFICHE,
+            AFICHE: fileList,
           }
+          return datos
+        }
+        const confirmSave = (values) => {
+          const datos = datosEvento(values)
           console.log("Los nuevos datos son :", datos)
           // Realizar la solicitud POST con Axios para guardar los datos en el servidor
           axios.post('http://localhost:8000/api/evento',datos)
@@ -200,15 +223,33 @@ export default function Evento() {
         
 
         //Ver mas informacion de un evento
+        const [isModalOpen, setIsModalOpen] = useState(false);
+        const showModalInfo = () => {
+          setIsModalOpen(true);
+        };
+        const handleOkInfo = () => {
+          setIsModalOpen(false);
+        };
+        const handleCancelInfo = () => {
+          setIsModalOpen(false);
+        };
+        const [show] = Form.useForm();
         function showInfo(key) {
           axios.get(`http://localhost:8000/api/evento/${key}`)
               .then(response => {
                 setInfo(response.data)
+                showModalInfo()
                 console.log("Informacion obtenida de show ",info)
               })
               .catch(error => {
                  console.log(error)
               });
+        }
+
+        const cerrarInfor = () => {
+          setIsModalOpen(false)
+          show.resetFields()
+          setInfo(null)
         }
 
     return(
@@ -421,6 +462,31 @@ export default function Evento() {
                 )}/>
                   
             </Table>
+
+            <Modal  title="Basic Modal" 
+                    open={isModalOpen} 
+                    onOk={handleOkInfo} 
+                    onCancel={handleCancelInfo}
+                    footer={[
+                      <Form >
+                          <Button onClick={cerrarInfor} className='boton-cancelar-evento'>Cerrar</Button>
+                      </Form>
+                  ]}
+                    >
+                <Form   layout='vertical'
+                        className='form-show'
+                        name='formulario_informacion'
+                        autoComplete="off" 
+                        form={show} 
+                        initialValues={info}>
+                  <Form.Item  label="Titulo"
+                              name="TITULO"
+                              >
+                    <Input ></Input>
+                  </Form.Item>
+                </Form>
+                      
+              </Modal>
         </div>
     )
 }
