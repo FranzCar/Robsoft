@@ -14,7 +14,15 @@ import axios from 'axios'
     const { confirm } = Modal;
     const { Column } = Table;
     
-    const getBase64 = (file) =>
+    const getBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+    };
+    const getBase64d = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -186,6 +194,7 @@ export default function Evento() {
 
         }
 
+        
         const datosEvento = (values) => {
           const fecha = values.FECHA
           const NUEVAFECHA = fecha.format('YYYY-MM-DD');
@@ -201,28 +210,56 @@ export default function Evento() {
             DESCRIPCION: values.DESCRIPCION,
             ORGANIZADOR: values.ORGANIZADOR,
             PATROCINADOR: values.PATROCINADOR,
-            AFICHE: fileList,
+            AFICHE: fileList[0].thumbUrl,
           }
           return datos
         }
+
+        const validarCampos = (error) => {
+          console.log("Error validarcampo ", error)
+          if(error === "El campo t i t u l o debe tener al menos 5 caracteres."){
+            console.log("validar campo titulo")
+          }
+          
+        }
+
+        const validarTitulo = (rule, value, callback) => {
+          if (value && value.length < 5) {
+            callback('El campo debe tener al menos 5 caracteres.');
+          } else {
+            callback();
+          }
+        }
+
         const confirmSave = (values) => {
           const datos = datosEvento(values)
+
           console.log("Los nuevos datos son :", datos)
           // Realizar la solicitud POST con Axios para guardar los datos en el servidor
           axios.post('http://localhost:8000/api/evento',datos)
-            .then((response) => {
+          .then((response) => {
               console.log('Datos guardados con éxito', response.data);
-              obtenerDatos()
-              message.success('El evento se registró correctamente')
-            })
-            .catch((error) => {
-              console.error('Error al guardar los datos', error);
-              // Manejar errores si es necesario
-            });
+              obtenerDatos();
+              message.success('El evento se registró correctamente');
+          })
+          .catch((error) => {
+              if (error.response) {
+                  // El servidor respondió con un código de estado fuera del rango 2xx
+                  const errores = error.response.data.errors;
+                  for (let campo in errores) {
+                      message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+                      validarCampos(errores[campo][0])
+                  }
+              } else {
+                  // Otros errores (problemas de red, etc.)
+                  message.error('Ocurrió un error al guardar los datos.');
+          }
+        });
         };
         
 
         //Ver mas informacion de un evento
+        const [componentDisabled, setComponentDisabled] = useState(true);
         const [isModalOpen, setIsModalOpen] = useState(false);
         const showModalInfo = () => {
           setIsModalOpen(true);
@@ -249,7 +286,6 @@ export default function Evento() {
         const cerrarInfor = () => {
           setIsModalOpen(false)
           show.resetFields()
-          setInfo(null)
         }
 
     return(
@@ -283,7 +319,9 @@ export default function Evento() {
                                       required: true,
                                       message: 'Por favor ingrese un título',
                                     },
-                                  ]}>
+                                    { validator: validarTitulo }
+                                  ]}
+                                  >
                         <Input placeholder='Ingrese el titulo del evento'></Input>
                     </Form.Item>
 
@@ -478,7 +516,8 @@ export default function Evento() {
                         name='formulario_informacion'
                         autoComplete="off" 
                         form={show} 
-                        initialValues={info}>
+                        initialValues={info}
+                        disabled={componentDisabled}>
                   <Form.Item  label="Titulo"
                               name="TITULO"
                               >
