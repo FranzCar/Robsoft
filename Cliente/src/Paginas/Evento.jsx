@@ -180,10 +180,12 @@ export default function Evento() {
     axios
       .patch(`http://localhost:8000/api/quitar-evento/${key}`)
       .then((response) => {
+        message.success("El evento se elimino correctamente");
         obtenerDatos();
         setImageData(response.data);
       })
       .catch((error) => {
+        message.error("No puede eliminar el evento,porque esta en proceso o ha terminado.");
         console.log(error);
       });
   }
