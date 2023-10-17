@@ -220,6 +220,8 @@ export default function Evento() {
     if (tipo === "7") return "Otros";
   };
 
+  
+
   const datosEvento = (values) => {
     const fecha = values.FECHA;
     const NUEVAFECHA = fecha.format("YYYY-MM-DD");
@@ -235,7 +237,7 @@ export default function Evento() {
       DESCRIPCION: values.DESCRIPCION,
       ORGANIZADOR: values.ORGANIZADOR,
       PATROCINADOR: values.PATROCINADOR,
-      AFICHE: fileList[0].thumbUrl,
+      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
     return datos;
   };
