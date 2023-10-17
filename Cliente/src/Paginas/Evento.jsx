@@ -59,7 +59,7 @@ export default function Evento() {
     form.resetFields();
   };
 
-  const [info, setInfo] = useState(null);
+  const [info, setInfo] = useState([]);
   const [verImagen, setVerImagen] = React.useState("");
 
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -74,7 +74,7 @@ export default function Evento() {
   const [data, setData] = useState([]);
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);  
 
-
+  
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -190,7 +190,7 @@ export default function Evento() {
         setImageData(response.data);
       })
       .catch((error) => {
-        message.error("No puede eliminar el evento,porque esta en proceso o ha terminado.");
+        message.error("No puede eliminar el evento, porque esta en proceso o ha terminado");
         console.log(error);
       });
   }
@@ -231,7 +231,6 @@ export default function Evento() {
 
   const datosEvento = (values) => {
     const fecha = values.FECHA;
-    console.log("LA fecha actual es ", fecha)
     const NUEVAFECHA = fecha.format("YYYY-MM-DD");
     const hora = values.HORA;
     const NUEVAHORA = hora.format("HH:mm:ss");
@@ -299,25 +298,25 @@ export default function Evento() {
 
   function showInfo(record) {
     /*axios
-      .get(`http://localhost:8000/api/evento/${key}`)
+      .get(`http://localhost:8000/api/evento/${record}`)
       .then((response) => {
         setInfo(response.data);
         setVerImagen(response.data.AFICHE);
-        console.log("Informacion obtenida de show ",info )
         showModalInfo();
       })
       .catch((error) => {
         console.log(error);
       });*/
       setInfo(record)
-      show.setFieldValue(record)
+      setVerImagen(record.AFICHE);
+      console.log("Informacion obtenida de show ", info )
       setIsModalOpen(true);
   }
 
   const cerrarInfor = () => {
     setIsModalOpen(false);
-    setInfo(null);
-    show.resetFields();
+    setInfo(null)
+    show.resetFields()
   };
 
   //Editar evento
