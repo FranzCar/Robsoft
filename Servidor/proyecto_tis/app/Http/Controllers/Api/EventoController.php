@@ -206,9 +206,9 @@ class EventoController extends Controller
             $horaEvento = $evento->HORA;
 
             $estado = 'En espera';
-            if ($fechaActual <= $fechaEvento && $horaActual >= $horaEvento) {
+            if ($fechaActual == $fechaEvento && $horaActual >= $horaEvento) {
                 $estado = 'En proceso';
-            } elseif ($fechaActual > $fechaEvento) {
+            } elseif ($fechaActual > $fechaEvento ) {
                 $estado = 'Terminado';
             }
 
