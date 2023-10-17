@@ -17,6 +17,6 @@ Route::delete('evento/{id}',[EventoController::class, 'destroy']);
 Route::get('eventos-no-mostrar', [EventoController::class, 'getEventosNoMostrar']);
 Route::get('eventos-mostrar', [EventoController::class, 'getEventosMostrar']);
 Route::patch('quitar-evento/{id}', [EventoController::class, 'QuitarEvento']);
-Route::get('set-estado/{id}',[EventoController::class, 'actualizarEstado']);
+Route::get('actualizar-estado',[EventoController::class, 'actualizarEstadoTodos']);
 
 
