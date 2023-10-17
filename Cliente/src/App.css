@@ -141,6 +141,23 @@
     text-align: center;
   }
 
+/*Ver informacion del evento*/
+.form-verInformacion{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding-top: 20px;
+    height: 380px;
+}
+.form-info-columna1{
+    width: 85%;
+}
+.form-info-columna2{
+    width: 90%;
+}
+.form-info-columna3{
+    text-align: center;
+}
+
 /*Pagina de inicio*/
 .imagen-inicio{
     width: auto;
