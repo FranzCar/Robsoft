@@ -30,7 +30,7 @@ function App() {
           <Route path='/evento' element= {<Evento/>}/>
         </Routes>
       </Content>
-      <Footer className='footer'>Footer</Footer>
+      <Footer className='footer'>Universidad Mayor de San Simon</Footer>
     </Layout>
   );
 }

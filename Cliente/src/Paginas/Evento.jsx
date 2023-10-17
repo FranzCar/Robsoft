@@ -67,6 +67,13 @@ export default function Evento() {
   const [previewTitle, setPreviewTitle] = useState("");
   const handleCancelIMG = () => setPreviewOpen(false);
   const [fileList, setFileList] = useState([]);
+  const [show] = Form.useForm();
+  const [estadoFormulario, setEstadoFormulario] = useState(true);
+  const [imageData, setImageData] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [data, setData] = useState([]);
+  const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);  
+
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -119,7 +126,7 @@ export default function Evento() {
     confirm({
       title: "¿Estás seguro de que deseas cancelar este evento?",
       icon: <ExclamationCircleFilled />,
-      content: "Los cambios no se guardarán",
+      
       okText: "Si",
       cancelText: "No",
       centered: "true",
@@ -158,8 +165,6 @@ export default function Evento() {
   };
 
   //Obtener datos de la base de datos
-  const [data, setData] = useState([]);
-
   useEffect(() => {
     obtenerDatos();
   }, []);
@@ -224,6 +229,7 @@ export default function Evento() {
 
   const datosEvento = (values) => {
     const fecha = values.FECHA;
+    console.log("LA fecha actual es ", fecha)
     const NUEVAFECHA = fecha.format("YYYY-MM-DD");
     const hora = values.HORA;
     const NUEVAHORA = hora.format("HH:mm:ss");
@@ -277,23 +283,20 @@ export default function Evento() {
   };
 
   //Ver mas informacion de un evento
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const showModalInfo = () => {
     setIsModalOpen(true);
   };
   const handleOkInfo = () => {
     setIsModalOpen(false);
-    setInfo("");
   };
   const handleCancelInfo = () => {
     setIsModalOpen(false);
     setInfo(null);
     show.resetFields();
   };
-  const [show] = Form.useForm();
 
-  function showInfo(key) {
-    axios
+  function showInfo(record) {
+    /*axios
       .get(`http://localhost:8000/api/evento/${key}`)
       .then((response) => {
         setInfo(response.data);
@@ -303,14 +306,48 @@ export default function Evento() {
       })
       .catch((error) => {
         console.log(error);
-      });
+      });*/
+      setInfo(record)
+      show.setFieldValue(record)
+      setIsModalOpen(true);
   }
 
   const cerrarInfor = () => {
-    show.resetFields();
-    setInfo(null);
     setIsModalOpen(false);
+    setInfo(null);
+    show.resetFields();
   };
+
+  //Editar evento
+  const showModalEdit = () => {
+    setIsModalOpenEdit(true);
+  };
+  const handleOkEdit = () => {
+    setIsModalOpenEdit(false);
+  };
+  const handleCancelEdit = () => {
+    setIsModalOpenEdit(false);
+    setInfo(null);
+    show.resetFields();
+  };
+
+  function showEdit(record) {
+      setEstadoFormulario(false)
+      setInfo(record)
+      show.setFieldValue(record)
+      setIsModalOpenEdit(true);
+  }
+
+  const cerrarEdit= () => {
+    setEstadoFormulario(true)
+    setIsModalOpenEdit(false);
+    setInfo(null);
+    show.resetFields();
+  };
+
+  const actualizarEdit = () =>{
+    
+  }
 
   //Validaciones de los campos input
   const validarMinimo = (_, value) => {
@@ -324,12 +361,10 @@ export default function Evento() {
     }
     return Promise.resolve();
   };
-  const [estadoFormulario, setEstadoFormulario] = useState(true);
-  const [imageData, setImageData] = useState("");
 
   return (
     <div className="pagina-evento">
-      <Button className="boton-crear-evento" onClick={showModal}>
+      <Button type="primary" className="boton-crear-evento" onClick={showModal}>
         Crear evento
       </Button>
 
@@ -540,6 +575,7 @@ export default function Evento() {
             </Upload>
             <Modal
               open={previewOpen}
+              accept=".png,.jpeg,.jpg"
               title={previewTitle}
               footer={null}
               onCancel={handleCancelIMG}
@@ -580,14 +616,14 @@ export default function Evento() {
           render={(record) => (
             <Space size="middle">
               {/* Boton para eliminar */}
-              <Button type="link" onClick={() => showInfo(record.id)}>
+              <Button type="link" onClick={() => showInfo(record)}>
                 <InfoCircleOutlined
                   style={{ fontSize: "25px", color: "#107710" }}
                 />
               </Button>
               {/* Boton para editar  */}
               <Button type="link">
-                <EditOutlined style={{ fontSize: "25px", color: "#3498DB" }} />
+                <EditOutlined onClick={() => showEdit(record)} style={{ fontSize: "25px", color: "#3498DB" }} />
               </Button>
               {/* Boton para eliminar */}
               <Button type="link" onClick={() => showDelete(record.id)}>
@@ -599,7 +635,7 @@ export default function Evento() {
           )}
         />
       </Table>
-
+      
       <Modal
         title="Informaci&oacute;n del evento"
         open={isModalOpen}
@@ -615,13 +651,139 @@ export default function Evento() {
         ]}
       >
         <Form
+          form={show}
+          initialValues={info}
           layout="vertical"
           className="form-verInformacion"
           name="formulario_informacion"
           autoComplete="off"
+        >
+          <div className="form-info-columna1">
+            <Form.Item label="Titulo" name="TITULO" className="titulo-info">
+              <Input readOnly={estadoFormulario}></Input>
+            </Form.Item>
+            <Form.Item
+              label="Tipo"
+              name="TIPO_EVENTO"
+              className="titulo-info"
+              readOnly={estadoFormulario}
+            >
+              <Select
+                readOnly={estadoFormulario}
+                allowClear
+                style={{pointerEvents: 'none'}}
+                options={[
+                  {
+                    value: "1",
+                    label: "Estilo ICPC",
+                  },
+                  {
+                    value: "2",
+                    label: "Estilo libre",
+                  },
+                  {
+                    value: "3",
+                    label: "Taller de programación",
+                  },
+                  {
+                    value: "4",
+                    label: "Sesión de reclutamiento",
+                  },
+                  {
+                    value: "5",
+                    label: "Torneos de programación",
+                  },
+                  {
+                    value: "6",
+                    label: "Entrenamientos",
+                  },
+                  {
+                    value: "7",
+                    label: "Otros",
+                  },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item label="Fecha" name="FECHA">
+              <Input readOnly={estadoFormulario} />
+            </Form.Item>
+
+            <Form.Item label="Hora" name="HORA">
+              <Input readOnly={estadoFormulario}/>
+            </Form.Item>
+          </div>
+
+          <div className="form-info-columna2">
+            <Form.Item label="Ubicaci&oacute;n" name="UBICACION">
+              <Input
+                readOnly={estadoFormulario}
+                maxLength={20}
+                minLength={5}
+                placeholder="Ingrese la ubicación del evento"
+              ></Input>
+            </Form.Item>
+
+            <Form.Item label="Organizador" name="ORGANIZADOR">
+              <Input
+                readOnly={estadoFormulario}
+                placeholder="Ingrese el nombre del organizador"
+                maxLength={20}
+                minLength={5}
+              ></Input>
+            </Form.Item>
+
+            <Form.Item label="Patrocinador" name="PATROCINADOR">
+              <Input
+                readOnly={estadoFormulario}
+                placeholder="Ingrese el nombre del patrocinador"
+                maxLength={20}
+                minLength={5}
+              ></Input>
+            </Form.Item>
+            <Form.Item label="Descripci&oacute;n" name="DESCRIPCION">
+              <TextArea
+                readOnly={estadoFormulario}
+                maxLength={300}
+                minLength={5}
+                rows={4}
+              />
+            </Form.Item>
+          </div>
+
+          <div className="form-info-columna3">
+          <label>Afiche del evento</label>
+            <Form.Item  name="AFICHE" >
+              <Image
+                width={200}
+                height={200}
+                src={verImagen}
+                fallback="info."
+              />
+            </Form.Item>
+          </div>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Editar Evento"
+        open={isModalOpenEdit}
+        onOk={handleOkEdit}
+        onCancel={handleCancelEdit}
+        width={1000}
+        footer={[
+          <Form>
+            <Button onClick={cerrarEdit} className="boton-cancelar-evento">Cerrar</Button>
+            <Button type="primary" onClick={actualizarEdit} className="boton-cancelar-evento">Actualizar</Button>
+          </Form>,
+        ]}
+      >
+        <Form
           form={show}
-          
           initialValues={info}
+          layout="vertical"
+          className="form-verInformacion"
+          name="formulario_informacion"
+          autoComplete="off"
         >
           <div className="form-info-columna1">
             <Form.Item label="Titulo" name="TITULO" className="titulo-info">

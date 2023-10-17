@@ -1,5 +1,5 @@
 .header{
-    background-color: #ffff;
+    background-color: #DFEBFA;
     height: 237px;
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
@@ -95,8 +95,8 @@
 
 /*Parte del contenido*/
 .content{
-    background-color: #b7d0f7;
-    min-height: 100vh;
+    background-color: #DFEBFA;
+    min-height: 80vh;
     text-align: center;
 }
 
@@ -115,16 +115,17 @@
 .tabla-eventos{
     border-radius: 15px;
     background-color: #ffffff;
-    height: 250px;
+    height: 310px;
     max-width: 80%;
     overflow-y: auto;
     margin-left: 10%;
-    margin-top: 4%;
+    margin-top: 2%;
 }
 
 .boton-crear-evento{
     margin-left: 85%;
-    margin-top: 2%;
+    margin-top: 10px;
+    margin-right: 10%;
 }
 
 .form-fecha-hora{
