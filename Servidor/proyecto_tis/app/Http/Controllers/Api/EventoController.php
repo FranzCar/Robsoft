@@ -9,7 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
-
+use Exception;
 
 class EventoController extends Controller
 {
@@ -175,7 +175,7 @@ class EventoController extends Controller
     }
     public function quitarEvento($id)
     {
-        $this->ActualizarEstadoEvento($id);
+        $this->actualizarEstadoTodos();
     
         $evento = Evento::find($id);
 
@@ -193,43 +193,30 @@ class EventoController extends Controller
             return response()->json(['message' => 'El evento no se puede eliminar porque no está en estado En espera.',], 400);
         }
     }
-
-    public function actualizarEstado($id)
-    {
-        if (!$evento) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Evento no encontrado',
-            ]);
-        }
-        $this->ActualizarEstadoEvento($id);
-        return response()->json(['message' => 'El estado se actualizo correctamente',], 200);
-    }
-    
-    private function ActualizarEstadoEvento($id)
+    public function actualizarEstadoTodos()
     {
         $fechaHora = Carbon::now()->subHours(4);
         $fechaActual = $fechaHora->format('Y-m-d');
         $horaActual = $fechaHora->format('H:i:s');
 
-        $evento = Evento::find($id);
+        $eventos = Evento::all();
 
-        if (!$evento) {
-            return;
+        foreach ($eventos as $evento) {
+            $fechaEvento = $evento->FECHA;
+            $horaEvento = $evento->HORA;
+
+            $estado = 'En espera';
+            if ($fechaActual <= $fechaEvento && $horaActual >= $horaEvento) {
+                $estado = 'En proceso';
+            } elseif ($fechaActual > $fechaEvento) {
+                $estado = 'Terminado';
+            }
+
+            $evento->ESTADO = $estado;
+            $evento->save();
         }
 
-        $fechaEvento = $evento->FECHA;
-        $horaEvento = $evento->HORA;
-
-        $estado = 'En espera';
-        if ($fechaActual >= $fechaEvento && $horaActual >= $horaEvento) {
-            $estado = 'En proceso';
-        } elseif ($fechaActual > $fechaEvento) {
-            $estado = 'Terminado';
-        }
-
-        $evento->ESTADO = $estado;
-        $evento->save();
+        return response()->json(['success' => true]);
     }
 }
 
