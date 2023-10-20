@@ -12,7 +12,7 @@ const { Header, Footer, Content } = Layout;
 
 function App() {
   return (
-    <Layout>
+    <Layout className='principal'>
       <Header className='header'>
 
         <div className='header-botones'>

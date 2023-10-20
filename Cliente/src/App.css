@@ -1,3 +1,7 @@
+.principal{
+    overflow: hidden;
+}
+
 .header{
     background-color: #DFEBFA;
     height: 237px;
@@ -35,14 +39,16 @@
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
     text-align: center;
+    padding-top: 8px;
+    padding-bottom: 4px;
 }
 
 
 .logo-umss{
     width: auto;
-    height: 80px;
+    height: 90px;
     display: block;
-    padding: 0 10% 0 10%;
+    padding: 0 10% 1% 10%;
 }
 
 .logo-icpc{
@@ -77,11 +83,11 @@
 .titulos-menu{
     background-color:  #003873;
     height: 45px;
-    margin-left: 80px;
-    width: 1175px;
-    border-radius: 15px;
+    margin-left: 5.9%;
+    width: 88.12%;
+    border-radius: 12px;
     padding-left: 20px;
-    margin-top: -25px;
+    margin-top: -1.8%;
 }
 
 .botones-inicio{
@@ -144,10 +150,8 @@
 
 /*Ver informacion del evento*/
 .form-verInformacion{
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    padding-top: 20px;
-    height: 380px;
+    height: 350px;
+    padding-left: 50px;
 }
 .form-info-columna1{
     width: 85%;
@@ -158,6 +162,14 @@
 .form-info-columna3{
     text-align: center;
 }
+h3, p {
+    display: inline-block; 
+    margin: 0; 
+}
+h3 {
+    margin-right: 5px; 
+}
+
 
 /*Pagina de inicio*/
 .imagen-inicio{
