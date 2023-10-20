@@ -96,6 +96,8 @@ class EventoController extends Controller
 
             $evento->save();
 
+            $this->actualizarEstadoTodos();
+    
             // Devolver una respuesta exitosa al cliente
             return response()->json(['status' => 'success', 'message' => 'Evento guardado con éxito']);
 
