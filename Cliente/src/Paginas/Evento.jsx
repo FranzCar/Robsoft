@@ -15,8 +15,6 @@ import {
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
-  DeleteOutlined,
-  EditOutlined,
   PlusOutlined,
   ExclamationCircleFilled,
   InfoCircleOutlined,
@@ -51,7 +49,6 @@ export default function Evento() {
     const [fileList, setFileList] = useState([]);
     const [show] = Form.useForm();
     const [estadoFormulario, setEstadoFormulario] = useState(true);
-    const [imageData, setImageData] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [data, setData] = useState([]);
     const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
@@ -190,39 +187,6 @@ export default function Evento() {
       });
   };
 
-  //Eliminar evento
-  function eliminarEvento(key) {
-    axios
-      .patch(`http://localhost:8000/api/quitar-evento/${key}`)
-      .then((response) => {
-        message.success("El evento se elimino correctamente");
-        obtenerDatos();
-        setImageData(response.data);
-      })
-      .catch((error) => {
-        message.error(
-          "No puede eliminar el evento, porque esta en proceso o ha terminado"
-        );
-        console.log(error);
-      });
-  }
-
-  const showDelete = (record) => {
-    confirm({
-      title: "¿Desea eliminar el evento?",
-      icon: <ExclamationCircleFilled />,
-      content: "Se eliminará el evento",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        handleOk();
-        eliminarEvento(record);
-      },
-      onCancel() {},
-    });
-  };
   //Guardar evento
 
   const onFinish = (values) => {
@@ -327,7 +291,6 @@ export default function Evento() {
   };
   const handleCancelInfo = () => {
     setIsModalOpen(false);
-    setInfo(null);
     show.resetFields();
   };
 
@@ -354,14 +317,6 @@ export default function Evento() {
   };
 
   //Editar evento 
-  const handleOkEdit = () => {
-    setIsModalOpenEdit(false);
-  };
-  const handleCancelEdit = () => {
-    setIsModalOpenEdit(false);
-    show.resetFields();
-  };
-
   function showEdit(record) {
     setEstadoFormulario(false);
     setInfo(record);
@@ -369,13 +324,6 @@ export default function Evento() {
     setIsModalOpenEdit(true);
   }
 
-  const cerrarEdit = () => {
-    setEstadoFormulario(true);
-    setIsModalOpenEdit(false);
-    show.resetFields();
-  };
-
-  const actualizarEdit = () => {};
 
   //Validaciones de los campos input
   const validarMinimo = (_, value, callback) => {
@@ -669,19 +617,6 @@ export default function Evento() {
                   style={{ fontSize: "25px", color: "#107710" }}
                 />
               </Button>
-              {/* Boton para editar  */}
-              <Button type="link">
-                <EditOutlined
-                  onClick={() => showEdit(record)}
-                  style={{ fontSize: "25px", color: "#3498DB" }}
-                />
-              </Button>
-              {/* Boton para eliminar */}
-              <Button type="link" onClick={() => showDelete(record.id)}>
-                <DeleteOutlined
-                  style={{ fontSize: "25px", color: "#E51919" }}
-                />
-              </Button>
             </Space>
           )}
         />
@@ -732,143 +667,7 @@ export default function Evento() {
         </Form>
       </Modal>
 
-      {/*Ventana para mostrar el editar evento */}
-      <Modal
-        title="Editar Evento"
-        open={isModalOpenEdit}
-        onOk={handleOkEdit}
-        onCancel={handleCancelEdit}
-        width={1000}
-        footer={[
-          <Form>
-            <Button onClick={cerrarEdit} className="boton-cancelar-evento">
-              Cerrar
-            </Button>
-            <Button
-              type="primary"
-              onClick={actualizarEdit}
-              className="boton-cancelar-evento"
-            >
-              Actualizar
-            </Button>
-          </Form>,
-        ]}
-      >
-        <Form
-          form={show}
-          initialValues={info}
-          layout="vertical"
-          className="form-verInformacion"
-          name="formulario_informacion"
-          autoComplete="off"
-        >
-          <div className="form-info-columna1">
-            <Form.Item label="Titulo" name="TITULO" className="titulo-info">
-              <Input readOnly={estadoFormulario}></Input>
-            </Form.Item>
-            <Form.Item label="Tipo" name="TIPO_EVENTO" className="titulo-info">
-              <Select
-                allowClear
-                readOnly={estadoFormulario}
-                options={[
-                  {
-                    value: "1",
-                    label: "Estilo ICPC",
-                  },
-                  {
-                    value: "2",
-                    label: "Estilo libre",
-                  },
-                  {
-                    value: "3",
-                    label: "Taller de programación",
-                  },
-                  {
-                    value: "4",
-                    label: "Sesión de reclutamiento",
-                  },
-                  {
-                    value: "5",
-                    label: "Torneos de programación",
-                  },
-                  {
-                    value: "6",
-                    label: "Entrenamientos",
-                  },
-                  {
-                    value: "7",
-                    label: "Otros",
-                  },
-                ]}
-              />
-            </Form.Item>
-            <Form.Item label="Fecha" name="FECHAs">
-              <DatePicker
-                style={{ width: "175px" }}
-                placeholder="Selecciona una fecha"
-              />
-            </Form.Item>
-
-            <Form.Item label="Hora" name="HORAs">
-              <TimePicker
-                style={{ width: "175px" }}
-                placeholder="Seleccione una hora"
-                format="HH:mm"
-                showNow={false}
-              />
-            </Form.Item>
-          </div>
-
-          <div className="form-info-columna2">
-            <Form.Item label="Ubicaci&oacute;n" name="UBICACION">
-              <Input
-                readOnly={estadoFormulario}
-                maxLength={20}
-                minLength={5}
-                placeholder="Ingrese la ubicación del evento"
-              ></Input>
-            </Form.Item>
-
-            <Form.Item label="Organizador" name="ORGANIZADOR">
-              <Input
-                readOnly={estadoFormulario}
-                placeholder="Ingrese el nombre del organizador"
-                maxLength={20}
-                minLength={5}
-              ></Input>
-            </Form.Item>
-
-            <Form.Item label="Patrocinador" name="PATROCINADOR">
-              <Input
-                readOnly={estadoFormulario}
-                placeholder="Ingrese el nombre del patrocinador"
-                maxLength={20}
-                minLength={5}
-              ></Input>
-            </Form.Item>
-            <Form.Item label="Descripci&oacute;n" name="DESCRIPCION">
-              <TextArea
-                readOnly={estadoFormulario}
-                maxLength={300}
-                minLength={5}
-                rows={4}
-              />
-            </Form.Item>
-          </div>
-
-          <div className="form-info-columna3">
-            <label>Afiche del evento</label>
-            <Form.Item name="AFICHE">
-              <Image
-                width={200}
-                height={200}
-                src={verImagen}
-                fallback="info."
-              />
-            </Form.Item>
-          </div>
-        </Form>
-      </Modal>
+      
     </div>
   );
 }

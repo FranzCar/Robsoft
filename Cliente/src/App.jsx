@@ -5,6 +5,8 @@ import Logos from './Componentes/Logos';
 import Menu from './Componentes/Menu';
 import Evento from './Paginas/Evento'
 import Inicio from './Paginas/Inicio'
+import Eliminar from './Paginas/EliminarEvento'
+import Editar from './Paginas/EditarEvento'
 import { Route, Routes } from 'react-router-dom';
 import React from 'react';
 import { Layout } from 'antd';
@@ -27,7 +29,9 @@ function App() {
       <Content className='content'>
         <Routes>
           <Route path='/' element={<Inicio />}/>
-          <Route path='/evento' element= {<Evento/>}/>
+          <Route path='/evento' element= {<Evento />}/>
+          <Route path='/eliminarEvento' element={<Eliminar />}/>
+          <Route path='/editarEvento' element ={<Editar />} />
         </Routes>
       </Content>
       <Footer className='footer'>Universidad Mayor de San Simon</Footer>

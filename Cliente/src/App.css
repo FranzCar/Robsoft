@@ -32,7 +32,6 @@
 }
 
 
-
 /*Parte de los logos y el titulo*/
 .header-logos{
     background-color: #ffff;
@@ -170,10 +169,39 @@ h3 {
     margin-right: 5px; 
 }
 
+/*Ver formulario de editar evento*/
+.form-editar{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    height: 340px;
+}
+
+.form-edit-columna1{
+    width: 100%;
+}
+
+.form-edit-columna2{
+    padding-left: 10%;
+    width: 100%;
+}
+
+.form-edit-columna3{
+    padding-left: 5%;
+    text-align: center;
+}
+
 
 /*Pagina de inicio*/
 .imagen-inicio{
     width: auto;
     height: 500px;
     padding-top: 50px;
+}
+
+/*Admiministracion despplegable*/
+.menu-desplegable{
+    height: 50px;
+}
+.boton-administracion{
+    color: #ffff; 
 }
