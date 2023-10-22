@@ -1,40 +1,105 @@
 import "../App.css";
-import { Button, Table, Space, Modal, Form, Input, Select, DatePicker, TimePicker, Image } from "antd";
+import { Button, Table, Space, Modal, Form, Input, Select, DatePicker, TimePicker, Image, message } from "antd";
 import React, { useState, useEffect } from "react";
-import { EditOutlined } from "@ant-design/icons";
+import { EditOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 
 const { Column } = Table;
 const { TextArea } = Input;
+const { confirm } = Modal;
 
 export default function EditarEvento() {
-  const [info, setInfo] = useState([]);
+  const [info, setInfo] = useState({});
   const [verImagen, setVerImagen] = React.useState("");
-  const [show] = Form.useForm();
-  const [estadoFormulario, setEstadoFormulario] = useState(true);
+  const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+  const [id,setId] = useState(null)
 
   const handleOkEdit = () => {
     setIsModalOpenEdit(false);
   };
   const handleCancelEdit = () => {
     setIsModalOpenEdit(false);
-    show.resetFields();
+    form.resetFields();
   };
-
-  function showEdit(record) {
-    setEstadoFormulario(false);
-    setInfo(record);
-    show.setFieldValue(record);
-    setIsModalOpenEdit(true);
+  const showEdit = (record) =>{
+    setInfo(record)
+    form.setFieldsValue(record);
+    console.log("Los datos son ", record)
+    setId(record.id)
+    setIsModalOpenEdit(true)
   }
 
-  const cerrarEdit = () => {
-    setEstadoFormulario(true);
-    setIsModalOpenEdit(false);
-    show.resetFields();
+  const onFinish = (values) => {
+    console.log('Valores del formulario:', values);
+   actualizarEvento(values)
   };
+
+  const actualizarEvento = (values) => {
+    confirm({
+      title: "¿Desea actualizar el evento?",
+      icon: <ExclamationCircleFilled />,
+      content: "Se guardarán los nuevos datos del evento",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+
+      onOk() {
+        actualizar(values, id);
+      },
+      onCancel() {},
+    });
+  };
+
+
+  const cerrarEdit = () => {
+    setIsModalOpenEdit(false);
+    form.resetFields();
+  };
+
+  const validarTipo = (tipo) => {
+    if (tipo === "1") return "Estilo ICPC";
+    if (tipo === "2") return "Estilo Libre";
+    if (tipo === "3") return "Taller de programación";
+    if (tipo === "4") return "Sesión de reclutamiento";
+    if (tipo === "5") return "Torneos de programación";
+    if (tipo === "6") return "Entrenamientos";
+    if (tipo === "7") return "Otros";
+  };
+
+  const datosEvento = (values) => {
+    const fecha = values.FECHAs;
+    const NUEVAFECHA = fecha.format("YYYY-MM-DD");
+    const hora = values.HORAs;
+    const NUEVAHORA = hora.format("HH:mm:ss");
+    const TIPO = validarTipo(values.TIPO_EVENTO);
+    const datos = {
+      TITULO: values.TITULO,
+      TIPO_EVENTO: TIPO,
+      FECHA: NUEVAFECHA,
+      HORA: NUEVAHORA,
+      UBICACION: values.UBICACION,
+      DESCRIPCION: values.DESCRIPCION,
+      ORGANIZADOR: values.ORGANIZADOR,
+      PATROCINADOR: values.PATROCINADOR,
+    };
+    return datos;
+  };
+
+  function actualizar(values,id) {
+    const datos = datosEvento(values);
+    axios
+      .put(`http://localhost:8000/api/evento/${id}`, datos)
+      .then((response) => {
+        message.success("El evento se actualizó correctamente");
+        obtenerDatos();
+        setIsModalOpenEdit(false)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   //Obtener datos de la base de datos
   useEffect(() => {
@@ -52,7 +117,6 @@ export default function EditarEvento() {
       });
   };
 
-  const actualizarEdit = () => {};
 
   return (
     <div>
@@ -99,13 +163,13 @@ export default function EditarEvento() {
         onCancel={handleCancelEdit}
         width={1000}
         footer={[
-          <Form>
+          <Form  form={form} onFinish={onFinish}>
             <Button onClick={cerrarEdit} className="boton-cancelar-evento">
               Cerrar
             </Button>
             <Button
               type="primary"
-              onClick={actualizarEdit}
+              htmlType="submit"
               className="boton-cancelar-evento"
             >
               Actualizar
@@ -114,8 +178,9 @@ export default function EditarEvento() {
         ]}
       >
         <Form
-          form={show}
+          form={form}
           initialValues={info}
+          onFinish={onFinish}
           layout="vertical"
           className="form-editar"
           name="formulario_informacion"
@@ -123,12 +188,11 @@ export default function EditarEvento() {
         >
           <div className="form-edit-columna1">
             <Form.Item label="Titulo" name="TITULO" className="titulo-info">
-              <Input readOnly={estadoFormulario}></Input>
+              <Input ></Input>
             </Form.Item>
             <Form.Item label="Tipo" name="TIPO_EVENTO" className="titulo-info">
               <Select
                 allowClear
-                readOnly={estadoFormulario}
                 options={[
                   {
                     value: "1",
@@ -181,7 +245,6 @@ export default function EditarEvento() {
           <div className="form-edit-columna2">
             <Form.Item label="Ubicaci&oacute;n" name="UBICACION">
               <Input
-                readOnly={estadoFormulario}
                 maxLength={20}
                 minLength={5}
                 placeholder="Ingrese la ubicación del evento"
@@ -190,7 +253,6 @@ export default function EditarEvento() {
 
             <Form.Item label="Organizador" name="ORGANIZADOR">
               <Input
-                readOnly={estadoFormulario}
                 placeholder="Ingrese el nombre del organizador"
                 maxLength={20}
                 minLength={5}
@@ -199,7 +261,6 @@ export default function EditarEvento() {
 
             <Form.Item label="Patrocinador" name="PATROCINADOR">
               <Input
-                readOnly={estadoFormulario}
                 placeholder="Ingrese el nombre del patrocinador"
                 maxLength={20}
                 minLength={5}
@@ -207,7 +268,6 @@ export default function EditarEvento() {
             </Form.Item>
             <Form.Item label="Descripci&oacute;n" name="DESCRIPCION">
               <TextArea
-                readOnly={estadoFormulario}
                 maxLength={300}
                 minLength={5}
                 rows={4}

@@ -190,6 +190,7 @@ export default function Evento() {
   //Guardar evento
 
   const onFinish = (values) => {
+    console.log("El formulario es ", values)
     showConfirm(values);
   };
   const validarTipo = (tipo) => {
@@ -315,14 +316,6 @@ export default function Evento() {
     setIsModalOpen(false);
     show.resetFields();
   };
-
-  //Editar evento 
-  function showEdit(record) {
-    setEstadoFormulario(false);
-    setInfo(record);
-    show.setFieldValue(record);
-    setIsModalOpenEdit(true);
-  }
 
 
   //Validaciones de los campos input
