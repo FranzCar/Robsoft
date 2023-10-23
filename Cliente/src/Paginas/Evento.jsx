@@ -316,7 +316,7 @@ export default function Evento() {
     setIsModalOpen(false);
     show.resetFields();
   };
-
+  
 
   //Validaciones de los campos input
   const validarMinimo = (_, value, callback) => {
@@ -330,6 +330,7 @@ export default function Evento() {
       callback();
     }
   };
+  
   
   //Validacion de los tipos de imagenes
 
