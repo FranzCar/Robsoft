@@ -7,7 +7,7 @@ const items = [
   {
     key: '1',
     label: (
-        <Link  to='/Evento'>Crear evento</Link>
+        <Link  to='/crearEvento'>Crear evento</Link>
     ),
   },
   {
@@ -33,7 +33,7 @@ const items = [
             <div className='titulos-menu'>
                 <div className='botones-inicio'>
                   <Link to='/' className='boton-inicio' >Inicio</Link>
-                  <Link to='/Evento'  className='boton-inicio'>Evento</Link>
+                  <Link to='/Evento'  className='boton-inicio'>Eventos</Link>
                   <Link  className='boton-inicio'>Participantes</Link>
                   <Dropdown
                     menu={{

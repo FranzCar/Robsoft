@@ -86,7 +86,7 @@ export default function EliminarEvento() {
         pagination={false}
         locale={{
           emptyText: (
-            <div style={{ padding: "100px", textAlign: "center" }}>
+            <div style={{ padding: "130px", textAlign: "center" }}>
               No hay datos registrados.
             </div>
           ),

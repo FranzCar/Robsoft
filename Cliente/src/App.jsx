@@ -7,6 +7,7 @@ import Evento from './Paginas/Evento'
 import Inicio from './Paginas/Inicio'
 import Eliminar from './Paginas/EliminarEvento'
 import Editar from './Paginas/EditarEvento'
+import Crear from './Paginas/CrearEvento'
 import { Route, Routes } from 'react-router-dom';
 import React from 'react';
 import { Layout } from 'antd';
@@ -30,6 +31,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Inicio />}/>
           <Route path='/evento' element= {<Evento />}/>
+          <Route path='/crearEvento' element= {<Crear />}/>
           <Route path='/eliminarEvento' element={<Eliminar />}/>
           <Route path='/editarEvento' element ={<Editar />} />
         </Routes>
