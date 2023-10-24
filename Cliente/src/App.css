@@ -32,7 +32,6 @@
 }
 
 
-
 /*Parte de los logos y el titulo*/
 .header-logos{
     background-color: #ffff;
@@ -121,40 +120,76 @@
 .tabla-eventos{
     border-radius: 15px;
     background-color: #ffffff;
-    height: 310px;
+    height: 370px;
     max-width: 80%;
     overflow-y: auto;
     margin-left: 10%;
     margin-top: 2%;
 }
-
-.boton-crear-evento{
-    margin-left: 85%;
-    margin-top: 10px;
-    margin-right: 10%;
+.ant-modal-title{
+    text-align: center;
 }
 
-.form-fecha-hora{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
 
+/*Crear evento*/
 .form-evento{
     width: 95%;
     padding-left: 30px;
+    background-color: #ffff;
+    width: 90%;
+    margin: 2% 5% 5% 5%;
+    padding-top: 2%;
+    border-radius: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
-.form-persona{
-    width: 95%;
-    padding-left: 30px;
+.crear-evento-columna1{
+    width: 90%;
+}
+.crear-evento-columna2{
+    width: 90%;
+}
+.columna-fecha-hora{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.fecha-hora{
+    float: left;
+    width: 200px;
+}
+.select-tipo-evento{
+    float: left;
+}
+.upload-imagen{
+    float: left;
+}
+.botones-crear-evento{
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 205px;
+}
+.boton-guardar-evento{
+    margin-left: 30px;
+    width: 100px;
+    font-size: 15px;
+    height: 35px;
+}
+.boton-cancelar-evento{
+    width: 100px;
+    font-size: 15px;
+    height: 35px;
 }
 
-.ant-modal-title {
-    text-align: center;
+/* Estilo para el mensaje de error */
+.ant-form-item-explain-error {
+    float: left;
   }
 
 /*Ver informacion del evento*/
 .form-verInformacion{
-    height: 350px;
+    height: 355px;
     padding-left: 50px;
 }
 .form-info-columna1{
@@ -174,6 +209,30 @@ h3 {
     margin-right: 5px; 
 }
 
+/*Ver formulario de editar evento*/
+.form-editar{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    height: 345px;
+}
+
+.form-edit-columna1{
+    width: 100%;
+}
+
+.form-edit-columna2{
+    padding-left: 10%;
+    width: 100%;
+}
+
+.form-edit-columna3{
+    padding-left: 5%;
+    text-align: center;
+}
+.upload-editar-evento{
+    padding-top: 30px;
+}
+
 
 /*Pagina de inicio*/
 .imagen-inicio{
@@ -181,22 +240,3 @@ h3 {
     height: 500px;
     padding-top: 50px;
 }
-/*Pagina de Participante*/
-.main-content {
-    border: 1.5px solid #003873;
-    border-radius: 4%;
-    margin-left: 4%;
-    margin-right: 4%;
-    flex: content;
-    margin-top: 2.5%;
-    height: 400px;
-    font-size: 14px;
-    line-height: 700px;
-    background: #ffffff;
-   }
-   
-
-   :root {
-    --primary-color: #003873;
-  }
-   

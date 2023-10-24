@@ -28,7 +28,7 @@ class EventoController extends Controller
                 'required',
                 'string',
                 'min:5',
-                'max:20',
+                'max:50',
                 'regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
                 function ($attribute, $value, $fail) {
                     $exists = DB::table('eventos')->where('TITULO', $value)->exists();
@@ -69,18 +69,7 @@ class EventoController extends Controller
 
     public function guardarEvento(Request $request) {
         try {
-       /* if($request->hasFile('AFICHE')){
-
-            $imagen = $request->file('AFICHE');
-
-            if($imagen -> isValid()){
-
-                $imagenBinaria = file_get_contents($imagen->getRealPath());
-            }
-
-        }*/
-
-            // Crear el evento
+            
             $evento = new Evento();
             $evento->TITULO = $request->TITULO;
             $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
@@ -101,9 +90,16 @@ class EventoController extends Controller
             // Devolver una respuesta exitosa al cliente
             return response()->json(['status' => 'success', 'message' => 'Evento guardado con éxito']);
 
-        } catch (Exception $e) {
-            // Si hay un error, devolver un mensaje de error al cliente
-            return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento'], 500);
+        } catch (\Exception $e) {
+            // Registrar el mensaje de error en el log
+            \Log::error('Error al guardar evento: ' . $e->getMessage());
+            
+            // Devolver el mensaje de error detallado al cliente (solo en ambiente de desarrollo)
+            if (app()->environment('local')) {
+                return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento', 'error_detail' => $e->getMessage()], 500);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento'], 500);
+            }
         }
     }
 
@@ -116,13 +112,25 @@ class EventoController extends Controller
     
     public function update(Request $request, $id)
     {
-        // Validar los datos de entrada
+       /* // Validar los datos de entrada
         $rules = [
-            'TITULO' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+            'TITULO' => [
+                'required',
+                'string',
+                'min:5',
+                'max:50',
+                'regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+                function ($attribute, $value, $fail) {
+                    $exists = DB::table('eventos')->where('TITULO', $value)->exists();
+                    if ($exists) {
+                        $fail("El evento con título '{$value}' ya existe.");
+                    }
+                },
+            ],
             'UBICACION' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'DESCRIPCION' => 'required|string|min:5|max:300|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'ORGANIZADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            'PATROCINADOR' => 'sometimes|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+           // 'PATROCINADOR' => 'sometimes|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             // Puedes agregar las demás reglas de los otros campos aquí si es necesario
         ];
 
@@ -134,7 +142,7 @@ class EventoController extends Controller
             'regex' => 'El campo :attribute contiene caracteres no permitidos.',
         ];
 
-        $request->validate($rules, $messages);
+        $request->validate($rules, $messages);*/
 
         // Buscar el evento
         $evento = Evento::findOrFail($id);
@@ -142,7 +150,6 @@ class EventoController extends Controller
         // Actualizar los datos del evento
         $evento->TITULO = $request->TITULO;
         $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
-        $evento->ESTADO = $request->ESTADO;
         $evento->FECHA = $request->FECHA;
         $evento->HORA = $request->HORA;
         $evento->UBICACION = $request->UBICACION;

@@ -1,32 +1,25 @@
 import '../App.css'
 
 import { Link } from 'react-router-dom';
-import { Button, Dropdown, Space, Typography } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { Dropdown} from 'antd';
 
 const items = [
   {
     key: '1',
     label: (
-      <a target="_blank" rel="noopener noreferrer">
-        <Link  to='/Evento'>Crear evento</Link>
-      </a>
+        <Link  to='/crearEvento'>Crear evento</Link>
     ),
   },
   {
     key: '2',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="/Evento">
-        Editar evento
-      </a>
+      <Link  to='/editarEvento'>Editar evento</Link>
     ),
   },
   {
     key: '3',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-        Eliminar evento
-      </a>
+      <Link  to='/eliminarEvento'>Eliminar evento</Link>
     ),
   },
 ];
@@ -45,10 +38,15 @@ const items = [
                   <Dropdown
                     menu={{
                       items,
+                      selectable: true,
                     }}
                     placement="bottom"
+                    arrow={{
+                      pointAtCenter: true,
+                    }}
+                    className='menu-desplegable'
                   >
-                    <Link className='boton-inicio'>Administración</Link>
+                    <Link className='boton-administracion'>Administración</Link>
                   </Dropdown>
                   <Link  className='boton-inicio'>Contacto</Link>
                 </div>
