@@ -150,7 +150,6 @@ class EventoController extends Controller
         // Actualizar los datos del evento
         $evento->TITULO = $request->TITULO;
         $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
-        $evento->ESTADO = $request->ESTADO;
         $evento->FECHA = $request->FECHA;
         $evento->HORA = $request->HORA;
         $evento->UBICACION = $request->UBICACION;
