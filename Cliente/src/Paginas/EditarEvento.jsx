@@ -3,6 +3,7 @@ import { Button, Table, Space, Modal, Form, Input, Select, DatePicker, TimePicke
 import React, { useState, useEffect } from "react";
 import { EditOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import axios from "axios";
+import moment from 'moment';
 
 const { Column } = Table;
 const { TextArea } = Input;
@@ -24,9 +25,21 @@ export default function EditarEvento() {
     form.resetFields();
   };
   const showEdit = (record) =>{
-    setInfo(record)
-    form.setFieldsValue(record);
-    console.log("Los datos son ", record)
+    const fechaEvento = moment(record.FECHA);
+    const horaEvento = moment(record.HORA, 'HH:mm:ss');
+    const TIPO = validarTipo(record.TIPO_EVENTO);
+    const datos = {
+      TITULO: record.TITULO,
+      TIPO_EVENTO: TIPO,
+      UBICACION: record.UBICACION,
+      DESCRIPCION: record.DESCRIPCION,
+      ORGANIZADOR: record.ORGANIZADOR,
+      PATROCINADOR: record.PATROCINADOR,
+    };
+    form.setFieldsValue({ FECHAs: fechaEvento });
+    form.setFieldsValue({ HORAs: horaEvento });
+    form.setFieldsValue(datos);
+    console.log("Los datos son ", datos.HORA)
     setId(record.id)
     setIsModalOpenEdit(true)
   }
@@ -127,7 +140,7 @@ export default function EditarEvento() {
         pagination={false}
         locale={{
           emptyText: (
-            <div style={{ padding: "100px", textAlign: "center" }}>
+            <div style={{ padding: "130px", textAlign: "center" }}>
               No hay datos registrados.
             </div>
           ),

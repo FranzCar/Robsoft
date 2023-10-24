@@ -120,36 +120,76 @@
 .tabla-eventos{
     border-radius: 15px;
     background-color: #ffffff;
-    height: 310px;
+    height: 370px;
     max-width: 80%;
     overflow-y: auto;
     margin-left: 10%;
     margin-top: 2%;
 }
-
-.boton-crear-evento{
-    margin-left: 85%;
-    margin-top: 10px;
-    margin-right: 10%;
+.ant-modal-title{
+    text-align: center;
 }
 
-.form-fecha-hora{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
 
+/*Crear evento*/
 .form-evento{
     width: 95%;
     padding-left: 30px;
+    background-color: #ffff;
+    width: 90%;
+    margin: 2% 5% 5% 5%;
+    padding-top: 2%;
+    border-radius: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.crear-evento-columna1{
+    width: 90%;
+}
+.crear-evento-columna2{
+    width: 90%;
+}
+.columna-fecha-hora{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.fecha-hora{
+    float: left;
+    width: 200px;
+}
+.select-tipo-evento{
+    float: left;
+}
+.upload-imagen{
+    float: left;
+}
+.botones-crear-evento{
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 205px;
+}
+.boton-guardar-evento{
+    margin-left: 30px;
+    width: 100px;
+    font-size: 15px;
+    height: 35px;
+}
+.boton-cancelar-evento{
+    width: 100px;
+    font-size: 15px;
+    height: 35px;
 }
 
-.ant-modal-title {
-    text-align: center;
+/* Estilo para el mensaje de error */
+.ant-form-item-explain-error {
+    float: left;
   }
 
 /*Ver informacion del evento*/
 .form-verInformacion{
-    height: 350px;
+    height: 355px;
     padding-left: 50px;
 }
 .form-info-columna1{
