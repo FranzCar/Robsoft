@@ -69,18 +69,7 @@ class EventoController extends Controller
 
     public function guardarEvento(Request $request) {
         try {
-       /* if($request->hasFile('AFICHE')){
-
-            $imagen = $request->file('AFICHE');
-
-            if($imagen -> isValid()){
-
-                $imagenBinaria = file_get_contents($imagen->getRealPath());
-            }
-
-        }*/
-
-            // Crear el evento
+            
             $evento = new Evento();
             $evento->TITULO = $request->TITULO;
             $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
@@ -101,9 +90,16 @@ class EventoController extends Controller
             // Devolver una respuesta exitosa al cliente
             return response()->json(['status' => 'success', 'message' => 'Evento guardado con éxito']);
 
-        } catch (Exception $e) {
-            // Si hay un error, devolver un mensaje de error al cliente
-            return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento'], 500);
+        } catch (\Exception $e) {
+            // Registrar el mensaje de error en el log
+            \Log::error('Error al guardar evento: ' . $e->getMessage());
+            
+            // Devolver el mensaje de error detallado al cliente (solo en ambiente de desarrollo)
+            if (app()->environment('local')) {
+                return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento', 'error_detail' => $e->getMessage()], 500);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento'], 500);
+            }
         }
     }
 

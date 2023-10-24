@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Evento extends Model
+class Coach extends Model
 {
     public $timestamps = false;
+    protected $table = 'coach';
     use HasFactory;
 }
