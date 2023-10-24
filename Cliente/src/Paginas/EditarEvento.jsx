@@ -1,5 +1,5 @@
 import "../App.css";
-import { Button, Table, Space, Modal, Form, Input, Select, DatePicker, TimePicker, Image, message } from "antd";
+import { Button, Table, Space, Modal, Form, Input, Select, DatePicker, TimePicker, Image, message, Upload } from "antd";
 import React, { useState, useEffect } from "react";
 import { EditOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import axios from "axios";
@@ -24,6 +24,7 @@ export default function EditarEvento() {
     setIsModalOpenEdit(false);
     form.resetFields();
   };
+  
   const showEdit = (record) =>{
     const fechaEvento = moment(record.FECHA);
     const horaEvento = moment(record.HORA, 'HH:mm:ss');
@@ -130,6 +131,58 @@ export default function EditarEvento() {
       });
   };
 
+  //Validaciones de los campos input
+  const validarMinimo = (_, value, callback) => {
+    if (!value) {
+      callback('');
+    } else if (value.trim() !== value) {
+      callback('No se permiten espacios en blanco al inicio ni al final');
+    } else if (value.replace(/\s/g, '').length < 5) {
+      callback('Ingrese al menos 5 caracteres');
+    } else {
+      callback();
+    }
+  };
+
+   //Restringir las fechas
+   const disabledDate = current => {
+    // Obtenemos la fecha actual
+    const today = new Date();
+    // Establecemos la fecha mínima como 3 días después de la fecha actual
+    const minDate = new Date();
+    minDate.setDate(today.getDate() + 3);
+    // Establecemos la fecha máxima como 180 días después de la fecha actual
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 180);
+
+    // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
+    return current < minDate || current > maxDate;
+  };
+
+  //Restringir las horas
+  const disabledHours = () => {
+    const hours = [];
+
+    for (let i = 0; i < 8; i++) {
+      // Deshabilitar las horas antes de las 8:00
+      hours.push(i);
+    }
+
+    for (let i = 21; i <= 23; i++) {
+      // Deshabilitar las horas después de las 20:00
+      hours.push(i);
+    }
+
+    return hours;
+  };
+
+  const disabledMinutes = (selectedHour) => {
+    if (selectedHour === 20) {
+      // Si la hora seleccionada es 20:00, habilita solo el minuto "00"
+      return Array.from({ length: 60 }, (_, i) => (i !== 0 ? i : false));
+    }
+    return [];
+  };
 
   return (
     <div>
@@ -200,8 +253,17 @@ export default function EditarEvento() {
           autoComplete="off"
         >
           <div className="form-edit-columna1">
-            <Form.Item label="Titulo" name="TITULO" className="titulo-info">
-              <Input ></Input>
+            <Form.Item label="Titulo" name="TITULO" className="titulo-info"
+              rules={[
+                { required: true, message: "Por favor, ingrese un titulo" },
+                { validator: validarMinimo },
+              ]}
+            >
+              <Input 
+              maxLength={50}
+              minLength={5}
+              >
+              </Input>
             </Form.Item>
             <Form.Item label="Tipo" name="TIPO_EVENTO" className="titulo-info">
               <Select
@@ -238,33 +300,66 @@ export default function EditarEvento() {
                 ]}
               />
             </Form.Item>
-            <Form.Item label="Fecha" name="FECHAs">
+            <Form.Item label="Fecha" name="FECHAs"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese una fecha",
+                },
+              ]}
+            >
               <DatePicker
                 style={{ width: "175px" }}
                 placeholder="Selecciona una fecha"
+                disabledDate={disabledDate}
               />
             </Form.Item>
 
-            <Form.Item label="Hora" name="HORAs">
+            <Form.Item label="Hora" name="HORAs"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese una hora",
+                },
+              ]}
+            >
               <TimePicker
                 style={{ width: "175px" }}
                 placeholder="Seleccione una hora"
                 format="HH:mm"
                 showNow={false}
+                inputReadOnly={true}
+                disabledHours={disabledHours}
+                disabledMinutes={disabledMinutes}
               />
             </Form.Item>
           </div>
 
           <div className="form-edit-columna2">
-            <Form.Item label="Ubicaci&oacute;n" name="UBICACION">
+            <Form.Item label="Ubicaci&oacute;n" name="UBICACION"
+               rules={[
+                {
+                  required: true,
+                },
+                { validator: validarMinimo },
+              ]}
+            >
               <Input
-                maxLength={20}
+                maxLength={30}
                 minLength={5}
                 placeholder="Ingrese la ubicación del evento"
               ></Input>
             </Form.Item>
 
-            <Form.Item label="Organizador" name="ORGANIZADOR">
+            <Form.Item label="Organizador" name="ORGANIZADOR"
+               rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese un organizador",
+                },
+                { validator: validarMinimo },
+              ]}
+            >
               <Input
                 placeholder="Ingrese el nombre del organizador"
                 maxLength={20}
@@ -279,7 +374,15 @@ export default function EditarEvento() {
                 minLength={5}
               ></Input>
             </Form.Item>
-            <Form.Item label="Descripci&oacute;n" name="DESCRIPCION">
+            <Form.Item label="Descripci&oacute;n" name="DESCRIPCION"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese una descripción del evento",
+                },
+                { validator: validarMinimo },
+              ]}
+            >
               <TextArea
                 maxLength={300}
                 minLength={5}
@@ -290,7 +393,7 @@ export default function EditarEvento() {
 
           <div className="form-edit-columna3">
             <label>Afiche del evento</label>
-            <Form.Item name="AFICHE">
+            <Form.Item label="Afiche del evento" name="AFICHE">
               <Image
                 width={200}
                 height={200}

@@ -28,7 +28,7 @@ class EventoController extends Controller
                 'required',
                 'string',
                 'min:5',
-                'max:20',
+                'max:50',
                 'regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
                 function ($attribute, $value, $fail) {
                     $exists = DB::table('eventos')->where('TITULO', $value)->exists();
@@ -118,11 +118,23 @@ class EventoController extends Controller
     {
         // Validar los datos de entrada
         $rules = [
-            'TITULO' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+            'TITULO' => [
+                'required',
+                'string',
+                'min:5',
+                'max:50',
+                'regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+                function ($attribute, $value, $fail) {
+                    $exists = DB::table('eventos')->where('TITULO', $value)->exists();
+                    if ($exists) {
+                        $fail("El evento con título '{$value}' ya existe.");
+                    }
+                },
+            ],
             'UBICACION' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'DESCRIPCION' => 'required|string|min:5|max:300|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             'ORGANIZADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            'PATROCINADOR' => 'sometimes|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
+           // 'PATROCINADOR' => 'sometimes|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
             // Puedes agregar las demás reglas de los otros campos aquí si es necesario
         ];
 
