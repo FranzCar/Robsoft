@@ -156,7 +156,8 @@ class EventoController extends Controller
         $evento->DESCRIPCION = $request->DESCRIPCION;
         $evento->ORGANIZADOR = $request->ORGANIZADOR;
         $evento->PATROCINADOR = $request->PATROCINADOR;
-
+        $evento->AFICHE = $request->AFICHE;
+        
         // Guardar el evento
         $evento->save();
 

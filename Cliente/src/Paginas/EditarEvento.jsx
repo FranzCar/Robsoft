@@ -50,6 +50,7 @@ export default function EditarEvento() {
   const handleOkEdit = () => {
     setIsModalOpenEdit(false);
   };
+  const [actual, setActual] = useState("")
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   const [fileList, setFileList] = useState([]);
@@ -124,6 +125,7 @@ export default function EditarEvento() {
     form.setFieldsValue({ HORAs: horaEvento });
     form.setFieldsValue({ TIPO_EVENTO: TIPO });
     form.setFieldsValue(datos);
+    setActual(record.TITULO)
     console.log("Los datos son ", record.AFICHE);
     setId(record.id);
     setIsModalOpenEdit(true);
@@ -146,7 +148,7 @@ export default function EditarEvento() {
       onOk() {
         actualizar(values, id);
       },
-      onCancel() {},
+      onCancel() { },
     });
   };
 
@@ -183,6 +185,7 @@ export default function EditarEvento() {
       DESCRIPCION: values.DESCRIPCION,
       ORGANIZADOR: values.ORGANIZADOR,
       PATROCINADOR: values.PATROCINADOR,
+      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
     return datos;
   };
@@ -190,20 +193,22 @@ export default function EditarEvento() {
   const validarDuplicado = (values) => {
     const titulo = values.TITULO;
     let resultado = false;
-  
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].TITULO === titulo && i !== values.index) {
-        console.log(
-          `Se encontró un objeto con campoObjetivo igual a "${titulo}" en el índice ${i}.`
-        );
-        resultado = true;
-        break;
+    if (actual !== titulo) {
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].TITULO === titulo) {
+          console.log(
+            `Se encontró un objeto con campoObjetivo igual a "${titulo}" en el índice ${i}.`
+          );
+          resultado = true;
+          break;
+        }
+      }
+      if (!resultado) {
+        console.log("NO hay datos iguales");
       }
     }
-    if (!resultado) {
-      console.log("NO hay datos iguales");
-    }
-  
+
+
     return resultado;
   };
 
