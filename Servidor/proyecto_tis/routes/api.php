@@ -19,4 +19,4 @@ Route::get('eventos-mostrar', [EventoController::class, 'getEventosMostrar']);
 Route::patch('quitar-evento/{id}', [EventoController::class, 'QuitarEvento']);
 Route::get('actualizar-estado',[EventoController::class, 'actualizarEstadoTodos']);
 
-
+Route::post('guardar-participante',[EventoController::class, 'guardarParticipante']);

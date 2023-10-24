@@ -143,6 +143,10 @@
     width: 95%;
     padding-left: 30px;
 }
+.form-persona{
+    width: 95%;
+    padding-left: 30px;
+}
 
 .ant-modal-title {
     text-align: center;
@@ -177,3 +181,22 @@ h3 {
     height: 500px;
     padding-top: 50px;
 }
+/*Pagina de Participante*/
+.main-content {
+    border: 1.5px solid #003873;
+    border-radius: 4%;
+    margin-left: 4%;
+    margin-right: 4%;
+    flex: content;
+    margin-top: 2.5%;
+    height: 400px;
+    font-size: 14px;
+    line-height: 700px;
+    background: #ffffff;
+   }
+   
+
+   :root {
+    --primary-color: #003873;
+  }
+   

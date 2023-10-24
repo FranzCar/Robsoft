@@ -41,7 +41,7 @@ const items = [
                 <div className='botones-inicio'>
                   <Link to='/' className='boton-inicio'>Inicio</Link>
                   <Link to='/Evento'  className='boton-inicio'>Evento</Link>
-                  <Link  className='boton-inicio'>Participantes</Link>
+                  <Link to='/Participante' className='boton-inicio'>Participantes</Link>
                   <Dropdown
                     menu={{
                       items,
