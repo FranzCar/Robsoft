@@ -213,7 +213,7 @@ h3 {
 .form-editar{
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    height: 340px;
+    height: 345px;
 }
 
 .form-edit-columna1{
@@ -228,6 +228,9 @@ h3 {
 .form-edit-columna3{
     padding-left: 5%;
     text-align: center;
+}
+.upload-editar-evento{
+    padding-top: 30px;
 }
 
 

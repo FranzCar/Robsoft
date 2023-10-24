@@ -112,7 +112,7 @@ class EventoController extends Controller
     
     public function update(Request $request, $id)
     {
-        // Validar los datos de entrada
+       /* // Validar los datos de entrada
         $rules = [
             'TITULO' => [
                 'required',
@@ -142,7 +142,7 @@ class EventoController extends Controller
             'regex' => 'El campo :attribute contiene caracteres no permitidos.',
         ];
 
-        $request->validate($rules, $messages);
+        $request->validate($rules, $messages);*/
 
         // Buscar el evento
         $evento = Evento::findOrFail($id);

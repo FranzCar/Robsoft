@@ -103,7 +103,7 @@ export default function CrearEvento() {
         setVisible(false);
         setFileList([]);
         form.resetFields();
-        navigate("/");
+        navigate("/evento");
       },
       onCancel() {},
     });
@@ -202,7 +202,7 @@ export default function CrearEvento() {
 
   const validarDuplicado = (values) => {
     const titulo = values.TITULO;
-    let resultado = false; // Cambiamos de const a let
+    let resultado = false; 
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].TITULO === titulo) {
@@ -210,7 +210,7 @@ export default function CrearEvento() {
           `Se encontró un objeto con campoObjetivo igual a "${titulo}" en el índice ${i}.`
         );
         resultado = true;
-        break; // Puedes usar 'break' si deseas detener la búsqueda cuando se encuentra una coincidencia
+        break; 
       }
     }
     if (!resultado) {
@@ -245,6 +245,7 @@ export default function CrearEvento() {
           console.log("Datos guardados con éxito", response.data);
           obtenerDatos();
           message.success("El evento se registró correctamente");
+          navigate("/evento");
         })
         .catch((error) => {
           if (error.response) {
