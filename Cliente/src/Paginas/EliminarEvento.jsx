@@ -48,7 +48,7 @@ export default function EliminarEvento() {
     axios
       .patch(`http://localhost:8000/api/quitar-evento/${key}`)
       .then((response) => {
-        message.success("El evento se elimino correctamente");
+        message.success("El evento se eliminó correctamente");
         obtenerDatos();
         setImageData(response.data);
       })
@@ -98,7 +98,7 @@ export default function EliminarEvento() {
         <Column title="Fecha" dataIndex="FECHA" key="estado" />
         <Column
           align="center"
-          title="Opciones"
+          title="Eliminar"
           key="accion"
           render={(record) => (
             <Space size="middle">

@@ -236,7 +236,7 @@ export default function CrearEvento() {
         "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
       );
       setVisible(true);
-      message.error("Exite un evento con el mismo titulo");
+      message.error("Exite un evento con el mismo título");
     } else {
       console.log("Se guarda los datos en la BD");
       axios
