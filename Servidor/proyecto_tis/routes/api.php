@@ -26,4 +26,3 @@ Route::get('lista-participantes',[ParticipanteController::class, 'listParticipan
 Route::get('lista-coachs',[CoachController::class, 'listaCoachs']);
 Route::post('guardar-equipo',[EquipoController::class, 'store']);
 
-Route::post('guardar-participante',[EventoController::class, 'guardarParticipante']);

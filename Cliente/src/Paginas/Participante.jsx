@@ -42,9 +42,7 @@ const onFinishFailed = (errorInfo) => {
 
 export default function Participante() {
   const [data, setData] = useState([]);
-
   const [form] = Form.useForm();
-
   const [visible, setVisible] = useState(false);
 
   const showModal = () => {
@@ -54,46 +52,24 @@ export default function Participante() {
     setVisible(false);
     form.submit();
     setFileList([]);
+    setFileList1([]);
   };
   const handleCancel = () => {
     setFileList([]);
+    setFileList1([]);
     setVisible(false);
     form.resetFields();
   };
-  const [previewOpen1, setPreviewOpen1] = useState(false);
-  const [previewImage1, setPreviewImage1] = useState('');
-  const [previewTitle1, setPreviewTitle1] = useState('');
-  const handleCancelIMG1 = () => setPreviewOpen1(false);
-  const [fileList1, setFileList1] = useState(['']);
-  const handlePreview1 = async (file) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
-    }
-    setPreviewImage1(file.url || file.preview);
-    setPreviewOpen1(true);
-    setPreviewTitle1(
-      file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
-    );
-  };
-  const handleChange1 = ({fileList1: newFileList1}) =>
-    setFileList1(newFileList1);
-  const customRequest1 = ({fileList1, onSuccess1}) => {
-    onSuccess1();
-  };
-  const uploadButton1 = (
-    <div>
-      {' '}
-      <PlusOutlined />
-      <div style={{marginTop: 10}}> Subir imagen 2 </div>
-    </div>
-  );
+  
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
   const handleCancelIMG = () => setPreviewOpen(false);
+  //Registrar Imagen 1
   const [fileList, setFileList] = useState([]);
-  const handlePreview = async (file) => {
+  const handleChange = ({fileList: newFileList}) => setFileList(newFileList);
+ const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
     }
@@ -103,7 +79,7 @@ export default function Participante() {
       file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
     );
   };
-  const handleChange = ({fileList: newFileList}) => setFileList(newFileList);
+  
   const customRequest = ({fileList, onSuccess}) => {
     onSuccess();
   };
@@ -114,6 +90,30 @@ export default function Participante() {
       <div style={{marginTop: 10}}>Subir imagen </div>
     </div>
   );
+// Registrar Imagen 2
+   const [fileList1, setFileList1] = React.useState([]); 
+   const handleChange1 = ({fileList: newfileList}) => setFileList1(newfileList);
+   const handlePreview1 = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+    setPreviewTitle(
+      file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
+    );
+  };
+  const customRequest1 = ({fileList1, onSuccess}) => {
+    onSuccess();
+  };
+  const uploadButton1 = (
+    <div>
+      {' '}
+      <PlusOutlined />
+      <div style={{marginTop: 10}}>Subir imagen 2 </div>
+    </div>
+  );
+  
 
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
@@ -153,13 +153,34 @@ export default function Participante() {
   };
 
   const onFinish = (values) => {
+    console.log("El formulario es ", values);
     showConfirm(values);
   };
-
+  //modelo participante
+  const datosParticipante = (values) => {
+  const fecha = values.FECHA;
+  const NUEVAFECHA = fecha.format("YYYY-MM-DD");
+  const datos = {
+    nombre: values.NOMBRE,
+    correo_electronico: values.CORREO,
+    ci: values.CI,
+    telefono: values.TELEFONO,
+    genero: values.GENERO,
+    semestre: values.SEMESTRE,
+    institucion: values.INSTITUCION,
+    fechaNacimiento: NUEVAFECHA,
+    talla_polera: values.TALLA_POLERA,
+    codigoSIS: values.CODIGOSIS,
+    foto: fileList1.length > 0 ? fileList1[0].thumbUrl : null,
+    certificado: fileList.length > 0 ? fileList[0].thumbUrl : null,
+  };
+    return datos;
+  };
+  
   const confirmSave = (values) => {
+    const datos = datosParticipante(values);
     console.log('Se guarda los datos en la BD');
-    axios
-      .post('http://localhost:8000/api/guardar-participante')
+    axios.post('http://localhost:8000/api/guardar-participante',datos)
       .then((response) => {
         console.log('Datos guardados con éxito', response.data);
         message.success('El evento se registró correctamente');
@@ -256,7 +277,7 @@ export default function Participante() {
           </Form.Item>
           <Form.Item
             label="Fecha de nacimiento"
-            name="FECHA_"
+            name="FECHA"
             rules={[{required: true, message: 'Ingrese una fecha, por favor.'}]}
           >
             <DatePicker
@@ -269,7 +290,7 @@ export default function Participante() {
             <Col span={12}>
               <Form.Item
                 label="Carnet de identidad"
-                name="CARNET"
+                name="CI"
                 rules={[
                   {
                     required: true,
@@ -351,7 +372,7 @@ export default function Participante() {
                   fileList={fileList}
                   maxCount={1}
                 >
-                  {fileList.length >= 1 ? null : uploadButton}
+                 {fileList.length >= 1 ? null : uploadButton}
                 </Upload>
                 <Modal
                   open={previewOpen}
@@ -396,14 +417,20 @@ export default function Participante() {
                 ></Input>
               </Form.Item>
 
-              <Form.Item label="Codigo SIS" name="CODSIS" style={{width: '190px'}}>
+              <Form.Item label="Codigo SIS" 
+                          name="CODIGOSIS" 
+                          style={{width: '250px'}}>
                 <Input
                   placeholder="Ingrese su codigo sis"
                   maxLength={9}
                   minLength={8}
+                  type="number"
+                  pattern="[20]{2}[0-3]{2}[0-9]{5}"
                 ></Input>
               </Form.Item>
-              <Form.Item label="Talla de polera" name="TALLA_POLERA" style={{width: '190px'}}>
+              <Form.Item label="Talla de polera" 
+              name="TALLA_POLERA" 
+              style={{width: '190px'}}>
                 <Select>
                   <Select.Option value="S">S</Select.Option>
                   <Select.Option value="M">M</Select.Option>
@@ -417,20 +444,20 @@ export default function Participante() {
               <Form.Item label="Foto" name="FOTO">
                 <Upload
                   name="FOTO"
-                  customRequest1={customRequest1}
+                  customRequest={customRequest1}
                   listType="picture-card"
                   onPreview={handlePreview1}
                   onChange={handleChange1}
-                  fileList1={fileList1}
+                  fileList={fileList1}
                   maxCount={1}
                 >
-                  {fileList.length >= 1 ? null : uploadButton}
+                  {fileList1.length >= 1 ? null : uploadButton1}
                 </Upload>
                 <Modal
-                  open={previewOpen1}
-                  title={previewTitle1}
+                  open={previewOpen}
+                  title={previewTitle}
                   footer={null}
-                  onCancel={handleCancelIMG1}
+                  onCancel={handleCancelIMG}
                 >
                   <img
                     alt="example"
@@ -438,7 +465,7 @@ export default function Participante() {
                       width: 'auto',
                       height: '300px',
                     }}
-                    src={previewImage1}
+                    src={previewImage}
                   />
                 </Modal>
               </Form.Item>
