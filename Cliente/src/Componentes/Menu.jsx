@@ -33,7 +33,7 @@ const items = [
             <div className='titulos-menu'>
                 <div className='botones-inicio'>
                   <Link to='/' className='boton-inicio'>Inicio</Link>
-                  <Link to='/Evento'  className='boton-inicio'>Evento</Link>
+                  <Link to='/Evento'  className='boton-inicio'>Eventos</Link>
                   <Link to='/Participante' className='boton-inicio'>Participantes</Link>
                   <Dropdown
                     menu={{
