@@ -154,6 +154,7 @@ export default function EditarEvento() {
 
   const cerrarEdit = () => {
     setIsModalOpenEdit(false);
+    setFileList([])
     form.resetFields();
   };
 
@@ -221,7 +222,8 @@ export default function EditarEvento() {
         "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
       );
       setIsModalOpenEdit(true);
-      message.error("Exite un evento con el mismo titulo");
+      message.error("Exite un evento con el mismo título");
+      setFileList([])
     } else {
       axios
         .put(`http://localhost:8000/api/evento/${id}`, datos)
@@ -326,7 +328,7 @@ export default function EditarEvento() {
         <Column title="Fecha" dataIndex="FECHA" key="estado" />
         <Column
           align="center"
-          title="Opciones"
+          title="Editar"
           key="accion"
           render={(record) => (
             <Space size="middle">
@@ -520,6 +522,14 @@ export default function EditarEvento() {
 
           <div className="form-edit-columna3">
             <label>Afiche del evento</label>
+            <Form.Item className="info-afiche" name="AFICHE">
+              <Image
+                width={160}
+                height={160}
+                src={verImagen}
+                fallback="info."
+              />
+            </Form.Item>
             <Form.Item name="AFICHE" className="upload-editar-evento">
               <Upload
                 {...uploadProps}
