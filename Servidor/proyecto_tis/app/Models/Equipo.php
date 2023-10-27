@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Equipo extends Model
 {
+    protected $primaryKey = 'id_equipo';
+    public $incrementing = true;
     public $timestamps = false;
     protected $table = 'equipo';
     use HasFactory;
