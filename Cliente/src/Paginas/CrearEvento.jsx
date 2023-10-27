@@ -181,8 +181,11 @@ export default function CrearEvento() {
   };
 
   const datosEvento = (values) => {
-    const fecha = values.FECHA;
+    const fecha = values.FECHA_INICIO;
     const NUEVAFECHA = fecha.format("YYYY-MM-DD");
+
+    const fecha1 = values.FECHA_FIN;
+    const NUEVAFECHA_FIN = fecha1.format("YYYY-MM-DD");
     const hora = values.HORA;
     const NUEVAHORA = hora.format("HH:mm:ss");
     const TIPO = validarTipo(values.TIPO_EVENTO);
@@ -190,6 +193,7 @@ export default function CrearEvento() {
       TITULO: values.TITULO,
       TIPO_EVENTO: TIPO,
       FECHA: NUEVAFECHA,
+      FECHAFIN: NUEVAFECHA_FIN,
       HORA: NUEVAHORA,
       UBICACION: values.UBICACION,
       DESCRIPCION: values.DESCRIPCION,
@@ -328,9 +332,25 @@ export default function CrearEvento() {
             ></Input>
           </Form.Item>
           <div className="columna-fecha-hora">
+          <Form.Item
+              label="Fecha inicio"
+              name="FECHA_INICIO"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese una fecha",
+                },
+              ]}
+            >
+              <DatePicker
+                className="fecha-hora"
+                placeholder="Selecciona una fecha"
+                disabledDate={disabledDate}
+              />
+            </Form.Item>
             <Form.Item
-              label="Fecha"
-              name="FECHA"
+              label="Fecha fin"
+              name="FECHA_FIN"
               rules={[
                 {
                   required: true,

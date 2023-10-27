@@ -1,28 +1,21 @@
 import '../App.css';
 import {
   Button,
-  Table,
   Space,
   Modal,
   Form,
   Input,
   Select,
   DatePicker,
-  TimePicker,
   Upload,
   message,
-  Image,
   Col,
   Row,
-  Slider,
 } from 'antd';
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
-  DeleteOutlined,
-  EditOutlined,
   PlusOutlined,
   ExclamationCircleFilled,
-  InfoCircleOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -41,19 +34,13 @@ const onFinishFailed = (errorInfo) => {
 };
 
 export default function Participante() {
-  const [data, setData] = useState([]);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
 
   const showModal = () => {
     setVisible(true);
   };
-  const handleOk = () => {
-    setVisible(false);
-    form.submit();
-    setFileList([]);
-    setFileList1([]);
-  };
+ 
   const handleCancel = () => {
     setFileList([]);
     setFileList1([]);
@@ -351,12 +338,18 @@ export default function Participante() {
                   },
                 ]}
               >
-                <Input
-                  placeholder="Ingrese el semestre"
-                  maxLength={10}
-                  minLength={5}
-                  style={{width: '175px'}}
-                ></Input>
+                <Select placeholder="Ingrese el semestre">
+                  <Select.Option value="1er semestre">1er semestre</Select.Option>
+                  <Select.Option value="2do semestre">2do semestre</Select.Option>
+                  <Select.Option value="3er semestre">3er semestre</Select.Option>
+                  <Select.Option value="4to semestre">4to semestre</Select.Option>
+                  <Select.Option value="5to semestre">5to semestre</Select.Option>
+                  <Select.Option value="6to semestre">6to semestre</Select.Option>
+                  <Select.Option value="7mo semestre">7mo semestre</Select.Option>
+                  <Select.Option value="8vo semestre">8vo semestre</Select.Option>
+                  <Select.Option value="9no semestre">9no semestre</Select.Option>
+                  <Select.Option value="10mo semestre">10mo semestre</Select.Option>
+                </Select>
               </Form.Item>
 
               <Form.Item
@@ -409,7 +402,10 @@ export default function Participante() {
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Correo electronico" name="CORREO">
+              <Form.Item 
+              label="Correo electronico" 
+              name="CORREO"
+              >
                 <Input
                   placeholder="Ingrese su correo electronico"
                   maxLength={30}
@@ -424,8 +420,6 @@ export default function Participante() {
                   placeholder="Ingrese su codigo sis"
                   maxLength={9}
                   minLength={8}
-                  type="number"
-                  pattern="[20]{2}[0-3]{2}[0-9]{5}"
                 ></Input>
               </Form.Item>
               <Form.Item label="Talla de polera" 
