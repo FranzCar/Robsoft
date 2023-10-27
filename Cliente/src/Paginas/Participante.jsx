@@ -18,7 +18,7 @@ import {
   ExclamationCircleFilled,
 } from '@ant-design/icons';
 import axios from 'axios';
-
+// un comentario q se hizo romotamente 
 const {confirm} = Modal;
 
 const getBase64 = (file) => {
@@ -189,7 +189,52 @@ export default function Participante() {
     setFileList([]);
     setFileList1([]);
   };
+// parte para registrar a un equipo
+//Mensaje de confirmacion al dar guardar en la parte de registro grupal
+const showConfirmGrupal = (values) => {
+  confirm({
+    title: '¿Esta seguro de guardar este registro?',
+    icon: <ExclamationCircleFilled />,
+    content: '',
+    okText: 'Si',
+    cancelText: 'No',
+    centered: 'true',
 
+    onOk() {
+      confirmSave(values);
+    },
+    onCancel() {},
+  });
+};
+
+//Mensaje al dar al boton cancelar del formulario de registrar equipo 
+const showCancelGrupal = () => {
+  confirm({
+    title: '¿Estás seguro de que deseas cancelar este registro?',
+    icon: <ExclamationCircleFilled />,
+
+    okText: 'Si',
+    cancelText: 'No',
+    centered: 'true',
+
+    onOk() {
+      form.resetFields();
+    },
+    onCancel() {},
+  });
+};
+
+//Guardar datos del formulario grupal
+const [participantes, setParticipantes] = useState([])
+
+const registrarGrupo = () => {
+  const participantes = participantes()
+  const datos = {
+    nombre_equipo : values.NombreEquipo,
+    cantidad_integrantes : values.cantidad,
+
+  }
+}
   return (
     <div className="pagina-evento">
       <Row gutter={[16, 8]}>

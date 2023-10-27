@@ -73,15 +73,16 @@ class EventoController extends Controller
             $evento = new Evento();
             $evento->TITULO = $request->TITULO;
             $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
-            $evento->ESTADO = $request->ESTADO;
-            $evento->FECHA = $request->FECHA;
+            $evento->FECHA_INICIO = $request->FECHA_INICIO;
+            $evento->FECHA_FIN = $request->FECHA_FIN;
             $evento->HORA = $request->HORA;
             $evento->UBICACION = $request->UBICACION;
             $evento->DESCRIPCION = $request->DESCRIPCION;
             $evento->ORGANIZADOR = $request->ORGANIZADOR;
             $evento->PATROCINADOR = $request->PATROCINADOR;
             $evento->AFICHE = $request->AFICHE;
-
+            $evento->TIPO_PARTICIPACION = $request->TIPO_PARTICIPACION;
+            $evento->MODALIDAD = $request->MODALIDAD;
 
             $evento->save();
 
@@ -150,14 +151,16 @@ class EventoController extends Controller
         // Actualizar los datos del evento
         $evento->TITULO = $request->TITULO;
         $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
-        $evento->FECHA = $request->FECHA;
+        $evento->FECHA_INICIO = $request->FECHA_INICIO;
+        $evento->FECHA_FIN = $request->FECHA_FIN;
         $evento->HORA = $request->HORA;
         $evento->UBICACION = $request->UBICACION;
         $evento->DESCRIPCION = $request->DESCRIPCION;
         $evento->ORGANIZADOR = $request->ORGANIZADOR;
         $evento->PATROCINADOR = $request->PATROCINADOR;
         $evento->AFICHE = $request->AFICHE;
-        
+        $evento->TIPO_PARTICIPACION = $request->TIPO_PARTICIPACION;
+        $evento->MODALIDAD = $request->MODALIDAD;
         // Guardar el evento
         $evento->save();
 
@@ -227,6 +230,10 @@ class EventoController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+    public function getEventosEnEspera() {
+        $eventos = DB::select('CALL EventosEnEspera()');
+        return response()->json($eventos);
     }
 }
 
