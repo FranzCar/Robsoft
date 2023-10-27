@@ -25,7 +25,7 @@ import {
   InfoCircleOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
-
+// un comentario q se hizo romotamente 
 const {confirm} = Modal;
 
 const getBase64 = (file) => {
@@ -467,7 +467,7 @@ export default function Participante() {
                     }}
                     src={previewImage}
                   />
-                </Modal>
+                </Modal>editado desde cel
               </Form.Item>
             </Col>
           </Row>
