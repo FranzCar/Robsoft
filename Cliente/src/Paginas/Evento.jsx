@@ -190,7 +190,6 @@ export default function Evento() {
           key="accion"
           render={(record) => (
             <Space size="middle">
-              {/* Boton para eliminar */}
               <Button type="link" onClick={() => showInfo(record)}>
                 <InfoCircleOutlined
                   style={{ fontSize: "25px", color: "#107710" }}

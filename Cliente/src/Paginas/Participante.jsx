@@ -1,4 +1,4 @@
-import '../App.css';
+import "../App.css";
 import {
   Button,
   Table,
@@ -15,18 +15,20 @@ import {
   Col,
   Row,
   Slider,
-} from 'antd';
-import React, {useState, useEffect} from 'react';
+} from "antd";
+import React, { useState, useEffect } from "react";
 import {
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
   ExclamationCircleFilled,
   InfoCircleOutlined,
-} from '@ant-design/icons';
-import axios from 'axios';
+} from "@ant-design/icons";
+import axios from "axios";
+import Column from "antd/es/table/Column";
 
-const {confirm} = Modal;
+const { confirm } = Modal;
+const { Search } = Input;
 
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -37,7 +39,7 @@ const getBase64 = (file) => {
   });
 };
 const onFinishFailed = (errorInfo) => {
-  console.log('Failed:', errorInfo);
+  console.log("Failed:", errorInfo);
 };
 
 export default function Participante() {
@@ -61,10 +63,10 @@ export default function Participante() {
     form.resetFields();
   };
   const [previewOpen1, setPreviewOpen1] = useState(false);
-  const [previewImage1, setPreviewImage1] = useState('');
-  const [previewTitle1, setPreviewTitle1] = useState('');
+  const [previewImage1, setPreviewImage1] = useState("");
+  const [previewTitle1, setPreviewTitle1] = useState("");
   const handleCancelIMG1 = () => setPreviewOpen1(false);
-  const [fileList1, setFileList1] = useState(['']);
+  const [fileList1, setFileList1] = useState([""]);
   const handlePreview1 = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -72,25 +74,25 @@ export default function Participante() {
     setPreviewImage1(file.url || file.preview);
     setPreviewOpen1(true);
     setPreviewTitle1(
-      file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
+      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
     );
   };
-  const handleChange1 = ({fileList1: newFileList1}) =>
+  const handleChange1 = ({ fileList1: newFileList1 }) =>
     setFileList1(newFileList1);
-  const customRequest1 = ({fileList1, onSuccess1}) => {
+  const customRequest1 = ({ fileList1, onSuccess1 }) => {
     onSuccess1();
   };
   const uploadButton1 = (
     <div>
-      {' '}
+      {" "}
       <PlusOutlined />
-      <div style={{marginTop: 10}}> Subir imagen 2 </div>
+      <div style={{ marginTop: 10 }}> Subir imagen 2 </div>
     </div>
   );
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [previewTitle, setPreviewTitle] = useState('');
+  const [previewImage, setPreviewImage] = useState("");
+  const [previewTitle, setPreviewTitle] = useState("");
   const handleCancelIMG = () => setPreviewOpen(false);
   const [fileList, setFileList] = useState([]);
   const handlePreview = async (file) => {
@@ -100,30 +102,30 @@ export default function Participante() {
     setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
     setPreviewTitle(
-      file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
+      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
     );
   };
-  const handleChange = ({fileList: newFileList}) => setFileList(newFileList);
-  const customRequest = ({fileList, onSuccess}) => {
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+  const customRequest = ({ fileList, onSuccess }) => {
     onSuccess();
   };
   const uploadButton = (
     <div>
-      {' '}
+      {" "}
       <PlusOutlined />
-      <div style={{marginTop: 10}}>Subir imagen </div>
+      <div style={{ marginTop: 10 }}>Subir imagen </div>
     </div>
   );
 
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
     confirm({
-      title: '¿Esta seguro de guardar este registro?',
+      title: "¿Esta seguro de guardar este registro?",
       icon: <ExclamationCircleFilled />,
-      content: '',
-      okText: 'Si',
-      cancelText: 'No',
-      centered: 'true',
+      content: "",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
 
       onOk() {
         confirmSave(values);
@@ -134,12 +136,12 @@ export default function Participante() {
   //Mensaje al dar al boton cancelar del formulario de crear registro
   const showCancel = () => {
     confirm({
-      title: '¿Estás seguro de que deseas cancelar este registro?',
+      title: "¿Estás seguro de que deseas cancelar este registro?",
       icon: <ExclamationCircleFilled />,
 
-      okText: 'Si',
-      cancelText: 'No',
-      centered: 'true',
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
 
       onOk() {
         setVisible(false);
@@ -157,12 +159,12 @@ export default function Participante() {
   };
 
   const confirmSave = (values) => {
-    console.log('Se guarda los datos en la BD');
+    console.log("Se guarda los datos en la BD");
     axios
-      .post('http://localhost:8000/api/guardar-participante')
+      .post("http://localhost:8000/api/guardar-participante")
       .then((response) => {
-        console.log('Datos guardados con éxito', response.data);
-        message.success('El evento se registró correctamente');
+        console.log("Datos guardados con éxito", response.data);
+        message.success("El evento se registró correctamente");
       })
       .catch((error) => {
         if (error.response) {
@@ -173,7 +175,7 @@ export default function Participante() {
           }
         } else {
           // Otros errores (problemas de red, etc.)
-          message.error('Ocurrió un error al guardar los datos.');
+          message.error("Ocurrió un error al guardar los datos.");
         }
       });
     setVisible(false);
@@ -182,30 +184,50 @@ export default function Participante() {
     setFileList1([]);
   };
 
+  //Modal para registro grupal
+  const [verModalGrupal, setVerModalGrupal] = useState(false);
+  const [buscarParticipante, setBuscarParticipante] = useState(false);
+
+  const handleCancelGrupal = () => {
+    setVerModalGrupal(false);
+  };
+
+  const showModalGrupal = () => {
+    setVerModalGrupal(true);
+  };
+
+  const aniadirPArticipante = () => {
+    setBuscarParticipante(true);
+  };
+
+  const handleCancelBuscador = () => {
+    setBuscarParticipante(false);
+  };
+
   return (
     <div className="pagina-evento">
       <Row gutter={[16, 8]}>
         <Col className="main-content" span={12}>
-          <Space direction="vertical" style={{width: '80%'}}>
+          <Space direction="vertical" style={{ width: "80%" }}>
             <Button
               type="primary"
               onClick={showModal}
               block
-              style={{background: 'var(--primary-color)'}}
+              style={{ background: "var(--primary-color)" }}
             >
-              <span style={{fontWeight: 'bold'}}>Registro Individual</span>
+              <span style={{ fontWeight: "bold" }}>Registro Individual</span>
             </Button>
           </Space>
         </Col>
         <Col className="main-content" span={12}>
-          <Space direction="vertical" style={{width: '80%'}}>
+          <Space direction="vertical" style={{ width: "80%" }}>
             <Button
               type="primary"
-              onClick={showModal}
+              onClick={showModalGrupal}
               block
-              style={{background: 'var(--primary-color)'}}
+              style={{ background: "var(--primary-color)" }}
             >
-              <span style={{fontWeight: 'bold'}}>Registro Grupal</span>
+              <span style={{ fontWeight: "bold" }}>Registro Grupal</span>
             </Button>
           </Space>
         </Col>
@@ -245,22 +267,26 @@ export default function Participante() {
           <Form.Item
             label="Nombre completo"
             name="NOMBRE"
-            rules={[{required: true, message: 'Ingrese un nombre, por favor.'}]}
+            rules={[
+              { required: true, message: "Ingrese un nombre, por favor." },
+            ]}
           >
             <Input
               maxLength={50}
               minLength={5}
               placeholder="Ingrese su nombre completo."
-              style={{width: '370px'}}
+              style={{ width: "370px" }}
             ></Input>
           </Form.Item>
           <Form.Item
             label="Fecha de nacimiento"
             name="FECHA_"
-            rules={[{required: true, message: 'Ingrese una fecha, por favor.'}]}
+            rules={[
+              { required: true, message: "Ingrese una fecha, por favor." },
+            ]}
           >
             <DatePicker
-              style={{width: '178px'}}
+              style={{ width: "178px" }}
               placeholder="Selecciona una fecha"
             />
           </Form.Item>
@@ -273,14 +299,14 @@ export default function Participante() {
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese su nro de carnet',
+                    message: "Por favor ingrese su nro de carnet",
                   },
                 ]}
               >
                 <Input
                   maxLength={9}
                   minLength={5}
-                  style={{width: '175px'}}
+                  style={{ width: "175px" }}
                   placeholder="Ingrese su nro de carnet"
                 ></Input>
               </Form.Item>
@@ -288,11 +314,11 @@ export default function Participante() {
               <Form.Item
                 label="Telefono"
                 name="TELEFONO"
-                style={{width: '200px'}}
+                style={{ width: "200px" }}
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese un telefono',
+                    message: "Por favor ingrese un telefono",
                   },
                 ]}
               >
@@ -300,7 +326,7 @@ export default function Participante() {
                   placeholder="Ingrese el telefono"
                   maxLength={10}
                   minLength={6}
-                  style={{width: '175px'}}
+                  style={{ width: "175px" }}
                 ></Input>
               </Form.Item>
 
@@ -310,7 +336,7 @@ export default function Participante() {
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese la institucion',
+                    message: "Por favor ingrese la institucion",
                   },
                 ]}
               >
@@ -326,7 +352,7 @@ export default function Participante() {
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese el semestre',
+                    message: "Por favor ingrese el semestre",
                   },
                 ]}
               >
@@ -334,7 +360,7 @@ export default function Participante() {
                   placeholder="Ingrese el semestre"
                   maxLength={10}
                   minLength={5}
-                  style={{width: '175px'}}
+                  style={{ width: "175px" }}
                 ></Input>
               </Form.Item>
 
@@ -362,8 +388,8 @@ export default function Participante() {
                   <img
                     alt="example"
                     style={{
-                      width: 'auto',
-                      height: '300px',
+                      width: "auto",
+                      height: "300px",
                     }}
                     src={previewImage}
                   />
@@ -374,11 +400,11 @@ export default function Participante() {
               <Form.Item
                 label="Genero"
                 name="GENERO"
-                style={{width: '190px'}}
+                style={{ width: "190px" }}
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor seleccione un genero ',
+                    message: "Por favor seleccione un genero ",
                   },
                 ]}
               >
@@ -396,14 +422,22 @@ export default function Participante() {
                 ></Input>
               </Form.Item>
 
-              <Form.Item label="Codigo SIS" name="CODSIS" style={{width: '190px'}}>
+              <Form.Item
+                label="Codigo SIS"
+                name="CODSIS"
+                style={{ width: "190px" }}
+              >
                 <Input
                   placeholder="Ingrese su codigo sis"
                   maxLength={9}
                   minLength={8}
                 ></Input>
               </Form.Item>
-              <Form.Item label="Talla de polera" name="TALLA_POLERA" style={{width: '190px'}}>
+              <Form.Item
+                label="Talla de polera"
+                name="TALLA_POLERA"
+                style={{ width: "190px" }}
+              >
                 <Select>
                   <Select.Option value="S">S</Select.Option>
                   <Select.Option value="M">M</Select.Option>
@@ -411,7 +445,6 @@ export default function Participante() {
                   <Select.Option value="XL">XL</Select.Option>
                   <Select.Option value="XXL">XXL</Select.Option>
                 </Select>
-
               </Form.Item>
 
               <Form.Item label="Foto" name="FOTO">
@@ -435,8 +468,8 @@ export default function Participante() {
                   <img
                     alt="example"
                     style={{
-                      width: 'auto',
-                      height: '300px',
+                      width: "auto",
+                      height: "300px",
                     }}
                     src={previewImage1}
                   />
@@ -444,6 +477,80 @@ export default function Participante() {
               </Form.Item>
             </Col>
           </Row>
+        </Form>
+      </Modal>
+
+      {/*Modal para la parte de registrar equipo grupal */}
+      <Modal
+        title="Formulario de registro grupal"
+        open={verModalGrupal}
+        onCancel={handleCancelGrupal}
+        width={600}
+        footer={[
+          <Form>
+            <Button>Cancelar</Button>
+            <Button type="primary">Registrarse</Button>
+          </Form>,
+        ]}
+      >
+        <Form  layout="vertical">
+          <Form.Item label="Nombre del equipo" name="EQUIPO">
+            <Input placeholder="Ingrese el nombre del equipo" />
+          </Form.Item>
+          <Form.Item label="Institución" name="INSTITUCION">
+            <Input placeholder="Ingrese el nombre de la institución" />
+          </Form.Item>
+          <Form.Item label="Entrenador" name="ENTRENADOR">
+            <Input placeholder="Ingrese el nombre del entrenador" />
+          </Form.Item>
+          <Form.Item label="Talla de polera" name="POLERA">
+            <Input placeholder="Ingrese la talla de la polera" />
+          </Form.Item>
+          <div className="aniadir-participante">
+            <div>
+              <label>Participantes</label>
+            </div>
+            <div className="boton-aniadir-participante">
+              <label>Añadir</label>
+              <Button type="link" onClick={aniadirPArticipante} className="icono-aniadir">
+                <PlusOutlined />
+              </Button>
+            </div>
+          </div>
+          <Table
+            className="tabla-participantes"
+            locale={{
+              emptyText: (
+                <div style={{ padding: "30px", textAlign: "center" }}>
+                  No hay participantes añadidos.
+                </div>
+              ),
+            }}
+          >
+            <Column title="Nro" />
+            <Column title="Nombre completo" />
+          </Table>
+        </Form>
+      </Modal>
+
+      {/*Modal para buscar un participante*/}
+      <Modal
+        open={buscarParticipante}
+        onCancel={handleCancelBuscador}
+        footer={[
+          <Form>
+            <Button type="primary">Añadir</Button>
+          </Form>,
+        ]}
+      >
+        <label>Carnet de identidad del participante</label>
+        <div>
+          <Search placeholder="Buscar participante" maxLength={50} allowClear />
+        </div>
+        <Form>
+          <Form.Item label="Nombre completo del participante">
+            <Input />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
