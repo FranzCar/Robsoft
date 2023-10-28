@@ -118,7 +118,7 @@
 }
 
 .tabla-eventos{
-    border: 1px solid #003873;
+   
     border-radius: 15px;
     background-color: #ffffff;
     height: 370px;
@@ -134,7 +134,7 @@
 
 /*Crear evento*/
 .form-evento{
-    border: 1px solid #003873;
+   
     width: 95%;
     padding-left: 30px;
     background-color: #ffff;

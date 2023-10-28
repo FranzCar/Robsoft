@@ -11,7 +11,7 @@ import {
   message,
   Col,
   Row,
-  Slider,
+  Table,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
@@ -195,6 +195,8 @@ export default function Participante() {
 
   
 // parte para registrar a un equipo
+const [verModalGrupal, setVerModalGrupal] = useState(false);
+const [buscarParticipante, setBuscarParticipante] = useState(false);
 //Mensaje de confirmacion al dar guardar en la parte de registro grupal
 const showConfirmGrupal = (values) => {
   confirm({
@@ -207,7 +209,10 @@ const showConfirmGrupal = (values) => {
     onOk() {
       confirmSave(values);
     },
-    onCancel() {},
+    
+    onCancel() {
+      form.resetFields();
+    },
   });
 };
 
@@ -216,20 +221,17 @@ const showCancelGrupal = () => {
   confirm({
     title: '¿Estás seguro de que deseas cancelar este registro?',
     icon: <ExclamationCircleFilled />,
-
     okText: 'Si',
     cancelText: 'No',
     centered: 'true',
-
     onOk() {
+      setVerModalGrupal(false);
       form.resetFields();
     },
     onCancel() {},
   });
 };
 //Modal para registro grupal
-const [verModalGrupal, setVerModalGrupal] = useState(false);
-const [buscarParticipante, setBuscarParticipante] = useState(false);
 
 const handleCancelGrupal = () => {
   setVerModalGrupal(false);
@@ -249,7 +251,7 @@ const handleCancelBuscador = () => {
 //Guardar datos del formulario grupal
 const [participantes, setParticipantes] = useState([])
 
-const registrarGrupo = () => {
+const registrarGrupo = (values) => {
   const participantes = participantes()
   const datos = {
     nombre_equipo : values.NombreEquipo,
@@ -544,7 +546,7 @@ const registrarGrupo = () => {
         width={600}
         footer={[
           <Form>
-            <Button>Cancelar</Button>
+            <Button onClick={() => showCancelGrupal()}>Cancelar</Button>
             <Button type="primary">Registrarse</Button>
           </Form>,
         ]}
