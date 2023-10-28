@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('FECHA_INICIO')->nullable();
             $table->date('FECHA_FIN')->nullable();
             $table->time('HORA')->nullable();
-            $table->integer('UBICACION');
+            $table->string('UBICACION', 30)->nullable();
             $table->string('DESCRIPCION', 350)->nullable();
             $table->string('ORGANIZADOR', 30)->nullable();
             $table->string('PATROCINADOR', 30)->nullable();

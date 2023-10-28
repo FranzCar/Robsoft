@@ -215,7 +215,7 @@ class EventoController extends Controller
         $eventos = Evento::all();
 
         foreach ($eventos as $evento) {
-            $fechaEvento = $evento->FECHA;
+            $fechaEvento = $evento->FECHA_INICIO;
             $horaEvento = $evento->HORA;
 
             $estado = 'En espera';
