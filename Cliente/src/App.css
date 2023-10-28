@@ -242,6 +242,26 @@ h3 {
     height: 500px;
     padding-top: 50px;
 }
+
+/*Formulario de inscripcion grupal*/
+.aniadir-participante{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.boton-aniadir-participante{
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.icono-aniadir{
+    margin-top: -5px;
+    font-size: 15px;
+}
+.tabla-participantes{
+    width: auto;
+    height: 165px;
+}
 .main-content {
     border: 2px solid #003873;
     border-radius: 4%;

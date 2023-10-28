@@ -1,4 +1,4 @@
-import '../App.css';
+import "../App.css";
 import {
   Button,
   Space,
@@ -11,15 +11,19 @@ import {
   message,
   Col,
   Row,
-} from 'antd';
-import React, {useState} from 'react';
+  Slider,
+} from "antd";
+import React, { useState, useEffect } from "react";
 import {
   PlusOutlined,
   ExclamationCircleFilled,
-} from '@ant-design/icons';
-import axios from 'axios';
-// un comentario q se hizo romotamente 
-const {confirm} = Modal;
+  InfoCircleOutlined,
+} from "@ant-design/icons";
+import axios from "axios";
+import Column from "antd/es/table/Column";
+
+const { confirm } = Modal;
+const { Search } = Input;
 
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -30,7 +34,7 @@ const getBase64 = (file) => {
   });
 };
 const onFinishFailed = (errorInfo) => {
-  console.log('Failed:', errorInfo);
+  console.log("Failed:", errorInfo);
 };
 
 export default function Participante() {
@@ -50,12 +54,11 @@ export default function Participante() {
   
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [previewTitle, setPreviewTitle] = useState('');
+  const [previewImage, setPreviewImage] = useState("");
+  const [previewTitle, setPreviewTitle] = useState("");
   const handleCancelIMG = () => setPreviewOpen(false);
   //Registrar Imagen 1
   const [fileList, setFileList] = useState([]);
-  const handleChange = ({fileList: newFileList}) => setFileList(newFileList);
  const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -63,18 +66,18 @@ export default function Participante() {
     setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
     setPreviewTitle(
-      file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
+      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
     );
   };
-  
-  const customRequest = ({fileList, onSuccess}) => {
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+  const customRequest = ({ fileList, onSuccess }) => {
     onSuccess();
   };
   const uploadButton = (
     <div>
-      {' '}
+      {" "}
       <PlusOutlined />
-      <div style={{marginTop: 10}}>Subir imagen </div>
+      <div style={{ marginTop: 10 }}>Subir imagen </div>
     </div>
   );
 // Registrar Imagen 2
@@ -105,12 +108,12 @@ export default function Participante() {
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
     confirm({
-      title: '¿Esta seguro de guardar este registro?',
+      title: "¿Esta seguro de guardar este registro?",
       icon: <ExclamationCircleFilled />,
-      content: '',
-      okText: 'Si',
-      cancelText: 'No',
-      centered: 'true',
+      content: "",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
 
       onOk() {
         confirmSave(values);
@@ -121,12 +124,12 @@ export default function Participante() {
   //Mensaje al dar al boton cancelar del formulario de crear registro
   const showCancel = () => {
     confirm({
-      title: '¿Estás seguro de que deseas cancelar este registro?',
+      title: "¿Estás seguro de que deseas cancelar este registro?",
       icon: <ExclamationCircleFilled />,
 
-      okText: 'Si',
-      cancelText: 'No',
-      centered: 'true',
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
 
       onOk() {
         setVisible(false);
@@ -169,8 +172,8 @@ export default function Participante() {
     console.log('Se guarda los datos en la BD');
     axios.post('http://localhost:8000/api/guardar-participante',datos)
       .then((response) => {
-        console.log('Datos guardados con éxito', response.data);
-        message.success('El evento se registró correctamente');
+        console.log("Datos guardados con éxito", response.data);
+        message.success("El evento se registró correctamente");
       })
       .catch((error) => {
         if (error.response) {
@@ -181,7 +184,7 @@ export default function Participante() {
           }
         } else {
           // Otros errores (problemas de red, etc.)
-          message.error('Ocurrió un error al guardar los datos.');
+          message.error("Ocurrió un error al guardar los datos.");
         }
       });
     setVisible(false);
@@ -189,6 +192,8 @@ export default function Participante() {
     setFileList([]);
     setFileList1([]);
   };
+
+  
 // parte para registrar a un equipo
 //Mensaje de confirmacion al dar guardar en la parte de registro grupal
 const showConfirmGrupal = (values) => {
@@ -199,7 +204,6 @@ const showConfirmGrupal = (values) => {
     okText: 'Si',
     cancelText: 'No',
     centered: 'true',
-
     onOk() {
       confirmSave(values);
     },
@@ -223,7 +227,25 @@ const showCancelGrupal = () => {
     onCancel() {},
   });
 };
+//Modal para registro grupal
+const [verModalGrupal, setVerModalGrupal] = useState(false);
+const [buscarParticipante, setBuscarParticipante] = useState(false);
 
+const handleCancelGrupal = () => {
+  setVerModalGrupal(false);
+};
+
+const showModalGrupal = () => {
+  setVerModalGrupal(true);
+};
+
+const aniadirPArticipante = () => {
+  setBuscarParticipante(true);
+};
+
+const handleCancelBuscador = () => {
+  setBuscarParticipante(false);
+};
 //Guardar datos del formulario grupal
 const [participantes, setParticipantes] = useState([])
 
@@ -239,26 +261,26 @@ const registrarGrupo = (values) => {
     <div className="pagina-evento">
       <Row gutter={[16, 8]}>
         <Col className="main-content" span={12}>
-          <Space direction="vertical" style={{width: '80%'}}>
+          <Space direction="vertical" style={{ width: "80%" }}>
             <Button
               type="primary"
               onClick={showModal}
               block
-              style={{background: 'var(--primary-color)'}}
+              style={{ background: "var(--primary-color)" }}
             >
-              <span style={{fontWeight: 'bold'}}>Registro Individual</span>
+              <span style={{ fontWeight: "bold" }}>Registro Individual</span>
             </Button>
           </Space>
         </Col>
         <Col className="main-content" span={12}>
-          <Space direction="vertical" style={{width: '80%'}}>
+          <Space direction="vertical" style={{ width: "80%" }}>
             <Button
               type="primary"
-              onClick={showModal}
+              onClick={showModalGrupal}
               block
-              style={{background: 'var(--primary-color)'}}
+              style={{ background: "var(--primary-color)" }}
             >
-              <span style={{fontWeight: 'bold'}}>Registro Grupal</span>
+              <span style={{ fontWeight: "bold" }}>Registro Grupal</span>
             </Button>
           </Space>
         </Col>
@@ -298,13 +320,15 @@ const registrarGrupo = (values) => {
           <Form.Item
             label="Nombre completo"
             name="NOMBRE"
-            rules={[{required: true, message: 'Ingrese un nombre, por favor.'}]}
+            rules={[
+              { required: true, message: "Ingrese un nombre, por favor." },
+            ]}
           >
             <Input
               maxLength={50}
               minLength={5}
               placeholder="Ingrese su nombre completo."
-              style={{width: '370px'}}
+              style={{ width: "370px" }}
             ></Input>
           </Form.Item>
           <Form.Item
@@ -313,7 +337,7 @@ const registrarGrupo = (values) => {
             rules={[{required: true, message: 'Ingrese una fecha, por favor.'}]}
           >
             <DatePicker
-              style={{width: '178px'}}
+              style={{ width: "178px" }}
               placeholder="Selecciona una fecha"
             />
           </Form.Item>
@@ -326,14 +350,14 @@ const registrarGrupo = (values) => {
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese su nro de carnet',
+                    message: "Por favor ingrese su nro de carnet",
                   },
                 ]}
               >
                 <Input
                   maxLength={9}
                   minLength={5}
-                  style={{width: '175px'}}
+                  style={{ width: "175px" }}
                   placeholder="Ingrese su nro de carnet"
                 ></Input>
               </Form.Item>
@@ -341,11 +365,11 @@ const registrarGrupo = (values) => {
               <Form.Item
                 label="Telefono"
                 name="TELEFONO"
-                style={{width: '200px'}}
+                style={{ width: "200px" }}
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese un telefono',
+                    message: "Por favor ingrese un telefono",
                   },
                 ]}
               >
@@ -353,7 +377,7 @@ const registrarGrupo = (values) => {
                   placeholder="Ingrese el telefono"
                   maxLength={10}
                   minLength={6}
-                  style={{width: '175px'}}
+                  style={{ width: "175px" }}
                 ></Input>
               </Form.Item>
 
@@ -363,7 +387,7 @@ const registrarGrupo = (values) => {
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese la institucion',
+                    message: "Por favor ingrese la institucion",
                   },
                 ]}
               >
@@ -379,7 +403,7 @@ const registrarGrupo = (values) => {
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor ingrese el semestre',
+                    message: "Por favor ingrese el semestre",
                   },
                 ]}
               >
@@ -421,8 +445,8 @@ const registrarGrupo = (values) => {
                   <img
                     alt="example"
                     style={{
-                      width: 'auto',
-                      height: '300px',
+                      width: "auto",
+                      height: "300px",
                     }}
                     src={previewImage}
                   />
@@ -433,11 +457,11 @@ const registrarGrupo = (values) => {
               <Form.Item
                 label="Genero"
                 name="GENERO"
-                style={{width: '190px'}}
+                style={{ width: "190px" }}
                 rules={[
                   {
                     required: true,
-                    message: 'Por favor seleccione un genero ',
+                    message: "Por favor seleccione un genero ",
                   },
                 ]}
               >
@@ -477,7 +501,6 @@ const registrarGrupo = (values) => {
                   <Select.Option value="XL">XL</Select.Option>
                   <Select.Option value="XXL">XXL</Select.Option>
                 </Select>
-
               </Form.Item>
 
               <Form.Item label="Foto" name="FOTO">
@@ -501,8 +524,8 @@ const registrarGrupo = (values) => {
                   <img
                     alt="example"
                     style={{
-                      width: 'auto',
-                      height: '300px',
+                      width: "auto",
+                      height: "300px",
                     }}
                     src={previewImage}
                   />
@@ -510,6 +533,80 @@ const registrarGrupo = (values) => {
               </Form.Item>
             </Col>
           </Row>
+        </Form>
+      </Modal>
+
+      {/*Modal para la parte de registrar equipo grupal */}
+      <Modal
+        title="Formulario de registro grupal"
+        open={verModalGrupal}
+        onCancel={handleCancelGrupal}
+        width={600}
+        footer={[
+          <Form>
+            <Button>Cancelar</Button>
+            <Button type="primary">Registrarse</Button>
+          </Form>,
+        ]}
+      >
+        <Form  layout="vertical">
+          <Form.Item label="Nombre del equipo" name="EQUIPO">
+            <Input placeholder="Ingrese el nombre del equipo" />
+          </Form.Item>
+          <Form.Item label="Institución" name="INSTITUCION">
+            <Input placeholder="Ingrese el nombre de la institución" />
+          </Form.Item>
+          <Form.Item label="Entrenador" name="ENTRENADOR">
+            <Input placeholder="Ingrese el nombre del entrenador" />
+          </Form.Item>
+          <Form.Item label="Talla de polera" name="POLERA">
+            <Input placeholder="Ingrese la talla de la polera" />
+          </Form.Item>
+          <div className="aniadir-participante">
+            <div>
+              <label>Participantes</label>
+            </div>
+            <div className="boton-aniadir-participante">
+              <label>Añadir</label>
+              <Button type="link" onClick={aniadirPArticipante} className="icono-aniadir">
+                <PlusOutlined />
+              </Button>
+            </div>
+          </div>
+          <Table
+            className="tabla-participantes"
+            locale={{
+              emptyText: (
+                <div style={{ padding: "30px", textAlign: "center" }}>
+                  No hay participantes añadidos.
+                </div>
+              ),
+            }}
+          >
+            <Column title="Nro" />
+            <Column title="Nombre completo" />
+          </Table>
+        </Form>
+      </Modal>
+
+      {/*Modal para buscar un participante*/}
+      <Modal
+        open={buscarParticipante}
+        onCancel={handleCancelBuscador}
+        footer={[
+          <Form>
+            <Button type="primary">Añadir</Button>
+          </Form>,
+        ]}
+      >
+        <label>Carnet de identidad del participante</label>
+        <div>
+          <Search placeholder="Buscar participante" maxLength={50} allowClear />
+        </div>
+        <Form>
+          <Form.Item label="Nombre completo del participante">
+            <Input />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
