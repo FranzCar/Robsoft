@@ -182,18 +182,18 @@ export default function CrearEvento() {
 
   const datosEvento = (values) => {
     const fecha = values.FECHA_INICIO;
-    const NUEVAFECHA = fecha.format("YYYY-MM-DD");
+    const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
 
-    const fecha1 = values.FECHA_FIN;
-    const NUEVAFECHA_FIN = fecha1.format("YYYY-MM-DD");
+    const fecha_fin = values.FECHA_FIN;
+    const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const hora = values.HORA;
     const NUEVAHORA = hora.format("HH:mm:ss");
     const TIPO = validarTipo(values.TIPO_EVENTO);
     const datos = {
       TITULO: values.TITULO,
       TIPO_EVENTO: TIPO,
-      FECHA: NUEVAFECHA,
-      FECHAFIN: NUEVAFECHA_FIN,
+      FECHA_INICIO: NUEVAFECHA_INICIO,
+      FECHA_FIN: NUEVAFECHA_FIN,
       HORA: NUEVAHORA,
       UBICACION: values.UBICACION,
       DESCRIPCION: values.DESCRIPCION,

@@ -95,7 +95,7 @@ export default function EliminarEvento() {
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
         <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
-        <Column title="Fecha" dataIndex="FECHA" key="estado" />
+        <Column title="Fecha inicio" dataIndex="FECHA_INICIO" key="estado" />
         <Column
           align="center"
           title="Eliminar"

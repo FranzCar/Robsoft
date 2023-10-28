@@ -486,7 +486,7 @@ const registrarGrupo = (values) => {
 
               <Form.Item label="Codigo SIS" 
                           name="CODIGOSIS" 
-                          style={{width: '250px'}}>
+                          style={{width: '230px'}}>
                 <Input
                   placeholder="Ingrese su codigo sis"
                   maxLength={9}

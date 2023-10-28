@@ -108,7 +108,8 @@ export default function EditarEvento() {
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const showEdit = (record) => {
-    const fechaEvento = moment(record.FECHA);
+    const fechaEventoInicio = moment(record.FECHA_INICIO);
+    const fechaEventoFin = moment(record.FECHA_FIN);
     const horaEvento = moment(record.HORA, "HH:mm:ss");
     const TIPO = record.TIPO_EVENTO;
     setVerImagen(record.AFICHE);
@@ -121,7 +122,8 @@ export default function EditarEvento() {
       PATROCINADOR: record.PATROCINADOR,
       AFICHE: record.AFICHE,
     };
-    form.setFieldsValue({ FECHAs: fechaEvento });
+    form.setFieldsValue({ FECHAsINI: fechaEventoInicio });
+    form.setFieldsValue({ FECHAsFIN: fechaEventoFin});
     form.setFieldsValue({ HORAs: horaEvento });
     form.setFieldsValue({ TIPO_EVENTO: TIPO });
     form.setFieldsValue(datos);
@@ -172,15 +174,19 @@ export default function EditarEvento() {
   };
 
   const datosEvento = (values) => {
-    const fecha = values.FECHAs;
-    const NUEVAFECHA = fecha.format("YYYY-MM-DD");
+    const fecha = values.FECHAsINI;
+    const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
+
+    const fecha_fin = values.FECHAsFIN;
+    const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const hora = values.HORAs;
     const NUEVAHORA = hora.format("HH:mm:ss");
     const TIPO = validarTipo(values.TIPO_EVENTO);
     const datos = {
       TITULO: values.TITULO,
       TIPO_EVENTO: TIPO,
-      FECHA: NUEVAFECHA,
+      FECHA_INICIO: NUEVAFECHA_INICIO,
+      FECHA_FIN: NUEVAFECHA_FIN,
       HORA: NUEVAHORA,
       UBICACION: values.UBICACION,
       DESCRIPCION: values.DESCRIPCION,
@@ -325,7 +331,7 @@ export default function EditarEvento() {
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
         <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
-        <Column title="Fecha" dataIndex="FECHA" key="estado" />
+        <Column title="Fecha inicio" dataIndex="FECHA_INICIO" key="estado" />
         <Column
           align="center"
           title="Editar"
@@ -423,8 +429,24 @@ export default function EditarEvento() {
               />
             </Form.Item>
             <Form.Item
+              label="Fecha inicio"
+              name="FECHAsINI"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese una fecha",
+                },
+              ]}
+            >
+              <DatePicker
+                style={{ width: "175px" }}
+                placeholder="Selecciona una fecha"
+                disabledDate={disabledDate}
+              />
+            </Form.Item>
+             <Form.Item
               label="Fecha"
-              name="FECHAs"
+              name="FECHAsFIN"
               rules={[
                 {
                   required: true,
