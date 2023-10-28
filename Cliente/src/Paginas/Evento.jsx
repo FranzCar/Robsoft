@@ -186,7 +186,7 @@ export default function Evento() {
         <Column title="Fecha" dataIndex="FECHA" key="estado" />
         <Column
           align="center"
-          title="Opciones"
+          title="Informacion"
           key="accion"
           render={(record) => (
             <Space size="middle">
@@ -202,7 +202,7 @@ export default function Evento() {
 
       {/*Ventana para mostrar la ventana de mas informacion */}
       <Modal
-        title="Informaci&oacute;n del evento"
+        title="Informaci&oacute;n"
         open={isModalOpen}
         onOk={handleOkInfo}
         onCancel={handleCancelInfo}
@@ -218,12 +218,12 @@ export default function Evento() {
         <Form
           form={show}
           initialValues={info}
-          layout="vertical"
+          layout="vertical"mostrar-informacion
           className="form-verInformacion"
           name="formulario_informacion"
           autoComplete="off"
         >
-          <div className="mostrar-informacion">
+          <div className="">
             <h3>Titulo:</h3>
             <p>{info.TITULO}</p>
             <br />

@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EventoController;
 use App\Http\Controllers\Api\ParticipanteController;
-use App\Http\Controllers\Api\CoachController;
+use App\Http\Controllers\Api\CoachController; 
 use App\Http\Controllers\Api\EquipoController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -25,5 +25,6 @@ Route::post('guardar-participante',[ParticipanteController::class, 'store']);
 Route::get('lista-participantes',[ParticipanteController::class, 'listParticipantes']);
 Route::get('lista-coachs',[CoachController::class, 'listaCoachs']);
 Route::post('guardar-equipo',[EquipoController::class, 'store']);
+Route::get('eventos-modificables', [EventoController::class, 'getEventosEnEspera']);
+Route::get('lista-equipos',[EquipoController::class, 'listaEquipos']);
 
-Route::post('guardar-participante',[EventoController::class, 'guardarParticipante']);
