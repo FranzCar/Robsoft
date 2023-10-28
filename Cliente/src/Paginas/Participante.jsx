@@ -227,7 +227,7 @@ const showCancelGrupal = () => {
 //Guardar datos del formulario grupal
 const [participantes, setParticipantes] = useState([])
 
-const registrarGrupo = () => {
+const registrarGrupo = (values) => {
   const participantes = participantes()
   const datos = {
     nombre_equipo : values.NombreEquipo,
@@ -460,7 +460,7 @@ const registrarGrupo = () => {
 
               <Form.Item label="Codigo SIS" 
                           name="CODIGOSIS" 
-                          style={{width: '250px'}}>
+                          style={{width: '230px'}}>
                 <Input
                   placeholder="Ingrese su codigo sis"
                   maxLength={9}
