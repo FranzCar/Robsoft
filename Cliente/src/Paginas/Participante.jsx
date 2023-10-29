@@ -17,7 +17,7 @@ import React, { useState, useEffect } from "react";
 import {
   PlusOutlined,
   ExclamationCircleFilled,
-  InfoCircleOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import Column from "antd/es/table/Column";
@@ -37,6 +37,21 @@ const onFinishFailed = (errorInfo) => {
   console.log("Failed:", errorInfo);
 };
 
+const rowSelection = {
+  onChange: (selectedRowKeys, selectedRows) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      "selectedRows: ",
+      selectedRows
+    );
+  },
+  getCheckboxProps: (record) => ({
+    disabled: record.nombre === "Disabled User",
+    // Column configuration not to be checked
+    name: record.nombre,
+  }),
+};
+
 export default function Participante() {
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
@@ -44,22 +59,27 @@ export default function Participante() {
   const showModal = () => {
     setVisible(true);
   };
- 
+
   const handleCancel = () => {
     setFileList([]);
     setFileList1([]);
     setVisible(false);
     form.resetFields();
   };
-  
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   const handleCancelIMG = () => setPreviewOpen(false);
+
+  useEffect(() => {
+    obtenerParticipantes();
+    obtenerGrupos();
+  }, []);
+
   //Registrar Imagen 1
   const [fileList, setFileList] = useState([]);
- const handlePreview = async (file) => {
+  const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
     }
@@ -80,30 +100,30 @@ export default function Participante() {
       <div style={{ marginTop: 10 }}>Subir imagen </div>
     </div>
   );
-// Registrar Imagen 2
-   const [fileList1, setFileList1] = React.useState([]); 
-   const handleChange1 = ({fileList: newfileList}) => setFileList1(newfileList);
-   const handlePreview1 = async (file) => {
+  // Registrar Imagen 2
+  const [fileList1, setFileList1] = React.useState([]);
+  const handleChange1 = ({ fileList: newfileList }) =>
+    setFileList1(newfileList);
+  const handlePreview1 = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
     }
     setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
     setPreviewTitle(
-      file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
+      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
     );
   };
-  const customRequest1 = ({fileList1, onSuccess}) => {
+  const customRequest1 = ({ fileList1, onSuccess }) => {
     onSuccess();
   };
   const uploadButton1 = (
     <div>
-      {' '}
+      {" "}
       <PlusOutlined />
-      <div style={{marginTop: 10}}>Subir imagen 2 </div>
+      <div style={{ marginTop: 10 }}>Subir imagen 2 </div>
     </div>
   );
-  
 
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
@@ -148,29 +168,30 @@ export default function Participante() {
   };
   //modelo participante
   const datosParticipante = (values) => {
-  const fecha = values.FECHA;
-  const NUEVAFECHA = fecha.format("YYYY-MM-DD");
-  const datos = {
-    nombre: values.NOMBRE,
-    correo_electronico: values.CORREO,
-    ci: values.CI,
-    telefono: values.TELEFONO,
-    genero: values.GENERO,
-    semestre: values.SEMESTRE,
-    institucion: values.INSTITUCION,
-    fechaNacimiento: NUEVAFECHA,
-    talla_polera: values.TALLA_POLERA,
-    codigoSIS: values.CODIGOSIS,
-    foto: fileList1.length > 0 ? fileList1[0].thumbUrl : null,
-    certificado: fileList.length > 0 ? fileList[0].thumbUrl : null,
-  };
+    const fecha = values.FECHA;
+    const NUEVAFECHA = fecha.format("YYYY-MM-DD");
+    const datos = {
+      nombre: values.NOMBRE,
+      correo_electronico: values.CORREO,
+      ci: values.CI,
+      telefono: values.TELEFONO,
+      genero: values.GENERO,
+      semestre: values.SEMESTRE,
+      institucion: values.INSTITUCION,
+      fechaNacimiento: NUEVAFECHA,
+      talla_polera: values.TALLA_POLERA,
+      codigoSIS: values.CODIGOSIS,
+      foto: fileList1.length > 0 ? fileList1[0].thumbUrl : null,
+      certificado: fileList.length > 0 ? fileList[0].thumbUrl : null,
+    };
     return datos;
   };
-  
+
   const confirmSave = (values) => {
     const datos = datosParticipante(values);
-    console.log('Se guarda los datos en la BD');
-    axios.post('http://localhost:8000/api/guardar-participante',datos)
+    console.log("Se guarda los datos en la BD");
+    axios
+      .post("http://localhost:8000/api/guardar-participante", datos)
       .then((response) => {
         console.log("Datos guardados con éxito", response.data);
         message.success("El evento se registró correctamente");
@@ -193,72 +214,218 @@ export default function Participante() {
     setFileList1([]);
   };
 
-  
-// parte para registrar a un equipo
-const [verModalGrupal, setVerModalGrupal] = useState(false);
-const [buscarParticipante, setBuscarParticipante] = useState(false);
-//Mensaje de confirmacion al dar guardar en la parte de registro grupal
-const showConfirmGrupal = (values) => {
-  confirm({
-    title: '¿Esta seguro de guardar este registro?',
-    icon: <ExclamationCircleFilled />,
-    content: '',
-    okText: 'Si',
-    cancelText: 'No',
-    centered: 'true',
-    onOk() {
-      confirmSave(values);
+  // Registro de un equipo
+  const [verModalGrupal, setVerModalGrupal] = useState(false);
+  const [buscarParticipante, setBuscarParticipante] = useState(false);
+  const [integrante, setIntegrante] = useState([]);
+  const [datoFiltrado, setDatoFiltrado] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [listaParticipante, setListaParticipante] = useState([]);
+  const [equipos, setEquipos] = useState([]);
+  const [nextID, setNextID] = useState(1);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectionType, setSelectionType] = useState("checkbox");
+
+  const rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      // Actualiza el estado con las filas seleccionadas
+      setSelectedRows(selectedRows);
     },
-    
-    onCancel() {
-      form.resetFields();
-    },
-  });
-};
+  };
 
-//Mensaje al dar al boton cancelar del formulario de registrar equipo 
-const showCancelGrupal = () => {
-  confirm({
-    title: '¿Estás seguro de que deseas cancelar este registro?',
-    icon: <ExclamationCircleFilled />,
-    okText: 'Si',
-    cancelText: 'No',
-    centered: 'true',
-    onOk() {
-      setVerModalGrupal(false);
-      form.resetFields();
-    },
-    onCancel() {},
-  });
-};
-//Modal para registro grupal
+  //Mensaje de confirmacion al dar guardar en la parte de registro grupal
+  const showConfirmGrupal = (values) => {
+    confirm({
+      title: "¿Esta seguro de guardar este registro?",
+      icon: <ExclamationCircleFilled />,
+      content: "",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        guardarEquipo(values);
+      },
+      onCancel() {
+        form.resetFields();
+      },
+    });
+  };
 
-const handleCancelGrupal = () => {
-  setVerModalGrupal(false);
-};
+  //Mensaje al dar al boton cancelar del formulario de registrar equipo
+  const showCancelGrupal = () => {
+    confirm({
+      title: "¿Estás seguro de que deseas cancelar este registro?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        setListaParticipante([]);
+        setVerModalGrupal(false);
+        form.resetFields();
+      },
+      onCancel() {},
+    });
+  };
+  //Modal para registro grupal
 
-const showModalGrupal = () => {
-  setVerModalGrupal(true);
-};
+  const handleCancelGrupal = () => {
+    setListaParticipante([]);
+    setVerModalGrupal(false);
+  };
 
-const aniadirPArticipante = () => {
-  setBuscarParticipante(true);
-};
+  const showModalGrupal = () => {
+    setVerModalGrupal(true);
+  };
 
-const handleCancelBuscador = () => {
-  setBuscarParticipante(false);
-};
-//Guardar datos del formulario grupal
-const [participantes, setParticipantes] = useState([])
+  const aniadirPArticipante = () => {
+    setBuscarParticipante(true);
+  };
 
-const registrarGrupo = (values) => {
-  const participantes = participantes()
-  const datos = {
-    nombre_equipo : values.NombreEquipo,
-    cantidad_integrantes : values.cantidad,
+  const handleCancelBuscador = () => {
+    setBuscarParticipante(false);
+  };
+  //Guardar datos del formulario grupal
+  const registrarGrupo = (values) => {
+    showConfirmGrupal(values);
+    console.log("el valor de los datos del grupo son ", values);
+  };
 
-  }
-}
+  //Obtener los equipos registrados
+  const obtenerGrupos = () => {
+    axios
+      .get("http://localhost:8000/api/lista-equipos")
+      .then((response) => {
+        setEquipos(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const datosGrupal = (values) => {
+    const datos = {
+      nombre_equipo: values.EQUIPO,
+      cantidad_integrantes: 3,
+      id_coach_persona: 2,
+    };
+    return datos;
+  };
+
+  const validarDuplicadoGrupal = (values) => {
+    const equipo = values.EQUIPO;
+    let resultado = false;
+
+    for (let i = 0; i < equipos.length; i++) {
+      if (equipos[i].nombre_equipo === equipo) {
+        resultado = true;
+        break;
+      }
+    }
+
+    return resultado;
+  };
+
+  const guardarEquipo = (values) => {
+    const datos = datosGrupal(values);
+    const duplicado = validarDuplicadoGrupal(values);
+
+    if (duplicado === true) {
+      message.error("Existe un equipo con el mismo nombre");
+    } else {
+      if (listaParticipante.length < 3) {
+        message.error("Para registrar el grupo, se requieren  3 participantes");
+      } else {
+        axios
+          .post("http://localhost:8000/api/guardar-equipo", datos)
+          .then((response) => {
+            message.success("El grupo se registró correctamente");
+            obtenerGrupos();
+            form.resetFields();
+          });
+        setVerModalGrupal(false);
+        setListaParticipante([]);
+      }
+    }
+  };
+
+  //Obtener participantes
+  const obtenerParticipantes = () => {
+    axios
+      .get("http://localhost:8000/api/lista-participantes")
+      .then((response) => {
+        setIntegrante(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  //Buscar participantes
+  const onSearch = (value) => {
+    setSearchText(value);
+    filtrarDatos(value, ["nombre", "ci"]);
+  };
+  const filtrarDatos = (searchText, fieldNames) => {
+    const filtered = integrante.filter((item) =>
+      fieldNames.some((fieldName) =>
+        String(item[fieldName])
+          .toString()
+          .toLowerCase()
+          .includes(searchText.toLowerCase())
+      )
+    );
+    setDatoFiltrado(filtered);
+  };
+
+  //Validar la lista de participantes añadidos
+  const validarLista = () => {
+    let resultado = false;
+
+    for (let i = 0; i < listaParticipante.length; i++) {
+      if (
+        listaParticipante[i].ci === searchText ||
+        listaParticipante[i].nombre === searchText
+      ) {
+        resultado = true;
+        break;
+      }
+    }
+    return resultado;
+  };
+  // Añadir participante a la tabla
+  const aniadirParticipante = () => {
+    const resultado = validarLista();
+
+    if (resultado === true) {
+      message.error("El participantes ya se encuentra añadido");
+    } else {
+      if (!searchText === true || searchText.trim() === "") {
+        message.error("Tiene que ingresar un CI de un participante");
+      } else {
+        if (listaParticipante.length === 3) {
+          message.error("Máximo 3 participantes permitidos");
+        } else {
+          const nuevoParticipante = { key: nextID, ...datoFiltrado[0] };
+
+          setListaParticipante((listaParticipante) => [
+            ...listaParticipante,
+            nuevoParticipante,
+          ]);
+          setNextID(nextID + 1);
+        }
+      }
+    }
+  };
+
+  //Eliminar participantes de la tabla
+  const eliminarParticipante = () => {
+    const nuevaListaParticipante = listaParticipante.filter(
+      (item) => !selectedRows.includes(item)
+    );
+    setListaParticipante(nuevaListaParticipante);
+  };
+
   return (
     <div className="pagina-evento">
       <Row gutter={[16, 8]}>
@@ -336,7 +503,9 @@ const registrarGrupo = (values) => {
           <Form.Item
             label="Fecha de nacimiento"
             name="FECHA"
-            rules={[{required: true, message: 'Ingrese una fecha, por favor.'}]}
+            rules={[
+              { required: true, message: "Ingrese una fecha, por favor." },
+            ]}
           >
             <DatePicker
               style={{ width: "178px" }}
@@ -410,16 +579,36 @@ const registrarGrupo = (values) => {
                 ]}
               >
                 <Select placeholder="Ingrese el semestre">
-                  <Select.Option value="1er semestre">1er semestre</Select.Option>
-                  <Select.Option value="2do semestre">2do semestre</Select.Option>
-                  <Select.Option value="3er semestre">3er semestre</Select.Option>
-                  <Select.Option value="4to semestre">4to semestre</Select.Option>
-                  <Select.Option value="5to semestre">5to semestre</Select.Option>
-                  <Select.Option value="6to semestre">6to semestre</Select.Option>
-                  <Select.Option value="7mo semestre">7mo semestre</Select.Option>
-                  <Select.Option value="8vo semestre">8vo semestre</Select.Option>
-                  <Select.Option value="9no semestre">9no semestre</Select.Option>
-                  <Select.Option value="10mo semestre">10mo semestre</Select.Option>
+                  <Select.Option value="1er semestre">
+                    1er semestre
+                  </Select.Option>
+                  <Select.Option value="2do semestre">
+                    2do semestre
+                  </Select.Option>
+                  <Select.Option value="3er semestre">
+                    3er semestre
+                  </Select.Option>
+                  <Select.Option value="4to semestre">
+                    4to semestre
+                  </Select.Option>
+                  <Select.Option value="5to semestre">
+                    5to semestre
+                  </Select.Option>
+                  <Select.Option value="6to semestre">
+                    6to semestre
+                  </Select.Option>
+                  <Select.Option value="7mo semestre">
+                    7mo semestre
+                  </Select.Option>
+                  <Select.Option value="8vo semestre">
+                    8vo semestre
+                  </Select.Option>
+                  <Select.Option value="9no semestre">
+                    9no semestre
+                  </Select.Option>
+                  <Select.Option value="10mo semestre">
+                    10mo semestre
+                  </Select.Option>
                 </Select>
               </Form.Item>
 
@@ -436,7 +625,7 @@ const registrarGrupo = (values) => {
                   fileList={fileList}
                   maxCount={1}
                 >
-                 {fileList.length >= 1 ? null : uploadButton}
+                  {fileList.length >= 1 ? null : uploadButton}
                 </Upload>
                 <Modal
                   open={previewOpen}
@@ -473,10 +662,7 @@ const registrarGrupo = (values) => {
                 </Select>
               </Form.Item>
 
-              <Form.Item 
-              label="Correo electronico" 
-              name="CORREO"
-              >
+              <Form.Item label="Correo electronico" name="CORREO">
                 <Input
                   placeholder="Ingrese su correo electronico"
                   maxLength={30}
@@ -484,18 +670,22 @@ const registrarGrupo = (values) => {
                 ></Input>
               </Form.Item>
 
-              <Form.Item label="Codigo SIS" 
-                          name="CODIGOSIS" 
-                          style={{width: '230px'}}>
+              <Form.Item
+                label="Codigo SIS"
+                name="CODIGOSIS"
+                style={{ width: "230px" }}
+              >
                 <Input
                   placeholder="Ingrese su codigo sis"
                   maxLength={9}
                   minLength={8}
                 ></Input>
               </Form.Item>
-              <Form.Item label="Talla de polera" 
-              name="TALLA_POLERA" 
-              style={{width: '190px'}}>
+              <Form.Item
+                label="Talla de polera"
+                name="TALLA_POLERA"
+                style={{ width: "190px" }}
+              >
                 <Select>
                   <Select.Option value="S">S</Select.Option>
                   <Select.Option value="M">M</Select.Option>
@@ -543,22 +733,50 @@ const registrarGrupo = (values) => {
         title="Formulario de registro grupal"
         open={verModalGrupal}
         onCancel={handleCancelGrupal}
+        style={{
+          top: 20,
+        }}
         width={600}
         footer={[
-          <Form>
+          <Form form={form} onFinish={registrarGrupo}>
             <Button onClick={() => showCancelGrupal()}>Cancelar</Button>
-            <Button type="primary">Registrarse</Button>
+            <Button type="primary" htmlType="submit">
+              Registrarse
+            </Button>
           </Form>,
         ]}
       >
-        <Form  layout="vertical">
-          <Form.Item label="Nombre del equipo" name="EQUIPO">
-            <Input placeholder="Ingrese el nombre del equipo" />
+        <Form
+          onFinishFailed={onFinishFailed}
+          form={form}
+          onFinish={registrarGrupo}
+          layout="vertical"
+        >
+          <Form.Item
+            label="Nombre del equipo"
+            name="EQUIPO"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, ingrese el nombre del equipo",
+              },
+            ]}
+          >
+            <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
           </Form.Item>
-          <Form.Item label="Institución" name="INSTITUCION">
+          {/*<Form.Item label="Institución" name="INSTITUCION">
             <Input placeholder="Ingrese el nombre de la institución" />
-          </Form.Item>
-          <Form.Item label="Entrenador" name="ENTRENADOR">
+          </Form.Item>*/}
+          <Form.Item
+            label="Entrenador"
+            name="ENTRENADOR"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, ingrese el nombre del entrenador",
+              },
+            ]}
+          >
             <Input placeholder="Ingrese el nombre del entrenador" />
           </Form.Item>
           <Form.Item label="Talla de polera" name="POLERA">
@@ -569,14 +787,33 @@ const registrarGrupo = (values) => {
               <label>Participantes</label>
             </div>
             <div className="boton-aniadir-participante">
+              <label>Eliminar</label>
+              <Button
+                type="link"
+                onClick={eliminarParticipante}
+                className="icono-eliminar"
+              >
+                <DeleteOutlined />
+              </Button>
+
               <label>Añadir</label>
-              <Button type="link" onClick={aniadirPArticipante} className="icono-aniadir">
+              <Button
+                type="link"
+                onClick={aniadirPArticipante}
+                className="icono-aniadir"
+              >
                 <PlusOutlined />
               </Button>
             </div>
           </div>
           <Table
             className="tabla-participantes"
+            dataSource={listaParticipante}
+            rowSelection={{
+              type: selectionType,
+              ...rowSelection,
+            }}
+            pagination={false}
             locale={{
               emptyText: (
                 <div style={{ padding: "30px", textAlign: "center" }}>
@@ -585,29 +822,42 @@ const registrarGrupo = (values) => {
               ),
             }}
           >
-            <Column title="Nro" />
-            <Column title="Nombre completo" />
+            <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
           </Table>
         </Form>
       </Modal>
 
       {/*Modal para buscar un participante*/}
       <Modal
+        title="Buscar participante"
         open={buscarParticipante}
         onCancel={handleCancelBuscador}
         footer={[
           <Form>
-            <Button type="primary">Añadir</Button>
+            <Button type="primary" onClick={aniadirParticipante}>
+              Añadir
+            </Button>
           </Form>,
         ]}
       >
-        <label>Carnet de identidad del participante</label>
+        <label>CI del participante</label>
         <div>
-          <Search placeholder="Buscar participante" maxLength={50} allowClear />
+          <Search
+            className="buscador-participante"
+            placeholder="Buscar participante"
+            onSearch={onSearch}
+            onChange={(e) => onSearch(e.target.value)}
+            maxLength={30}
+            allowClear
+          />
         </div>
-        <Form>
-          <Form.Item label="Nombre completo del participante">
-            <Input />
+        <Form layout="vertical">
+          <Form.Item label="Nombre del participante">
+            {datoFiltrado.map((item) => (
+              <div key={item}>
+                <p> {item.nombre}</p>
+              </div>
+            ))}
           </Form.Item>
         </Form>
       </Modal>

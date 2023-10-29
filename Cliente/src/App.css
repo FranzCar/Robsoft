@@ -258,10 +258,24 @@ h3 {
     margin-top: -5px;
     font-size: 15px;
 }
+.icono-eliminar{
+    margin-top: -5px;
+    font-size: 15px;
+    margin-right: 20px;
+}
 .tabla-participantes{
     width: auto;
-    height: 165px;
+    height: 220px;
+    overflow-y: auto;
 }
+.buscador-participante{
+    padding-top: 5px;
+}
+
+
+
+
+/**/
 .main-content {
     border: 2px solid #003873;
     border-radius: 4%;

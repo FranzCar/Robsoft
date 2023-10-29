@@ -5,7 +5,6 @@ import {
   Space,
   Modal,
   Form,
-  message,
   Image,
 } from "antd";
 import React, { useState, useEffect } from "react";
@@ -20,16 +19,9 @@ const { Column } = Table;
 export default function Evento() {
   const [info, setInfo] = useState([]);
   const [verImagen, setVerImagen] = React.useState("");
-  const [fileList, setFileList] = useState([]);
   const [show] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState([]);
-  const [form] = Form.useForm();
-  const [visible, setVisible] = useState(false);
-
-  const showModal = () => {
-    setVisible(true);
-  };
 
   //Obtener datos de la base de datos
   useEffect(() => {
@@ -41,111 +33,13 @@ export default function Evento() {
       .get("http://localhost:8000/api/eventos-mostrar")
       .then((response) => {
         setData(response.data);
+        console.log("El valor de la data es ",data)
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  //Guardar evento
-  const validarTipo = (tipo) => {
-    if (tipo === "1") return "Estilo ICPC";
-    if (tipo === "2") return "Estilo Libre";
-    if (tipo === "3") return "Taller de programación";
-    if (tipo === "4") return "Sesión de reclutamiento";
-    if (tipo === "5") return "Torneos de programación";
-    if (tipo === "6") return "Entrenamientos";
-    if (tipo === "7") return "Otros";
-  };
-
-  const datosEvento = (values) => {
-     const fecha = values.FECHA_INICIO;
-    const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
-
-    const fecha_fin = values.FECHA_FIN;
-    const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
-    const hora = values.HORA;
-    const NUEVAHORA = hora.format("HH:mm:ss");
-    const TIPO = validarTipo(values.TIPO_EVENTO);
-    const datos = {
-      TITULO: values.TITULO,
-      TIPO_EVENTO: TIPO,
-      FECHA_INICIO: NUEVAFECHA_INICIO,
-      FECHA_FIN: NUEVAFECHA_FIN,
-      HORA: NUEVAHORA,
-      UBICACION: values.UBICACION,
-      DESCRIPCION: values.DESCRIPCION,
-      ORGANIZADOR: values.ORGANIZADOR,
-      PATROCINADOR: values.PATROCINADOR,
-      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
-    };
-    return datos;
-  };
-
-  const validarDuplicado = (values) => {
-    const titulo = values.TITULO;
-    let resultado = false; // Cambiamos de const a let
-
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].TITULO === titulo) {
-        console.log(
-          `Se encontró un objeto con campoObjetivo igual a "${titulo}" en el índice ${i}.`
-        );
-        resultado = true;
-        break; // Puedes usar 'break' si deseas detener la búsqueda cuando se encuentra una coincidencia
-      }
-    }
-    if (!resultado) {
-      console.log("NO hay datos iguales");
-    }
-
-    return resultado;
-  };
-
-  const validarCampos = (error) => {
-    console.log("Error validarcampo ", error);
-    if (error === "El campo t i t u l o debe tener al menos 5 caracteres.") {
-      console.log("validar campo titulo");
-    }
-  };
-
-  const confirmSave = (values) => {
-    const datos = datosEvento(values);
-    const duplicado = validarDuplicado(values);
-
-    if (duplicado === true) {
-      console.log(
-        "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
-      );
-      setVisible(true);
-      message.error("Exite un evento con el mismo titulo");
-    } else {
-      console.log("Se guarda los datos en la BD");
-      axios
-        .post("http://localhost:8000/api/guardar-evento", datos)
-        .then((response) => {
-          console.log("Datos guardados con éxito", response.data);
-          obtenerDatos();
-          message.success("El evento se registró correctamente");
-        })
-        .catch((error) => {
-          if (error.response) {
-            // El servidor respondió con un código de estado fuera del rango 2xx
-            const errores = error.response.data.errors;
-            for (let campo in errores) {
-              message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
-              validarCampos(errores[campo][0]);
-            }
-          } else {
-            // Otros errores (problemas de red, etc.)
-            message.error("Ocurrió un error al guardar los datos.");
-          }
-        });
-      setVisible(false);
-      form.resetFields();
-      setFileList([]);
-    }
-  };
 
   //Ver mas informacion de un evento
 
@@ -187,7 +81,7 @@ export default function Evento() {
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
         <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
-        <Column title="Fecha inicio" dataIndex="FECHA_INICIO" key="estado" />
+        <Column title="Fecha inicio" dataIndex="FECHA_INICIO" key="fecha_inicio" />
         <Column
           align="center"
           title="Informacion"
@@ -220,9 +114,7 @@ export default function Evento() {
         ]}
       >
         <Form
-          form={show}
-          initialValues={info}
-          layout="vertical"mostrar-informacion
+          layout="vertical"
           className="form-verInformacion"
           name="formulario_informacion"
           autoComplete="off"
