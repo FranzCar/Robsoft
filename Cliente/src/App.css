@@ -134,7 +134,6 @@
 
 /*Crear evento*/
 .form-evento{
-   
     width: 95%;
     padding-left: 30px;
     background-color: #ffff;
@@ -272,6 +271,19 @@ h3 {
     padding-top: 5px;
 }
 
+/*Parte añadir entrenador*/
+.botones-entrenador{
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: -35px;
+}
+.tabla-entrenadores{
+    width: auto;
+    height: 220px;
+    overflow-y: auto;
+}
 
 
 

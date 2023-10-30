@@ -74,6 +74,7 @@ export default function Participante() {
 
   useEffect(() => {
     obtenerParticipantes();
+    obtenerEntrenadores();
     obtenerGrupos();
   }, []);
 
@@ -225,7 +226,12 @@ export default function Participante() {
   const [nextID, setNextID] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectionType, setSelectionType] = useState("checkbox");
-
+  const [buscarEntrenador, setBuscarEntrenador] = useState(false);
+  const [entrenador, setEntrenador] = useState([]);
+  const [searchEntrenador, setSearchEntrenador] = useState("");
+  const [datoFiltradoEntrenador, setDatoFiltradoEntrenador] = useState([]);
+  const [nombreEntrenador, setNombreEntrenador] = useState("");
+  const [estadoFormulario, setEstadoFormulario] = useState(false);
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
       // Actualiza el estado con las filas seleccionadas
@@ -260,6 +266,7 @@ export default function Participante() {
       cancelText: "No",
       centered: "true",
       onOk() {
+        setNombreEntrenador("");
         setListaParticipante([]);
         setVerModalGrupal(false);
         form.resetFields();
@@ -267,9 +274,11 @@ export default function Participante() {
       onCancel() {},
     });
   };
-  //Modal para registro grupal
 
+  //Modal para registro grupal
   const handleCancelGrupal = () => {
+    form.resetFields()
+    setNombreEntrenador("");
     setListaParticipante([]);
     setVerModalGrupal(false);
   };
@@ -285,6 +294,15 @@ export default function Participante() {
   const handleCancelBuscador = () => {
     setBuscarParticipante(false);
   };
+
+  //Modal para mostrar el buscador de entrenador
+  const showModalEntrenador = () => {
+    setBuscarEntrenador(true);
+  };
+  const handleCancelEntrenador = () => {
+    setBuscarEntrenador(false);
+  };
+
   //Guardar datos del formulario grupal
   const registrarGrupo = (values) => {
     showConfirmGrupal(values);
@@ -345,6 +363,7 @@ export default function Participante() {
           });
         setVerModalGrupal(false);
         setListaParticipante([]);
+        setNombreEntrenador("");
       }
     }
   };
@@ -366,6 +385,7 @@ export default function Participante() {
     setSearchText(value);
     filtrarDatos(value, ["nombre", "ci"]);
   };
+
   const filtrarDatos = (searchText, fieldNames) => {
     const filtered = integrante.filter((item) =>
       fieldNames.some((fieldName) =>
@@ -393,6 +413,7 @@ export default function Participante() {
     }
     return resultado;
   };
+
   // Añadir participante a la tabla
   const aniadirParticipante = () => {
     const resultado = validarLista();
@@ -412,6 +433,7 @@ export default function Participante() {
             ...listaParticipante,
             nuevoParticipante,
           ]);
+          message.success("Se añadió al participante");
           setNextID(nextID + 1);
         }
       }
@@ -424,6 +446,59 @@ export default function Participante() {
       (item) => !selectedRows.includes(item)
     );
     setListaParticipante(nuevaListaParticipante);
+  };
+
+  //Obtener informacion de los entrenadores
+  const obtenerEntrenadores = () => {
+    axios
+      .get("http://localhost:8000/api/lista-coachs")
+      .then((response) => {
+        setEntrenador(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  // Buscar entreandor
+  const onSearchEntrenador = (value) => {
+    setSearchEntrenador(value);
+    filtrarDatosEntrenador(value, ["nombre", "ci"]);
+  };
+
+  const filtrarDatosEntrenador = (searchText, fieldNames) => {
+    const filtered = entrenador.filter((item) =>
+      fieldNames.some((fieldName) =>
+        String(item[fieldName])
+          .toString()
+          .toLowerCase()
+          .includes(searchText.toLowerCase())
+      )
+    );
+    setDatoFiltradoEntrenador(filtered);
+  };
+
+  //Añadir entrenador en el input
+  const aniadirEntrenador = () => {
+    const regex = /^[0-9]+$/;
+
+    if (!searchEntrenador || searchEntrenador.trim() === "") {
+      message.error("Tiene que ingresar el CI del entrenador");
+    } else if (!regex.test(searchEntrenador)) {
+      message.error("El CI del entrenador debe contener solo números");
+    } else {
+      setNombreEntrenador(datoFiltradoEntrenador[0].nombre);
+      message.success("Se agregó al entrenador");
+    }
+  };
+
+  //
+  const validarEntrenador = (rule, value, callback) => {
+    // Realiza la validación personalizada aquí
+    if (!nombreEntrenador === true) {
+      callback("Por favor, añada un entrenador");
+    } else {
+    }
   };
 
   return (
@@ -741,7 +816,7 @@ export default function Participante() {
           <Form form={form} onFinish={registrarGrupo}>
             <Button onClick={() => showCancelGrupal()}>Cancelar</Button>
             <Button type="primary" htmlType="submit">
-              Registrarse
+              Registrar
             </Button>
           </Form>,
         ]}
@@ -749,6 +824,7 @@ export default function Participante() {
         <Form
           onFinishFailed={onFinishFailed}
           form={form}
+          initialValues={nombreEntrenador}
           onFinish={registrarGrupo}
           layout="vertical"
         >
@@ -773,15 +849,31 @@ export default function Participante() {
             rules={[
               {
                 required: true,
-                message: "Por favor, ingrese el nombre del entrenador",
+                message: ""
+              },
+              {
+                validator: validarEntrenador,
               },
             ]}
           >
-            <Input placeholder="Ingrese el nombre del entrenador" />
+            <div className="botones-entrenador">
+              <label>Añadir</label>
+              <Button
+                type="link"
+                onClick={showModalEntrenador}
+                className="icono-aniadir"
+              >
+                <PlusOutlined />
+              </Button>
+            </div>
+
+            <Input
+              value={nombreEntrenador}
+              readOnly={estadoFormulario}
+              placeholder="Ingrese el nombre del entrenador"
+            />
           </Form.Item>
-          <Form.Item label="Talla de polera" name="POLERA">
-            <Input placeholder="Ingrese la talla de la polera" />
-          </Form.Item>
+
           <div className="aniadir-participante">
             <div>
               <label>Participantes</label>
@@ -833,7 +925,7 @@ export default function Participante() {
         open={buscarParticipante}
         onCancel={handleCancelBuscador}
         footer={[
-          <Form>
+          <Form onFinish={aniadirEntrenador}>
             <Button type="primary" onClick={aniadirParticipante}>
               Añadir
             </Button>
@@ -854,6 +946,40 @@ export default function Participante() {
         <Form layout="vertical">
           <Form.Item label="Nombre del participante">
             {datoFiltrado.map((item) => (
+              <div key={item}>
+                <p> {item.nombre}</p>
+              </div>
+            ))}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/*Modal para buscar un entrenador*/}
+      <Modal
+        title="Selecionar un entrenador"
+        open={buscarEntrenador}
+        onCancel={handleCancelEntrenador}
+        footer={[
+          <Form>
+            <Button type="primary" onClick={aniadirEntrenador}>
+              Añadir
+            </Button>
+          </Form>,
+        ]}
+      >
+        <label>CI del entrenador</label>
+        <div>
+          <Search
+            placeholder="Buscar entrenador"
+            onSearch={onSearchEntrenador}
+            onChange={(e) => onSearchEntrenador(e.target.value)}
+            maxLength={30}
+            allowClear
+          />
+        </div>
+        <Form layout="vertical">
+          <Form.Item label="Nombre del Entrenador">
+            {datoFiltradoEntrenador.map((item) => (
               <div key={item}>
                 <p> {item.nombre}</p>
               </div>

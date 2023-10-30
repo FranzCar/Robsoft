@@ -174,14 +174,15 @@ export default function EditarEvento() {
   };
 
   const datosEvento = (values) => {
+
     const fecha = values.FECHAsINI;
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
-
     const fecha_fin = values.FECHAsFIN;
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const hora = values.HORAs;
     const NUEVAHORA = hora.format("HH:mm:ss");
     const TIPO = validarTipo(values.TIPO_EVENTO);
+
     const datos = {
       TITULO: values.TITULO,
       TIPO_EVENTO: TIPO,
@@ -193,7 +194,7 @@ export default function EditarEvento() {
       ORGANIZADOR: values.ORGANIZADOR,
       PATROCINADOR: values.PATROCINADOR,
       AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
-    };
+    }
     return datos;
   };
 
@@ -251,7 +252,7 @@ export default function EditarEvento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-mostrar")
+      .get("http://localhost:8000/api/eventos-modificables")
       .then((response) => {
         setData(response.data);
       })
@@ -283,7 +284,6 @@ export default function EditarEvento() {
     // Establecemos la fecha máxima como 180 días después de la fecha actual
     const maxDate = new Date();
     maxDate.setDate(today.getDate() + 180);
-
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
   };
