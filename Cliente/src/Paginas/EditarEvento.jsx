@@ -89,7 +89,7 @@ export default function EditarEvento() {
         message.error(
           "Solo se permiten archivos de imagen (JPEG, JPG, PNG, GIF)"
         );
-        return false; // Impedir la carga del archivo
+        return Upload.LIST_IGNORE; // Impedir la carga del archivo y no lo añade a la lista
       }
       return isImage(file); // Permitir la carga del archivo solo si es una imagen
     },
