@@ -141,7 +141,7 @@ export default function EditarEvento() {
   const actualizarEvento = (values) => {
     confirm({
       title: "¿Desea actualizar el evento?",
-      icon: <ExclamationCircleFilled />,
+      icon: <ExclamationCircleFilled />,//
       content: "Se guardarán los nuevos datos del evento",
       okText: "Si",
       cancelText: "No",
@@ -155,9 +155,22 @@ export default function EditarEvento() {
   };
 
   const cerrarEdit = () => {
-    setIsModalOpenEdit(false);
-    setFileList([])
-    form.resetFields();
+    confirm({ 
+      title: "¿Cancelar edición?",
+      icon: <ExclamationCircleFilled />,//
+      content: "¿Está seguro de que desea cancelar la edición del evento? Todos los cambios se perderán.",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+
+      onOk(){
+        setIsModalOpenEdit(false);
+      },
+      onCancel(){},
+    })
+    //setIsModalOpenEdit(false);
+    //setFileList([])
+    //form.resetFields();
   };
 
   const validarTipo = (tipo) => {
@@ -314,7 +327,7 @@ export default function EditarEvento() {
   };
 
    //validacion de caracteres especiales en titulo
-   const caracteresPermitidos = /^[a-zA-Z0-9\-&*" ]+$/;
+   const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9\-&*" ]+$/;
    function validarCaracteresPermitidos(_, value) {
      if (value && !caracteresPermitidos.test(value)) {
        return Promise.reject("Este campo solo acepta los siguientes caracteres especiales: -&*\"");
@@ -372,7 +385,7 @@ export default function EditarEvento() {
         footer={[
           <Form form={form} onFinish={onFinish}>
             <Button onClick={cerrarEdit} className="boton-cancelar-evento">
-              Cerrar
+              Cancelar
             </Button>
             <Button
               type="primary"
