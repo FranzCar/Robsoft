@@ -79,6 +79,9 @@ export default function EliminarEvento() {
 
   return (
     <div>
+      <div className="tabla-descripcion-eliminarEv">
+      <p>ELIMINAR EVENTOS REGISTRADOS</p>
+       </div>
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
