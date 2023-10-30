@@ -65,6 +65,9 @@ export default function Evento() {
 
   return (
     <div className="pagina-evento">
+       <div className="tabla-descripcion">
+      <p>LISTA DE EVENTOS REGISTRADOS</p>
+      </div>
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"

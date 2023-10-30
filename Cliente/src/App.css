@@ -286,6 +286,33 @@ h3 {
 }
 
 
+/*descripcion tabla eventos*/
+.tabla-descripcion{
+    color: black;
+    font-weight: bold;
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+/*descripcion tabla editar eventos*/
+.tabla-descripcion-editarEv{
+    color: black;
+    font-weight: bold;
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+/*descripcion tabla eliminar eventos*/
+.tabla-descripcion-eliminarEv{
+    color: black;
+    font-weight: bold;
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
 
 /**/
 .main-content {

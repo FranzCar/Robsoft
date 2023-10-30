@@ -315,6 +315,9 @@ export default function EditarEvento() {
 
   return (
     <div>
+       <div className="tabla-descripcion-editarEv">
+      <p>EDITAR EVENTOS REGISTRADOS</p>
+       </div>
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
