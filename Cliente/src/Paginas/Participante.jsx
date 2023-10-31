@@ -98,7 +98,7 @@ export default function Participante() {
     <div>
       {" "}
       <PlusOutlined />
-      <div style={{ marginTop: 10 }}>Subir imagen </div>
+      <div style={{ marginTop: 10 }}>Subir certificado </div>
     </div>
   );
   // Registrar Imagen 2
@@ -122,14 +122,24 @@ export default function Participante() {
     <div>
       {" "}
       <PlusOutlined />
-      <div style={{ marginTop: 10 }}>Subir imagen 2 </div>
+      <div style={{ marginTop: 10 }}>Subir fotografia. </div>
     </div>
   );
+//Restringir las fechas
+  const disabledDate = (current) => {
+    // Obtenemos la fecha actual
+    const today = new Date();
+    // Establecemos la fecha máxima como 6205 días después de la fecha actual
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() - 6205);
 
+    // Comparamos si la fecha actual está antes de la fecha máxima
+    return current > maxDate ;
+  };
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
     confirm({
-      title: "¿Esta seguro de guardar este registro?",
+      title: "¿Esta seguro de registrarse?",
       icon: <ExclamationCircleFilled />,
       content: "",
       okText: "Si",
@@ -145,7 +155,7 @@ export default function Participante() {
   //Mensaje al dar al boton cancelar del formulario de crear registro
   const showCancel = () => {
     confirm({
-      title: "¿Estás seguro de que deseas cancelar este registro?",
+      title: "¿Esta seguro de que desea cancelar su registro? Se perdera el progreso realizado.",
       icon: <ExclamationCircleFilled />,
 
       okText: "Si",
@@ -195,7 +205,8 @@ export default function Participante() {
       .post("http://localhost:8000/api/guardar-participante", datos)
       .then((response) => {
         console.log("Datos guardados con éxito", response.data);
-        message.success("El evento se registró correctamente");
+        message.success("El participante se registró correctamente");
+
       })
       .catch((error) => {
         if (error.response) {
@@ -203,10 +214,11 @@ export default function Participante() {
           const errores = error.response.data.errors;
           for (let campo in errores) {
             message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+            
           }
         } else {
           // Otros errores (problemas de red, etc.)
-          message.error("Ocurrió un error al guardar los datos.");
+          message.error("Ocurrió un error al guardar el registro.");
         }
       });
     setVisible(false);
@@ -517,9 +529,86 @@ export default function Participante() {
     }
   };
 
-  //
-  const validarEntrenador = (rule, value, callback) => {};
 
+  //
+  const validarEntrenador = (rule, value, callback) => {
+    // Realiza la validación personalizada aquí
+    if (!nombreEntrenador === true) {
+      callback("Por favor, añada un entrenador");
+    } else {
+    }
+  };
+  //validar Nombre participante
+  const validarMinimo = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 5) {
+      callback("Ingrese al menos 5 caracteres");
+    } else {
+      callback();
+    }
+
+  };
+  //validar carnet de identidad del participante
+  const validarMinimoCI = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 7) {
+      callback("Ingrese al menos 7 digitos del CI.");
+    } else {
+      callback();
+    }
+  };
+  //Solo permitir numeros en los input
+  function onlyNumbers(event) {
+  const key = event.key;
+
+  if (!key.match(/[0-9]/)) {
+    event.preventDefault();
+  }
+}
+
+  //Solo permitir letras en los input
+function onlyLetters(event) {
+  const key = event.key;
+
+  if (!key.match(/[a-zA-Z\s]/)) {
+    event.preventDefault();
+  }
+}
+//validar telefono del participante
+  const validarTelefono = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (!/^(6|7)/.test(value)) {
+      callback("El número de teléfono debe comenzar con 6 o 7.");
+    } else if (!value.match(/^[0-9]{8}$/)) {
+    callback("El número de teléfono debe tener 8 dígitos.");
+    }else {
+      callback();//sin error
+    }
+  };
+  //validar CodigoSis
+  const validarCodigoSis = (_, value, callback) => {
+    const anoActual = new Date().getFullYear();
+
+  // Obtener el año del código de estudiante
+  const codsisValue = value.substring(0, 4);
+
+    if (!value) {
+    callback("");
+  } else if (!/^(199|200|201|202)([0-9]{6}$)/.test(value)) {
+    callback("El códigoSIS no es valido.");
+  } else if (codsisValue > anoActual) {
+    callback("El códigoSIS no existe.");
+  } else {
+    callback();//sin error
+  }
+  };
   return (
     <div className="pagina-evento">
       <Row gutter={[16, 8]}>
@@ -585,6 +674,7 @@ export default function Participante() {
             name="NOMBRE"
             rules={[
               { required: true, message: "Ingrese un nombre, por favor." },
+              { validator: validarMinimo },
             ]}
           >
             <Input
@@ -592,6 +682,7 @@ export default function Participante() {
               minLength={5}
               placeholder="Ingrese su nombre completo."
               style={{ width: "370px" }}
+              onKeyPress={onlyLetters}
             ></Input>
           </Form.Item>
           <Form.Item
@@ -604,6 +695,7 @@ export default function Participante() {
             <DatePicker
               style={{ width: "178px" }}
               placeholder="Selecciona una fecha"
+              disabledDate={disabledDate}
             />
           </Form.Item>
 
@@ -617,32 +709,38 @@ export default function Participante() {
                     required: true,
                     message: "Por favor ingrese su nro de carnet",
                   },
+                  { validator: validarMinimoCI },
                 ]}
               >
                 <Input
-                  maxLength={9}
-                  minLength={5}
+                  maxLength={8}
+                  minLength={7}
                   style={{ width: "175px" }}
                   placeholder="Ingrese su nro de carnet"
+                  onKeyPress={onlyNumbers}
                 ></Input>
               </Form.Item>
 
               <Form.Item
                 label="Telefono"
                 name="TELEFONO"
-                style={{ width: "200px" }}
+                style={{ width: "280px" ,maxWidth: "100%"}}
                 rules={[
                   {
                     required: true,
                     message: "Por favor ingrese un telefono",
                   },
+                  {
+                    validator:validarTelefono,
+                  },
                 ]}
               >
                 <Input
                   placeholder="Ingrese el telefono"
-                  maxLength={10}
-                  minLength={6}
+                  maxLength={8}
+                  minLength={8}
                   style={{ width: "175px" }}
+                  onKeyPress={onlyNumbers}
                 ></Input>
               </Form.Item>
 
@@ -660,6 +758,7 @@ export default function Participante() {
                   placeholder="Ingrese el nombre de la Institucion"
                   maxLength={60}
                   minLength={4}
+                  onKeyPress={onlyLetters}
                 ></Input>
               </Form.Item>
               <Form.Item
@@ -742,11 +841,10 @@ export default function Participante() {
               <Form.Item
                 label="Genero"
                 name="GENERO"
-                style={{ width: "190px" }}
+                style={{ width: "270px",maxWidth: "100%" }}
                 rules={[
                   {
-                    required: true,
-                    message: "Por favor seleccione un genero ",
+                    required: true,message: "Por favor seleccione un genero ",
                   },
                 ]}
               >
@@ -756,25 +854,41 @@ export default function Participante() {
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Correo electronico" name="CORREO">
-                <Input
-                  placeholder="Ingrese su correo electronico"
+              <Form.Item 
+                label="Correo electronico" 
+                name="CORREO"
+                rules={[
+                  {
+                          type: "email",
+                          message: "El correo electrónico no es válido.",
+                        },
+                ]}
+                  >
+                  <Input
+                  placeholder="Ingrese su correo"
                   maxLength={30}
-                  minLength={6}
+                  minLength={5}
                 ></Input>
               </Form.Item>
 
-              <Form.Item
+             {/* <Form.Item
                 label="Codigo SIS"
                 name="CODIGOSIS"
-                style={{ width: "230px" }}
+                style={{ width: "230px" ,maxWidth: "100%"}}
+                 rules={[
+                  {
+                    requires:false,
+                    validator:validarCodigoSis,
+                  },
+                ]}
               >
                 <Input
                   placeholder="Ingrese su codigo sis"
                   maxLength={9}
-                  minLength={8}
+                  minLength={9}
+                  onKeyPress={onlyNumbers}
                 ></Input>
-              </Form.Item>
+              </Form.Item>*/}
               <Form.Item
                 label="Talla de polera"
                 name="TALLA_POLERA"
@@ -999,3 +1113,5 @@ export default function Participante() {
     </div>
   );
 }
+
+  
