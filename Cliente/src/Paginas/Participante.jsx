@@ -355,8 +355,19 @@ export default function Participante() {
     if (duplicado === true) {
       message.error("Existe un equipo con el mismo nombre");
     } else {
-      if (!datos.id_coach_persona) {
-        message.error("Debe añadir un entrenador");
+      if (listaParticipante.length < 3) {
+        message.error("Para registrar el grupo, se requieren  3 participantes");
+      } else {
+        axios
+          .post("http://localhost:8000/api/guardar-equipo", datos)
+          .then((response) => {
+            message.success("El grupo se registró correctamente");
+            obtenerGrupos();
+            form.resetFields();
+          });
+        setVerModalGrupal(false);
+        setListaParticipante([]);
+        setNombreEntrenador("");
       }
     }
   };

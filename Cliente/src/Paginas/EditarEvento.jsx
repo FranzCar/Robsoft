@@ -108,9 +108,10 @@ export default function EditarEvento() {
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const showEdit = (record) => {
+    form.resetFields(['FECHAsINI']);
     const fechaEventoInicio = moment(record.FECHA_INICIO);
     const fechaEventoFin = moment(record.FECHA_FIN);
-    console.log("El valor de la fecha es", fechaEventoInicio)
+    console.log("El valor de la fecha es", record.FECHA_INICIO)
     const horaEvento = moment(record.HORA, "HH:mm:ss");
     const TIPO = record.TIPO_EVENTO;
     setVerImagen(record.AFICHE);
@@ -123,7 +124,7 @@ export default function EditarEvento() {
       PATROCINADOR: record.PATROCINADOR,
       AFICHE: record.AFICHE,
     };
-    form.setFieldsValue({ FECHAsINI: fechaEventoInicio });
+    form.setFieldsValue({ FECHAsINI: fechaEventoInicio});
     form.setFieldsValue({ FECHAsFIN: fechaEventoFin});
     form.setFieldsValue({ HORAs: horaEvento });
     form.setFieldsValue({ TIPO_EVENTO: TIPO });
