@@ -518,13 +518,49 @@ export default function Participante() {
     }
   };
 
+
   //
-  const validarEntrenador = (rule, value, callback) => {};
+  const validarEntrenador = (rule, value, callback) => {
+    // Realiza la validación personalizada aquí
+    if (!nombreEntrenador === true) {
+      callback("Por favor, añada un entrenador");
+    } else {
+    }
+  };
+  //validar Nombre participante
+  const validarMinimo = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 5) {
+      callback("Ingrese al menos 5 caracteres");
+    } else {
+      callback();
+    }
+
+  };
+  //validar carnet de identidad del participante
+  const validarMinimoCI = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 7) {
+      callback("Ingrese al menos 7 digitos del CI.");
+    } else {
+      callback();
+    }
+  };
+  //Solo permitir numeros en los input
+  function onlyNumbers(event) {
+  const key = event.key;
 
   if (!key.match(/[0-9]/)) {
     event.preventDefault();
   }
 }
+
   //Solo permitir letras en los input
 function onlyLetters(event) {
   const key = event.key;
@@ -1066,3 +1102,5 @@ function onlyLetters(event) {
     </div>
   );
 }
+
+  
