@@ -20,7 +20,7 @@ class ParticipanteController extends Controller
             $persona->ci = $request->ci;
             $persona->telefono = $request->telefono;
             $persona->genero = $request->genero;
-            
+            $persona->rol_persona = 1;
             $persona->save();
 
             // Ahora, utiliza el ID devuelto para guardar la información específica en Participante

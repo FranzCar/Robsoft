@@ -267,7 +267,7 @@ const validarDuplicadoCI = (values) => {
       .then((response) => {
         console.log("Datos guardados con éxito", response.data);
         message.success("El participante se registró correctamente");
-
+      
       })
       .catch((error) => {
         if (error.response) {
