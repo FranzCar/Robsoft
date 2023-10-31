@@ -182,6 +182,10 @@
     font-size: 15px;
     height: 35px;
 }
+.radio-modalidad{
+    background-color: #FDBA12;
+    margin-bottom: 10px;
+}
 
 /* Estilo para el mensaje de error */
 .ant-form-item-explain-error {
