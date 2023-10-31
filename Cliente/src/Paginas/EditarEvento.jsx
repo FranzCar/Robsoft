@@ -296,8 +296,8 @@ export default function EditarEvento() {
       callback("");
     } else if (value.trim() !== value) {
       callback("No se permiten espacios en blanco al inicio ni al final");
-    } else if (value.replace(/\s/g, "").length < 5) {
-      callback("Ingrese al menos 5 caracteres");
+    } else if (value.replace(/\s/g, "").length < 4) {
+      callback("Ingrese al menos 4 caracteres");
     } else {
       callback();
     }

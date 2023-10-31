@@ -74,10 +74,58 @@ export default function Participante() {
 
   useEffect(() => {
     obtenerParticipantes();
+    obtenerParticipantesCI();
     obtenerEntrenadores();
     obtenerGrupos();
   }, []);
 
+//*Kevin
+const options = [
+    { value: "1er semestre", label: "1er semestre" },
+    { value: "2do semestre", label: "2do semestre" },
+    { value: "3er semestre", label: "3er semestre" },
+    { value: "4to semestre", label: "4to semestre" },
+    { value: "5to semestre", label: "5to semestre" },
+    { value: "6to semestre", label: "6to semestre" },
+    { value: "7mo semestre", label: "7mo semestre" },
+    { value: "8vo semestre", label: "8vo semestre" },
+    { value: "9no semestre", label: "9no semestre" },
+    { value: "10mo semestre", label: "10mo semestre" },
+     { value: "Otro", label: "Otro" },
+  ];
+//Obtener participantes para validar
+  const obtenerParticipantesCI = () => {
+    axios
+      .get("http://localhost:8000/api/lista-participantes")
+      .then((response) => {
+        setData(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+const [data, setData] = useState([]);
+
+const validarDuplicadoCI = (values) => {
+    const carnet = values.CI;
+    let resultado = false; 
+
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].ci === carnet) {
+        console.log(
+          `Se encontró un objeto con campo Objetivo igual a "${carnet}" en el índice ${i}.`
+        );
+        resultado = true;
+        break; 
+      }
+    }
+    if (!resultado) {
+      console.log("NO hay datos iguales");
+    }
+
+    return resultado;
+  };
+//
   //Registrar Imagen 1
   const [fileList, setFileList] = useState([]);
   const handlePreview = async (file) => {
@@ -106,14 +154,14 @@ export default function Participante() {
   const handleChange1 = ({ fileList: newfileList }) =>
     setFileList1(newfileList);
   const handlePreview1 = async (file) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
-    }
-    setPreviewImage(file.url || file.preview);
-    setPreviewOpen(true);
-    setPreviewTitle(
-      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
-    );
+      if (!file.url && !file.preview) {
+        file.preview = await getBase64(file.originFileObj);
+      }
+      setPreviewImage(file.url || file.preview);
+      setPreviewOpen(true);
+      setPreviewTitle(
+        file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
+      );
   };
   const customRequest1 = ({ fileList1, onSuccess }) => {
     onSuccess();
@@ -125,7 +173,7 @@ export default function Participante() {
       <div style={{ marginTop: 10 }}>Subir fotografia. </div>
     </div>
   );
-//Restringir las fechas
+//Restringir las fechas de 17 a 30 años a la fecha actual
   const disabledDate = (current) => {
     // Obtenemos la fecha actual
     const today = new Date();
@@ -133,8 +181,12 @@ export default function Participante() {
     const maxDate = new Date();
     maxDate.setDate(today.getDate() - 6205);
 
+    // Establecemos la fecha mínima como 3 días después de la fecha actual
+    const minDate = new Date()
+    minDate.setDate(today.getDate() -10957);
+
     // Comparamos si la fecha actual está antes de la fecha máxima
-    return current > maxDate ;
+    return current > maxDate | current < minDate;
   };
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
@@ -200,6 +252,15 @@ export default function Participante() {
 
   const confirmSave = (values) => {
     const datos = datosParticipante(values);
+    const duplicado = validarDuplicadoCI(values);
+
+    if (duplicado === true) {
+      console.log(
+        "No se cierra el formulario y no se guarda, se mustra un mensaje de q existe evento duplicado"
+      );
+      setVisible(true);
+      message.error("Existe un participante con el mismo carnet de identidad.");
+    } else {
     console.log("Se guarda los datos en la BD");
     axios
       .post("http://localhost:8000/api/guardar-participante", datos)
@@ -225,6 +286,7 @@ export default function Participante() {
     form.resetFields();
     setFileList([]);
     setFileList1([]);
+    }
   };
 
   // Registro de un equipo
@@ -265,16 +327,14 @@ export default function Participante() {
       onOk() {
         guardarEquipo(values);
       },
-      onCancel() {
-        form.resetFields();
-      },
+      onCancel() { },
     });
   };
 
   //Mensaje al dar al boton cancelar del formulario de registrar equipo
   const showCancelGrupal = () => {
     confirm({
-      title: "¿Estás seguro de que deseas cancelar este registro?",
+      title: "¿Estás seguro de que desea cancelar su registro? Se perdera el progreso realizado. ",
       icon: <ExclamationCircleFilled />,
       okText: "Si",
       cancelText: "No",
@@ -698,10 +758,7 @@ function onlyLetters(event) {
               disabledDate={disabledDate}
             />
           </Form.Item>
-
-          <Row gutter={[16, 8]}>
-            <Col span={12}>
-              <Form.Item
+          <Form.Item
                 label="Carnet de identidad"
                 name="CI"
                 rules={[
@@ -721,8 +778,12 @@ function onlyLetters(event) {
                 ></Input>
               </Form.Item>
 
+          <Row gutter={[16, 8]}>
+            <Col span={12}>
+              
+
               <Form.Item
-                label="Telefono"
+                label="Celular"
                 name="TELEFONO"
                 style={{ width: "280px" ,maxWidth: "100%"}}
                 rules={[
@@ -771,38 +832,8 @@ function onlyLetters(event) {
                   },
                 ]}
               >
-                <Select placeholder="Ingrese el semestre">
-                  <Select.Option value="1er semestre">
-                    1er semestre
-                  </Select.Option>
-                  <Select.Option value="2do semestre">
-                    2do semestre
-                  </Select.Option>
-                  <Select.Option value="3er semestre">
-                    3er semestre
-                  </Select.Option>
-                  <Select.Option value="4to semestre">
-                    4to semestre
-                  </Select.Option>
-                  <Select.Option value="5to semestre">
-                    5to semestre
-                  </Select.Option>
-                  <Select.Option value="6to semestre">
-                    6to semestre
-                  </Select.Option>
-                  <Select.Option value="7mo semestre">
-                    7mo semestre
-                  </Select.Option>
-                  <Select.Option value="8vo semestre">
-                    8vo semestre
-                  </Select.Option>
-                  <Select.Option value="9no semestre">
-                    9no semestre
-                  </Select.Option>
-                  <Select.Option value="10mo semestre">
-                    10mo semestre
-                  </Select.Option>
-                </Select>
+                <Select placeholder="Ingrese el semestre" options={options} />
+  
               </Form.Item>
 
               <Form.Item
@@ -837,7 +868,7 @@ function onlyLetters(event) {
                 </Modal>
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={10}>
               <Form.Item
                 label="Genero"
                 name="GENERO"
@@ -947,8 +978,12 @@ function onlyLetters(event) {
         width={600}
         footer={[
           <Form form={form} onFinish={registrarGrupo}>
-            <Button onClick={() => showCancelGrupal()}>Cancelar</Button>
-            <Button type="primary" htmlType="submit">
+            <Button onClick={showCancelGrupal} className="boton-cancelar-registro">
+            Cancelar</Button>
+            <Button  
+            type="primary" 
+            htmlType="submit"
+            className="boton-guardar-registro">
               Guardar
             </Button>
           </Form>,
