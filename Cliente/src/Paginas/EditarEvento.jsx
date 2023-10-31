@@ -448,7 +448,7 @@ export default function EditarEvento() {
               />
             </Form.Item>
              <Form.Item
-              label="Fecha"
+              label="Fecha fin"
               name="FECHAsFIN"
               rules={[
                 {
