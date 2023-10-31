@@ -110,6 +110,7 @@ export default function EditarEvento() {
   const showEdit = (record) => {
     const fechaEventoInicio = moment(record.FECHA_INICIO);
     const fechaEventoFin = moment(record.FECHA_FIN);
+    console.log("El valor de la fecha es", fechaEventoInicio)
     const horaEvento = moment(record.HORA, "HH:mm:ss");
     const TIPO = record.TIPO_EVENTO;
     setVerImagen(record.AFICHE);

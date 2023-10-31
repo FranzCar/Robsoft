@@ -232,6 +232,8 @@ export default function Participante() {
   const [datoFiltradoEntrenador, setDatoFiltradoEntrenador] = useState([]);
   const [nombreEntrenador, setNombreEntrenador] = useState("");
   const [estadoFormulario, setEstadoFormulario] = useState(false);
+  const [listaID_Persona, setListaID_Persona] = useState([]);
+
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
       // Actualiza el estado con las filas seleccionadas
@@ -268,6 +270,7 @@ export default function Participante() {
       onOk() {
         setNombreEntrenador("");
         setListaParticipante([]);
+        setListaID_Persona([])
         setVerModalGrupal(false);
         form.resetFields();
       },
@@ -277,9 +280,10 @@ export default function Participante() {
 
   //Modal para registro grupal
   const handleCancelGrupal = () => {
-    form.resetFields()
+    form.resetFields();
     setNombreEntrenador("");
     setListaParticipante([]);
+    setListaID_Persona([])
     setVerModalGrupal(false);
   };
 
@@ -324,8 +328,8 @@ export default function Participante() {
   const datosGrupal = (values) => {
     const datos = {
       nombre_equipo: values.EQUIPO,
-      cantidad_integrantes: 3,
-      id_coach_persona: 2,
+      id_coach_persona: datoFiltradoEntrenador[0].id_persona,
+      participantes:listaID_Persona,
     };
     return datos;
   };
@@ -347,23 +351,12 @@ export default function Participante() {
   const guardarEquipo = (values) => {
     const datos = datosGrupal(values);
     const duplicado = validarDuplicadoGrupal(values);
-
+    console.log("los datos que se recuperan del grupo son ", datos)
     if (duplicado === true) {
       message.error("Existe un equipo con el mismo nombre");
     } else {
-      if (listaParticipante.length < 3) {
-        message.error("Para registrar el grupo, se requieren  3 participantes");
-      } else {
-        axios
-          .post("http://localhost:8000/api/guardar-equipo", datos)
-          .then((response) => {
-            message.success("El grupo se registró correctamente");
-            obtenerGrupos();
-            form.resetFields();
-          });
-        setVerModalGrupal(false);
-        setListaParticipante([]);
-        setNombreEntrenador("");
+      if (!datos.id_coach_persona) {
+        message.error("Debe añadir un entrenador");
       }
     }
   };
@@ -417,7 +410,6 @@ export default function Participante() {
   // Añadir participante a la tabla
   const aniadirParticipante = () => {
     const resultado = validarLista();
-
     if (resultado === true) {
       message.error("El participantes ya se encuentra añadido");
     } else {
@@ -433,11 +425,20 @@ export default function Participante() {
             ...listaParticipante,
             nuevoParticipante,
           ]);
+          setSearchText("");
           message.success("Se añadió al participante");
+          aniadorIDPersona(datoFiltrado[0].id_persona);
           setNextID(nextID + 1);
         }
       }
     }
+  };
+
+  const aniadorIDPersona = (id) => {
+    setListaID_Persona((listaID_Persona) => [...listaID_Persona, id]);
+
+    // Muestra el contenido actualizado de la lista al final
+    console.log("El id de los participantes es", [...listaID_Persona, id]);
   };
 
   //Eliminar participantes de la tabla
@@ -445,7 +446,14 @@ export default function Participante() {
     const nuevaListaParticipante = listaParticipante.filter(
       (item) => !selectedRows.includes(item)
     );
+  
+    // Crear una nueva lista de IDs excluyendo los IDs de los participantes eliminados
+    const nuevaListaID_Persona = listaID_Persona.filter(
+      (id) => !selectedRows.map((item) => item.key).includes(id)
+    );
+  
     setListaParticipante(nuevaListaParticipante);
+    setListaID_Persona(nuevaListaID_Persona);
   };
 
   //Obtener informacion de los entrenadores
@@ -488,18 +496,18 @@ export default function Participante() {
       message.error("El CI del entrenador debe contener solo números");
     } else {
       setNombreEntrenador(datoFiltradoEntrenador[0].nombre);
+      console.log(
+        "el id del entrenador ",
+        datoFiltradoEntrenador[0].id_persona
+      );
+      setBuscarEntrenador(false);
+      setSearchEntrenador("");
       message.success("Se agregó al entrenador");
     }
   };
 
   //
-  const validarEntrenador = (rule, value, callback) => {
-    // Realiza la validación personalizada aquí
-    if (!nombreEntrenador === true) {
-      callback("Por favor, añada un entrenador");
-    } else {
-    }
-  };
+  const validarEntrenador = (rule, value, callback) => {};
 
   return (
     <div className="pagina-evento">
@@ -816,7 +824,7 @@ export default function Participante() {
           <Form form={form} onFinish={registrarGrupo}>
             <Button onClick={() => showCancelGrupal()}>Cancelar</Button>
             <Button type="primary" htmlType="submit">
-              Registrar
+              Guardar
             </Button>
           </Form>,
         ]}
@@ -843,19 +851,7 @@ export default function Participante() {
           {/*<Form.Item label="Institución" name="INSTITUCION">
             <Input placeholder="Ingrese el nombre de la institución" />
           </Form.Item>*/}
-          <Form.Item
-            label="Entrenador"
-            name="ENTRENADOR"
-            rules={[
-              {
-                required: true,
-                message: ""
-              },
-              {
-                validator: validarEntrenador,
-              },
-            ]}
-          >
+          <Form.Item label="Entrenador" name="ENTRENADOR">
             <div className="botones-entrenador">
               <label>Añadir</label>
               <Button
@@ -936,6 +932,7 @@ export default function Participante() {
         <div>
           <Search
             className="buscador-participante"
+            value={searchText}
             placeholder="Buscar participante"
             onSearch={onSearch}
             onChange={(e) => onSearch(e.target.value)}
@@ -971,6 +968,7 @@ export default function Participante() {
         <div>
           <Search
             placeholder="Buscar entrenador"
+            value={searchEntrenador}
             onSearch={onSearchEntrenador}
             onChange={(e) => onSearchEntrenador(e.target.value)}
             maxLength={30}
