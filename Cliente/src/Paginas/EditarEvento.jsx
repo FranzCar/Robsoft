@@ -89,7 +89,7 @@ export default function EditarEvento() {
         message.error(
           "Solo se permiten archivos de imagen (JPEG, JPG, PNG, GIF)"
         );
-        return false; // Impedir la carga del archivo
+        return Upload.LIST_IGNORE; // Impedir la carga del archivo y no lo añade a la lista
       }
       return isImage(file); // Permitir la carga del archivo solo si es una imagen
     },
@@ -142,7 +142,7 @@ export default function EditarEvento() {
   const actualizarEvento = (values) => {
     confirm({
       title: "¿Desea actualizar el evento?",
-      icon: <ExclamationCircleFilled />,
+      icon: <ExclamationCircleFilled />,//
       content: "Se guardarán los nuevos datos del evento",
       okText: "Si",
       cancelText: "No",
@@ -156,9 +156,22 @@ export default function EditarEvento() {
   };
 
   const cerrarEdit = () => {
-    setIsModalOpenEdit(false);
-    setFileList([])
-    form.resetFields();
+    confirm({ 
+      title: "¿Cancelar edición?",
+      icon: <ExclamationCircleFilled />,//
+      content: "¿Está seguro de que desea cancelar la edición del evento? Todos los cambios se perderán.",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+
+      onOk(){
+        setIsModalOpenEdit(false);
+      },
+      onCancel(){},
+    })
+    //setIsModalOpenEdit(false);
+    //setFileList([])
+    //form.resetFields();
   };
 
   const validarTipo = (tipo) => {
@@ -314,6 +327,15 @@ export default function EditarEvento() {
     return [];
   };
 
+   //validacion de caracteres especiales en titulo
+   const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9\-&*" ]+$/;
+   function validarCaracteresPermitidos(_, value) {
+     if (value && !caracteresPermitidos.test(value)) {
+       return Promise.reject("Este campo solo acepta los siguientes caracteres especiales: -&*\"");
+     }
+     return Promise.resolve();
+   }
+
   return (
     <div>
        <div className="tabla-descripcion-editarEv">
@@ -364,7 +386,7 @@ export default function EditarEvento() {
         footer={[
           <Form form={form} onFinish={onFinish}>
             <Button onClick={cerrarEdit} className="boton-cancelar-evento">
-              Cerrar
+              Cancelar
             </Button>
             <Button
               type="primary"
@@ -393,6 +415,7 @@ export default function EditarEvento() {
               rules={[
                 { required: true, message: "Por favor, ingrese un titulo" },
                 { validator: validarMinimo },
+                { validator: validarCaracteresPermitidos },
               ]}
             >
               <Input maxLength={50} minLength={5}></Input>
