@@ -54,6 +54,7 @@ export default function EditarEvento() {
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   const [fileList, setFileList] = useState([]);
+  const [dataEditar, setDataEditar] = useState([]);
   const customRequest = ({ fileList, onSuccess }) => {
     onSuccess();
   };
@@ -124,6 +125,7 @@ export default function EditarEvento() {
     };
     form.setFieldsValue({ FECHAsINI: fechaEventoInicio });
     form.setFieldsValue({ FECHAsFIN: fechaEventoFin});
+    console.log("Fecha",fechaEventoInicio)
     form.setFieldsValue({ HORAs: horaEvento });
     form.setFieldsValue({ TIPO_EVENTO: TIPO });
     form.setFieldsValue(datos);
@@ -215,8 +217,8 @@ export default function EditarEvento() {
     const titulo = values.TITULO;
     let resultado = false;
     if (actual !== titulo) {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].TITULO === titulo) {
+      for (let i = 0; i < dataEditar.length; i++) {
+        if (dataEditar[i].TITULO === titulo) {
           console.log(
             `Se encontró un objeto con campoObjetivo igual a "${titulo}" en el índice ${i}.`
           );
@@ -261,6 +263,7 @@ export default function EditarEvento() {
   //Obtener datos de la base de datos
   useEffect(() => {
     obtenerDatos();
+    obtenerDatosEditar();
   }, []);
 
   const obtenerDatos = () => {
@@ -268,6 +271,17 @@ export default function EditarEvento() {
       .get("http://localhost:8000/api/eventos-modificables")
       .then((response) => {
         setData(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const obtenerDatosEditar = () => {
+    axios
+      .get("http://localhost:8000/api/eventos")
+      .then((response) => {
+        setDataEditar(response.data);
       })
       .catch((error) => {
         console.error(error);
