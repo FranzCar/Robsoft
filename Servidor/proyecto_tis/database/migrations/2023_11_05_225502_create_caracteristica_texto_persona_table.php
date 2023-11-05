@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('caracteristica_fecha_persona', function (Blueprint $table) {
-            $table->date('valor_fecha_persona')->nullable();
-            $table->integer('id_caract_persona')->nullable()->index('id_caract_persona');
+        Schema::create('caracteristica_texto_persona', function (Blueprint $table) {
+            $table->string('valor_texto_persona', 50)->nullable();
+            $table->integer('id_caract_per')->nullable()->index('id_caract_per');
             $table->integer('id_persona')->nullable()->index('id_persona');
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('caracteristica_fecha_persona');
+        Schema::dropIfExists('caracteristica_texto_persona');
     }
 };

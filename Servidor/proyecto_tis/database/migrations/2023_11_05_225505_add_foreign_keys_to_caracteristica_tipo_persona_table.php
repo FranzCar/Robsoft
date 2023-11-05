@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('caracteristica_tipo_persona', function (Blueprint $table) {
             $table->foreign(['id_tipo_persona'], 'caracteristica_tipo_persona_ibfk_2')->references(['id_tipo_persona'])->on('tipo_persona');
-            $table->foreign(['id_caract_persona'], 'caracteristica_tipo_persona_ibfk_1')->references(['id_caract_persona'])->on('caracteristica_persona');
+            $table->foreign(['id_caract_per'], 'caracteristica_tipo_persona_ibfk_1')->references(['id_caract_per'])->on('caracteristica_persona');
         });
     }
 
