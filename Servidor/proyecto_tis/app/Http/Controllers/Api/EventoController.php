@@ -68,40 +68,54 @@ class EventoController extends Controller
     }
 
     public function guardarEvento(Request $request) {
-        try {
+        return DB::transaction(function() use ($request) {
+            try {
             
-            $evento = new Evento();
-            $evento->TITULO = $request->TITULO;
-            $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
-            $evento->FECHA_INICIO = $request->FECHA_INICIO;
-            $evento->FECHA_FIN = $request->FECHA_FIN;
-            $evento->HORA = $request->HORA;
-            $evento->UBICACION = $request->UBICACION;
-            $evento->DESCRIPCION = $request->DESCRIPCION;
-            $evento->ORGANIZADOR = $request->ORGANIZADOR;
-            $evento->PATROCINADOR = $request->PATROCINADOR;
-            $evento->AFICHE = $request->AFICHE;
-            $evento->TIPO_PARTICIPACION = $request->TIPO_PARTICIPACION;
-            $evento->MODALIDAD = $request->MODALIDAD;
+                $evento = new Evento();
+                $evento->TITULO = $request->TITULO;
+                $evento->FECHA_INICIO = $request->FECHA_INICIO;
+                $evento->FECHA_FIN = $request->FECHA_FIN;
+                $evento->DESCRIPCION = $request->DESCRIPCION;
+                $evento->AFICHE = $request->AFICHE;
+                $evento->id_tipo_evento = $request->id_tipo_evento;
 
-            $evento->save();
+                $evento->save();
+                // Asociar Patrocinador al evento
+                if ($request->has('auspiciadores')) {
+                    foreach ($request->auspiciadores as $id_auspiciador) {
+                        DB::table('EVENTO_AUSPICIADOR')->insert([
+                            'id_evento' => $evento->id_evento,
+                            'id_auspiciador' => $id_auspiciador,
+                        ]);
+                    }
+                }
+                // Asociar Organizador al evento
+                if ($request->has('organizadores')) {
+                    foreach ($request->organizadores as $id_rol_persona) {
+                        DB::table('ROL_PERSONA_EN_EVENTO')->insert([
+                            'id_rol_persona' => $id_rol_persona,
+                            'id_evento' => $evento->id_evento, 
+                        ]);
+                    }
+                }
 
-            $this->actualizarEstadoTodos();
+                $this->actualizarEstadoTodos();
     
-            // Devolver una respuesta exitosa al cliente
-            return response()->json(['status' => 'success', 'message' => 'Evento guardado con éxito']);
+                // Devolver una respuesta exitosa al cliente
+                return response()->json(['status' => 'success', 'message' => 'Evento guardado con éxito']);
 
-        } catch (\Exception $e) {
-            // Registrar el mensaje de error en el log
-            \Log::error('Error al guardar evento: ' . $e->getMessage());
+            } catch (\Exception $e) {
+                // Registrar el mensaje de error en el log
+                \Log::error('Error al guardar evento: ' . $e->getMessage());
             
-            // Devolver el mensaje de error detallado al cliente (solo en ambiente de desarrollo)
-            if (app()->environment('local')) {
-                return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento', 'error_detail' => $e->getMessage()], 500);
-            } else {
-                return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento'], 500);
+                // Devolver el mensaje de error detallado al cliente (solo en ambiente de desarrollo)
+                if (app()->environment('local')) {
+                    return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento', 'error_detail' => $e->getMessage()], 500);
+                } else {
+                    return response()->json(['status' => 'error', 'message' => 'Hubo un error al guardar el evento'], 500);
+                }
             }
-        }
+        });
     }
 
     public function show($id)
@@ -150,19 +164,33 @@ class EventoController extends Controller
 
         // Actualizar los datos del evento
         $evento->TITULO = $request->TITULO;
-        $evento->TIPO_EVENTO = $request->TIPO_EVENTO;
         $evento->FECHA_INICIO = $request->FECHA_INICIO;
         $evento->FECHA_FIN = $request->FECHA_FIN;
-        $evento->HORA = $request->HORA;
-        $evento->UBICACION = $request->UBICACION;
         $evento->DESCRIPCION = $request->DESCRIPCION;
-        $evento->ORGANIZADOR = $request->ORGANIZADOR;
-        $evento->PATROCINADOR = $request->PATROCINADOR;
         $evento->AFICHE = $request->AFICHE;
-        $evento->TIPO_PARTICIPACION = $request->TIPO_PARTICIPACION;
-        $evento->MODALIDAD = $request->MODALIDAD;
+        $evento->id_tipo_evento = $request->id_tipo_evento;
+
         // Guardar el evento
         $evento->save();
+
+        // Asociar Patrocinador al evento
+        if ($request->has('auspiciadores')) {
+            foreach ($request->auspiciadores as $id_auspiciador) {
+                DB::table('EVENTO_AUSPICIADOR')->insert([
+                    'id_evento' => $evento->id_evento,
+                    'id_auspiciador' => $id_auspiciador,
+                ]);
+            }
+        }
+        // Asociar Organizador al evento
+        if ($request->has('organizadores')) {
+            foreach ($request->organizadores as $id_rol_persona) {
+                DB::table('ROL_PERSONA_EN_EVENTO')->insert([
+                    'id_rol_persona' => $id_rol_persona,
+                    'id_evento' => $evento->id_evento, 
+                ]);
+            }
+        }
 
         return response()->json([
             'message' => 'Evento editado con exito',

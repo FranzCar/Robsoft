@@ -15,7 +15,7 @@ return new class extends Migration
         DB::unprepared("CREATE DEFINER=`root`@`localhost` PROCEDURE `EventosEnEspera`()
 BEGIN
     SELECT * FROM eventos 
-    WHERE MOSTRAR = 0 AND ESTADO = 'En espera'
+    WHERE MOSTRAR = 1 AND ESTADO = 'En espera'
     ORDER BY TITULO ASC, TIPO_EVENTO ASC, ESTADO ASC;
 END");
     }

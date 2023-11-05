@@ -13,11 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('participante_equipo', function (Blueprint $table) {
-            $table->integer('id_participante');
-            $table->integer('id_equipo')->index('id_equipo');
-
-            $table->primary(['id_participante', 'id_equipo']);
+        Schema::create('caracteristica_decimal_evento', function (Blueprint $table) {
+            $table->decimal('valor_decimal_evento', 10)->nullable();
+            $table->integer('id_caracteristica_evento')->nullable()->index('id_caracteristica_evento');
+            $table->integer('id_evento')->nullable()->index('id_evento');
         });
     }
 
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('participante_equipo');
+        Schema::dropIfExists('caracteristica_decimal_evento');
     }
 };

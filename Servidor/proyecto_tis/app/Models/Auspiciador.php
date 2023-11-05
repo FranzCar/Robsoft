@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Participante extends Model
+class Auspiciador extends Model
 {
     public $timestamps = false;
-    protected $table = 'participante';
+    protected $table = 'auspiciador';
     use HasFactory;
 }

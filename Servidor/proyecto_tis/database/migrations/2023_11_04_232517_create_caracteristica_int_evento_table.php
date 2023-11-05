@@ -13,8 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('coach', function (Blueprint $table) {
-            $table->foreign(['id_persona'], 'coach_ibfk_1')->references(['id_persona'])->on('persona');
+        Schema::create('caracteristica_int_evento', function (Blueprint $table) {
+            $table->integer('valor_int_evento')->nullable();
+            $table->integer('id_caracteristica_evento')->nullable()->index('id_caracteristica_evento');
+            $table->integer('id_evento')->nullable()->index('id_evento');
         });
     }
 
@@ -25,8 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('coach', function (Blueprint $table) {
-            $table->dropForeign('coach_ibfk_1');
-        });
+        Schema::dropIfExists('caracteristica_int_evento');
     }
 };

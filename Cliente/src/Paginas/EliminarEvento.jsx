@@ -34,7 +34,7 @@ export default function EliminarEvento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-mostrar")
+      .get("http://localhost:8000/api/eventos-modificables")
       .then((response) => {
         setData(response.data);
       })
