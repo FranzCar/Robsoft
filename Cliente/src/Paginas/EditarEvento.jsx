@@ -160,9 +160,9 @@ export default function EditarEvento() {
 
   const cerrarEdit = () => {
     confirm({ 
-      title: "¿Cancelar edición?",
+      title: "¿Está seguro de que desea cancelar la edición del evento?",
       icon: <ExclamationCircleFilled />,//
-      content: "¿Está seguro de que desea cancelar la edición del evento? Todos los cambios se perderán.",
+      content: "Todos los cambios se perderán",
       okText: "Si",
       cancelText: "No",
       centered: "true",
@@ -359,6 +359,7 @@ export default function EditarEvento() {
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
+        scroll={{ y: 350 }}
         dataSource={data}
         pagination={false}
         locale={{
@@ -398,6 +399,9 @@ export default function EditarEvento() {
         onOk={handleOkEdit}
         onCancel={handleCancelEdit}
         width={1000}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
         footer={[
           <Form form={form} onFinish={onFinish}>
             <Button onClick={cerrarEdit} className="boton-cancelar-evento">
@@ -503,7 +507,7 @@ export default function EditarEvento() {
               />
             </Form.Item>
 
-            <Form.Item
+            {/*<Form.Item
               label="Hora"
               name="HORAs"
               rules={[
@@ -522,7 +526,7 @@ export default function EditarEvento() {
                 disabledHours={disabledHours}
                 disabledMinutes={disabledMinutes}
               />
-            </Form.Item>
+            </Form.Item>*/}
           </div>
 
           <div className="form-edit-columna2">

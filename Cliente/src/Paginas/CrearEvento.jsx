@@ -9,17 +9,16 @@ import {
   TimePicker,
   Upload,
   message,
+  Space,
 } from "antd";
 import React, { useState, useEffect } from "react";
-import {
-  PlusOutlined,
-  ExclamationCircleFilled,
-} from "@ant-design/icons";
+import { PlusOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const { TextArea } = Input;
 const { confirm } = Modal;
+const { Option } = Select;
 
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -34,7 +33,6 @@ const onFinishFailed = (errorInfo) => {
 };
 
 export default function CrearEvento() {
-
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
@@ -45,6 +43,8 @@ export default function CrearEvento() {
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+  const [listaUbicacion, setListaUbicacion] = useState([]);
+  const [listaOrganizador, setListaOrganizador] = useState([]);
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -151,6 +151,7 @@ export default function CrearEvento() {
   //Obtener datos de la base de datos
   useEffect(() => {
     obtenerDatos();
+    obtenerUbicacion();
   }, []);
 
   const obtenerDatos = () => {
@@ -167,9 +168,9 @@ export default function CrearEvento() {
   //Guardar evento
 
   const onFinish = (values) => {
-    console.log("El formulario es ", values);
     showConfirm(values);
   };
+
   const validarTipo = (tipo) => {
     if (tipo === "1") return "Estilo ICPC";
     if (tipo === "2") return "Estilo Libre";
@@ -183,12 +184,12 @@ export default function CrearEvento() {
   const datosEvento = (values) => {
     const fecha = values.FECHA_INICIO;
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
-
     const fecha_fin = values.FECHA_FIN;
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const hora = values.HORA;
     const NUEVAHORA = hora.format("HH:mm:ss");
     const TIPO = validarTipo(values.TIPO_EVENTO);
+    const organizadores = listaOrganizador[listaOrganizador.length -1];
     const datos = {
       TITULO: values.TITULO,
       TIPO_EVENTO: TIPO,
@@ -197,7 +198,7 @@ export default function CrearEvento() {
       HORA: NUEVAHORA,
       UBICACION: values.UBICACION,
       DESCRIPCION: values.DESCRIPCION,
-      ORGANIZADOR: values.ORGANIZADOR,
+      ORGANIZADOR: organizadores,
       PATROCINADOR: values.PATROCINADOR,
       AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
@@ -206,7 +207,7 @@ export default function CrearEvento() {
 
   const validarDuplicado = (values) => {
     const titulo = values.TITULO;
-    let resultado = false; 
+    let resultado = false;
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].TITULO === titulo) {
@@ -214,7 +215,7 @@ export default function CrearEvento() {
           `Se encontró un objeto con campoObjetivo igual a "${titulo}" en el índice ${i}.`
         );
         resultado = true;
-        break; 
+        break;
       }
     }
     if (!resultado) {
@@ -234,7 +235,7 @@ export default function CrearEvento() {
   const confirmSave = (values) => {
     const datos = datosEvento(values);
     const duplicado = validarDuplicado(values);
-
+    console.log("Los datos del formulario son ", datos);
     if (duplicado === true) {
       console.log(
         "No se cierra el formulario y no se guarda, se mustra un mensaje de q existe evento duplicado"
@@ -296,9 +297,7 @@ export default function CrearEvento() {
     name: "file",
     beforeUpload: (file) => {
       if (!isImage(file)) {
-        message.error(
-          "Solo se permiten archivos de imagen (JPEG, JPG, PNG, GIF)"
-        );
+        message.error("Solo se permiten archivos de imagen (JPEG, JPG, PNG)");
         return Upload.LIST_IGNORE; // Impedir la carga del archivo y no lo añade a la lista
       }
       return isImage(file); // Permitir la carga del archivo solo si es una imagen
@@ -309,10 +308,62 @@ export default function CrearEvento() {
   const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9\-&*" ]+$/;
   function validarCaracteresPermitidos(_, value) {
     if (value && !caracteresPermitidos.test(value)) {
-      return Promise.reject("Este campo solo acepta los siguientes caracteres especiales: -&*\"");
+      return Promise.reject(
+        'Este campo solo acepta los siguientes caracteres especiales: -&*"'
+      );
     }
     return Promise.resolve();
   }
+
+  //3er sprint
+  const obtenerUbicacion = () => {
+    axios
+      .get("http://localhost:8000/api/eventos")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          value: element.TITULO,
+          label: element.TITULO,
+        }));
+        setListaUbicacion(listaConFormato);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  //Buscador de ubicacion
+  const onChange = (value) => {
+    console.log(`selected ${value}`);
+  };
+  const onSearch = (value) => {
+    console.log("search:", value);
+  };
+  const filterOption = (input, option) =>
+    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
+  //Organizadores
+  const options = [];
+  for (let i = 10; i < 36; i++) {
+    options.push({
+      label: i.toString(36) + i,
+      value: i.toString(36) + i,
+    });
+  }
+  const handleChangeOrganizador = (value) => {
+    const nuevaListaOrganizador = [...listaOrganizador];
+  
+    // Si `value` ya existe en la lista, elimínalo
+    if (nuevaListaOrganizador.includes(value)) {
+      const index = nuevaListaOrganizador.indexOf(value);
+      nuevaListaOrganizador.splice(index, 1);
+    } else {
+      // Si `value` no existe en la lista, agrégalo
+      nuevaListaOrganizador.push(value);
+    }
+  
+    setListaOrganizador(nuevaListaOrganizador);
+    console.log("El último valor en la lista de organizadores es ", nuevaListaOrganizador[nuevaListaOrganizador.length - 1]);
+  };
 
   return (
     <div>
@@ -342,7 +393,7 @@ export default function CrearEvento() {
             ></Input>
           </Form.Item>
           <div className="columna-fecha-hora">
-          <Form.Item
+            <Form.Item
               label="Fecha inicio"
               name="FECHA_INICIO"
               rules={[
@@ -375,7 +426,7 @@ export default function CrearEvento() {
               />
             </Form.Item>
 
-            <Form.Item
+            {/*<Form.Item
               label="Hora"
               name="HORA"
               className="fecha-hora"
@@ -395,7 +446,7 @@ export default function CrearEvento() {
                 disabledHours={disabledHours}
                 disabledMinutes={disabledMinutes}
               />
-            </Form.Item>
+            </Form.Item>*/}
           </div>
           <Form.Item
             label="Ubicaci&oacute;n"
@@ -403,16 +454,26 @@ export default function CrearEvento() {
             rules={[
               {
                 required: true,
-                message: "Por favor ingrese una ubicación",
+                message: "Por favor seleccione una ubicación",
               },
-              { validator: validarMinimo },
             ]}
           >
-            <Input
-              maxLength={30}
-              minLength={5}
-              placeholder="Ingrese la ubicación del evento"
-            ></Input>
+            <Select
+              showSearch
+              placeholder="Seleciones una ubicación"
+              optionFilterProp="children"
+              onChange={onChange}
+              onSearch={onSearch}
+              filterOption={filterOption}
+              options={listaUbicacion}
+              allowClear
+            >
+              {listaUbicacion.map((option) => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item
@@ -421,24 +482,33 @@ export default function CrearEvento() {
             rules={[
               {
                 required: true,
-                message: "Por favor ingrese un organizador",
+                message: "Por favor seleccione al menos un organizador",
               },
-              { validator: validarMinimo },
             ]}
           >
-            <Input
-              placeholder="Ingrese el nombre del organizador"
-              maxLength={20}
-              minLength={5}
-            ></Input>
+            <Select
+              mode="multiple"
+              allowClear
+              style={{
+                width: "100%",
+              }}
+              placeholder="Selecione uno o mas organizadores"
+              onChange={handleChangeOrganizador}
+              options={listaUbicacion}
+            />
           </Form.Item>
 
           <Form.Item label="Patrocinador" name="PATROCINADOR">
-            <Input
-              placeholder="Ingrese el nombre del patrocinador"
-              maxLength={20}
-              minLength={5}
-            ></Input>
+            <Select
+              mode="multiple"
+              allowClear
+              style={{
+                width: "100%",
+              }}
+              placeholder="Selecione uno o mas patrocinadores"
+              onChange={handleChangeOrganizador}
+              options={listaUbicacion}
+            />
           </Form.Item>
         </div>
 
@@ -539,14 +609,13 @@ export default function CrearEvento() {
             </Modal>
           </Form.Item>
           <div className="botones-crear-evento">
-            <Button onClick={showCancel} 
-                    className="boton-cancelar-evento">
+            <Button onClick={showCancel} className="boton-cancelar-evento">
               Cancelar
             </Button>
             <Button
-                className="boton-guardar-evento"
-                htmlType="submit"
-                type="primary"
+              className="boton-guardar-evento"
+              htmlType="submit"
+              type="primary"
             >
               Guardar
             </Button>

@@ -30,7 +30,12 @@
     position: relative;
     height: 15px;
 }
-
+.boton-administracion{
+    color: #ffff;
+}
+/*.activo {
+    color: #89baff; 
+  }*/
 
 /*Parte de los logos y el titulo*/
 .header-logos{
@@ -123,7 +128,6 @@
     background-color: #ffffff;
     height: 370px;
     max-width: 80%;
-    overflow-y: auto;
     margin-left: 10%;
     margin-top: 2%;
 }
@@ -165,11 +169,10 @@
     float: left;
 }
 .botones-crear-evento{
-    position: relative;
+    margin-top: 37.6%;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    margin-top: 205px;
 }
 .boton-guardar-evento{
     margin-left: 30px;
@@ -182,10 +185,6 @@
     font-size: 15px;
     height: 35px;
 }
-.radio-modalidad{
-    background-color: #FDBA12;
-    margin-bottom: 10px;
-}
 
 /* Estilo para el mensaje de error */
 .ant-form-item-explain-error {
@@ -194,8 +193,8 @@
 
 /*Ver informacion del evento*/
 .form-verInformacion{
-    height: 355px;
-    padding-left: 50px;
+    height: auto;
+    padding-left: 20px;
 }
 .form-info-columna1{
     width: 85%;
@@ -212,6 +211,15 @@ h3, p {
 }
 h3 {
     margin-right: 5px; 
+}
+.description-container {
+    max-width: 100%; 
+    overflow: hidden; 
+  }
+  
+.description {
+    max-width: 100%; 
+    margin: 0 auto; 
 }
 
 /*Ver formulario de editar evento*/
@@ -333,4 +341,25 @@ h3 {
   }
   :root {
     --primary-color: #003873;
+  }
+
+  /*Modal de resgistro individual*/
+ 
+  .formulario-individual{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 2%;
+  }
+
+  .form-individual-columna1{
+    padding-right: 25px;
+  }
+  
+  /*Modal tipo ICPC*/
+  .modal-icpc{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .columna1-icpc{
+    padding-right: 20px;
   }

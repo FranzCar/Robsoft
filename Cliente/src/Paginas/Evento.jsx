@@ -1,20 +1,10 @@
 import "../App.css";
-import {
-  Button,
-  Table,
-  Space,
-  Modal,
-  Form,
-  Image,
-} from "antd";
+import { Button, Table, Space, Modal, Form, Image } from "antd";
 import React, { useState, useEffect } from "react";
-import {
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const { Column } = Table;
-
 
 export default function Evento() {
   const [info, setInfo] = useState([]);
@@ -33,13 +23,12 @@ export default function Evento() {
       .get("http://localhost:8000/api/eventos-mostrar")
       .then((response) => {
         setData(response.data);
-        console.log("El valor de la data es ",data)
+        console.log("El valor de la data es ", data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
-
 
   //Ver mas informacion de un evento
 
@@ -62,15 +51,21 @@ export default function Evento() {
     setIsModalOpen(false);
     show.resetFields();
   };
+  const [expanded, setExpanded] = useState(false);
+
+  const expandDescription = () => {
+    setExpanded(true);
+  };
 
   return (
     <div className="pagina-evento">
-       <div className="tabla-descripcion">
-      <p>LISTA DE EVENTOS REGISTRADOS</p>
+      <div className="tabla-descripcion">
+        <p>LISTA DE EVENTOS REGISTRADOS</p>
       </div>
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
+        scroll={{ y: 350 }}
         dataSource={data}
         pagination={false}
         locale={{
@@ -84,7 +79,11 @@ export default function Evento() {
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
         <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
-        <Column title="Fecha inicio" dataIndex="FECHA_INICIO" key="fecha_inicio" />
+        <Column
+          title="Fecha inicio"
+          dataIndex="FECHA_INICIO"
+          key="fecha_inicio"
+        />
         <Column
           align="center"
           title="Informacion"
@@ -145,7 +144,9 @@ export default function Evento() {
             <p>{info.PATROCINADOR}</p>
             <br />
             <h3>Descripción :</h3>
-            <p>{info.DESCRIPCION}</p>
+            <div className="description-container">
+              <p className="description">{info.DESCRIPCION}</p>
+            </div>
             <br />
             <h3>Afiche del evento :</h3>
             <Form.Item className="info-afiche" name="AFICHE">

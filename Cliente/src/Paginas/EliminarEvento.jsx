@@ -85,6 +85,7 @@ export default function EliminarEvento() {
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
+        scroll={{ y: 350 }}
         dataSource={data}
         pagination={false}
         locale={{
