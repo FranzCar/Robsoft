@@ -237,10 +237,10 @@ export default function CrearEvento() {
 
     if (duplicado === true) {
       console.log(
-        "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
+        "No se cierra el formulario y no se guarda, se mustra un mensaje de q existe evento duplicado"
       );
       setVisible(true);
-      message.error("Exite un evento con el mismo título");
+      message.error("Existe un evento con el mismo título");
     } else {
       console.log("Se guarda los datos en la BD");
       axios
@@ -305,6 +305,15 @@ export default function CrearEvento() {
     },
   };
 
+  //validacion de caracteres especiales en titulo
+  const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9\-&*" ]+$/;
+  function validarCaracteresPermitidos(_, value) {
+    if (value && !caracteresPermitidos.test(value)) {
+      return Promise.reject("Este campo solo acepta los siguientes caracteres especiales: -&*\"");
+    }
+    return Promise.resolve();
+  }
+
   return (
     <div>
       <Form
@@ -323,10 +332,11 @@ export default function CrearEvento() {
             rules={[
               { required: true, message: "Por favor, ingrese un titulo" },
               { validator: validarMinimo },
+              { validator: validarCaracteresPermitidos },
             ]}
           >
             <Input
-              maxLength={20}
+              maxLength={50}
               minLength={5}
               placeholder="Ingrese el titulo del evento"
             ></Input>
@@ -399,7 +409,7 @@ export default function CrearEvento() {
             ]}
           >
             <Input
-              maxLength={20}
+              maxLength={30}
               minLength={5}
               placeholder="Ingrese la ubicación del evento"
             ></Input>

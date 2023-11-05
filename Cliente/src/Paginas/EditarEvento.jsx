@@ -54,6 +54,7 @@ export default function EditarEvento() {
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   const [fileList, setFileList] = useState([]);
+  const [dataEditar, setDataEditar] = useState([]);
   const customRequest = ({ fileList, onSuccess }) => {
     onSuccess();
   };
@@ -89,7 +90,7 @@ export default function EditarEvento() {
         message.error(
           "Solo se permiten archivos de imagen (JPEG, JPG, PNG, GIF)"
         );
-        return false; // Impedir la carga del archivo
+        return Upload.LIST_IGNORE; // Impedir la carga del archivo y no lo añade a la lista
       }
       return isImage(file); // Permitir la carga del archivo solo si es una imagen
     },
@@ -108,8 +109,10 @@ export default function EditarEvento() {
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const showEdit = (record) => {
+    form.resetFields(['FECHAsINI']);
     const fechaEventoInicio = moment(record.FECHA_INICIO);
     const fechaEventoFin = moment(record.FECHA_FIN);
+    console.log("El valor de la fecha es", record.FECHA_INICIO)
     const horaEvento = moment(record.HORA, "HH:mm:ss");
     const TIPO = record.TIPO_EVENTO;
     setVerImagen(record.AFICHE);
@@ -122,8 +125,9 @@ export default function EditarEvento() {
       PATROCINADOR: record.PATROCINADOR,
       AFICHE: record.AFICHE,
     };
-    form.setFieldsValue({ FECHAsINI: fechaEventoInicio });
+    form.setFieldsValue({ FECHAsINI: fechaEventoInicio});
     form.setFieldsValue({ FECHAsFIN: fechaEventoFin});
+    console.log("Fecha",fechaEventoInicio)
     form.setFieldsValue({ HORAs: horaEvento });
     form.setFieldsValue({ TIPO_EVENTO: TIPO });
     form.setFieldsValue(datos);
@@ -141,7 +145,7 @@ export default function EditarEvento() {
   const actualizarEvento = (values) => {
     confirm({
       title: "¿Desea actualizar el evento?",
-      icon: <ExclamationCircleFilled />,
+      icon: <ExclamationCircleFilled />,//
       content: "Se guardarán los nuevos datos del evento",
       okText: "Si",
       cancelText: "No",
@@ -155,9 +159,22 @@ export default function EditarEvento() {
   };
 
   const cerrarEdit = () => {
-    setIsModalOpenEdit(false);
-    setFileList([])
-    form.resetFields();
+    confirm({ 
+      title: "¿Cancelar edición?",
+      icon: <ExclamationCircleFilled />,//
+      content: "¿Está seguro de que desea cancelar la edición del evento? Todos los cambios se perderán.",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+
+      onOk(){
+        setIsModalOpenEdit(false);
+      },
+      onCancel(){},
+    })
+    //setIsModalOpenEdit(false);
+    //setFileList([])
+    //form.resetFields();
   };
 
   const validarTipo = (tipo) => {
@@ -174,14 +191,15 @@ export default function EditarEvento() {
   };
 
   const datosEvento = (values) => {
+
     const fecha = values.FECHAsINI;
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
-
     const fecha_fin = values.FECHAsFIN;
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const hora = values.HORAs;
     const NUEVAHORA = hora.format("HH:mm:ss");
     const TIPO = validarTipo(values.TIPO_EVENTO);
+
     const datos = {
       TITULO: values.TITULO,
       TIPO_EVENTO: TIPO,
@@ -193,7 +211,7 @@ export default function EditarEvento() {
       ORGANIZADOR: values.ORGANIZADOR,
       PATROCINADOR: values.PATROCINADOR,
       AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
-    };
+    }
     return datos;
   };
 
@@ -201,8 +219,8 @@ export default function EditarEvento() {
     const titulo = values.TITULO;
     let resultado = false;
     if (actual !== titulo) {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].TITULO === titulo) {
+      for (let i = 0; i < dataEditar.length; i++) {
+        if (dataEditar[i].TITULO === titulo) {
           console.log(
             `Se encontró un objeto con campoObjetivo igual a "${titulo}" en el índice ${i}.`
           );
@@ -247,13 +265,25 @@ export default function EditarEvento() {
   //Obtener datos de la base de datos
   useEffect(() => {
     obtenerDatos();
+    obtenerDatosEditar();
   }, []);
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-mostrar")
+      .get("http://localhost:8000/api/eventos-modificables")
       .then((response) => {
         setData(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const obtenerDatosEditar = () => {
+    axios
+      .get("http://localhost:8000/api/eventos")
+      .then((response) => {
+        setDataEditar(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -266,8 +296,8 @@ export default function EditarEvento() {
       callback("");
     } else if (value.trim() !== value) {
       callback("No se permiten espacios en blanco al inicio ni al final");
-    } else if (value.replace(/\s/g, "").length < 5) {
-      callback("Ingrese al menos 5 caracteres");
+    } else if (value.replace(/\s/g, "").length < 4) {
+      callback("Ingrese al menos 4 caracteres");
     } else {
       callback();
     }
@@ -283,7 +313,6 @@ export default function EditarEvento() {
     // Establecemos la fecha máxima como 180 días después de la fecha actual
     const maxDate = new Date();
     maxDate.setDate(today.getDate() + 180);
-
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
   };
@@ -313,8 +342,20 @@ export default function EditarEvento() {
     return [];
   };
 
+   //validacion de caracteres especiales en titulo
+   const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9\-&*" ]+$/;
+   function validarCaracteresPermitidos(_, value) {
+     if (value && !caracteresPermitidos.test(value)) {
+       return Promise.reject("Este campo solo acepta los siguientes caracteres especiales: -&*\"");
+     }
+     return Promise.resolve();
+   }
+
   return (
     <div>
+       <div className="tabla-descripcion-editarEv">
+      <p>EDITAR EVENTOS REGISTRADOS</p>
+       </div>
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
@@ -360,7 +401,7 @@ export default function EditarEvento() {
         footer={[
           <Form form={form} onFinish={onFinish}>
             <Button onClick={cerrarEdit} className="boton-cancelar-evento">
-              Cerrar
+              Cancelar
             </Button>
             <Button
               type="primary"
@@ -389,6 +430,7 @@ export default function EditarEvento() {
               rules={[
                 { required: true, message: "Por favor, ingrese un titulo" },
                 { validator: validarMinimo },
+                { validator: validarCaracteresPermitidos },
               ]}
             >
               <Input maxLength={50} minLength={5}></Input>
@@ -445,7 +487,7 @@ export default function EditarEvento() {
               />
             </Form.Item>
              <Form.Item
-              label="Fecha"
+              label="Fecha fin"
               name="FECHAsFIN"
               rules={[
                 {
