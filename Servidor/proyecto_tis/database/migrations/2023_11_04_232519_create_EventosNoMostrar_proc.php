@@ -14,9 +14,10 @@ return new class extends Migration
     {
         DB::unprepared("CREATE DEFINER=`root`@`localhost` PROCEDURE `EventosNoMostrar`()
 BEGIN
-    SELECT * FROM eventos 
+    SELECT * FROM TIPO_EVENTO as te
+    JOIN evento as e ON te.id_tipo_evento = e.id_tipo_evento
     WHERE MOSTRAR = 0
-    ORDER BY TITULO ASC, TIPO_EVENTO ASC, ESTADO ASC;
+    ORDER BY e.TITULO ASC, te.nombre_tipo_evento ASC, e.ESTADO ASC;
 END");
     }
 
