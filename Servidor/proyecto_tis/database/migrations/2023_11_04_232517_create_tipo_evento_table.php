@@ -13,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('equipo', function (Blueprint $table) {
-            $table->integer('id_equipo', true);
-            $table->string('nombre_equipo', 25)->nullable();
-            $table->integer('cantidad_integrantes')->nullable();
-            $table->integer('id_coach_persona')->nullable()->index('id_coach_persona');
+        Schema::create('tipo_evento', function (Blueprint $table) {
+            $table->integer('id_tipo_evento', true);
+            $table->string('nombre_tipo_evento', 50)->nullable();
         });
     }
 
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('equipo');
+        Schema::dropIfExists('tipo_evento');
     }
 };

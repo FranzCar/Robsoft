@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('coach', function (Blueprint $table) {
-            $table->integer('id_persona')->primary();
+        Schema::table('equipo', function (Blueprint $table) {
+            $table->foreign(['coach'], 'equipo_ibfk_1')->references(['id_rol_persona'])->on('rol_persona');
         });
     }
 
@@ -25,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('coach');
+        Schema::table('equipo', function (Blueprint $table) {
+            $table->dropForeign('equipo_ibfk_1');
+        });
     }
 };

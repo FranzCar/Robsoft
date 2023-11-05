@@ -17,7 +17,6 @@ class EquipoController extends Controller {
                     $equipo->id_coach_persona = $request->id_coach_persona;
         
                     $equipo->save();
-                    \Log::info("ID de equipo después de guardar: " . $equipo->id_equipo);
                     
                     // Asociar participantes al equipo
                     if ($request->has('participantes')) {

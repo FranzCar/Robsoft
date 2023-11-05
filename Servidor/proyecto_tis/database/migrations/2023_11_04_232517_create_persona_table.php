@@ -15,12 +15,13 @@ return new class extends Migration
     {
         Schema::create('persona', function (Blueprint $table) {
             $table->integer('id_persona', true);
-            $table->string('nombre', 60)->nullable();
-            $table->string('correo_electronico', 30)->nullable();
-            $table->string('telefono', 10)->nullable();
-            $table->string('ci', 10)->nullable();
+            $table->string('nombre', 50)->nullable();
+            $table->string('correo_electronico', 100)->nullable();
+            $table->string('telefono', 12)->nullable();
+            $table->string('ci', 12)->nullable();
             $table->string('genero', 9)->nullable();
-            $table->integer('rol_persona')->nullable();
+            $table->integer('id_tipo_persona')->nullable()->index('id_tipo_persona');
+            $table->integer('id_institucion')->nullable()->index('id_institucion');
         });
     }
 
