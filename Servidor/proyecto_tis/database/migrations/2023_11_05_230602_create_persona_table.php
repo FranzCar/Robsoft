@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('telefono', 12)->nullable();
             $table->string('ci', 12)->nullable();
             $table->string('genero', 9)->nullable();
-            $table->integer('id_tipo_persona')->nullable()->index('id_tipo_persona');
+            $table->integer('id_tipo_per')->nullable()->index('id_tipo_per');
             $table->integer('id_institucion')->nullable()->index('id_institucion');
         });
     }

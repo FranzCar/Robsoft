@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('tipo_persona', function (Blueprint $table) {
-            $table->integer('id_tipo_persona', true);
+            $table->integer('id_tipo_per', true);
             $table->string('nombre_tipo_persona', 50)->nullable();
         });
     }
