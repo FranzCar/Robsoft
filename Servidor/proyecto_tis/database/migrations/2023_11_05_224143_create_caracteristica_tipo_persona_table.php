@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('caracteristica_longtext_persona', function (Blueprint $table) {
-            $table->longText('valor_longtext_persona')->nullable();
-            $table->integer('id_caracteristica_persona')->nullable()->index('id_caracteristica_persona');
-            $table->integer('id_persona')->nullable()->index('id_persona');
+        Schema::create('caracteristica_tipo_persona', function (Blueprint $table) {
+            $table->integer('id_caract_persona');
+            $table->integer('id_tipo_persona')->index('id_tipo_persona');
+
+            $table->primary(['id_caract_persona', 'id_tipo_persona']);
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('caracteristica_longtext_persona');
+        Schema::dropIfExists('caracteristica_tipo_persona');
     }
 };

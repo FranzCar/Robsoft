@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('caracteristica_persona', function (Blueprint $table) {
-            $table->integer('id_caracteristica_persona', true);
-            $table->string('nombre_caracteristica_persona', 50)->nullable();
+            $table->integer('id_caract_persona', true);
+            $table->string('nombre_caract_persona', 50)->nullable();
             $table->string('tipo_dato_persona', 50)->nullable();
         });
     }

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('caracteristica_texto_persona', function (Blueprint $table) {
             $table->string('valor_texto_persona', 50)->nullable();
-            $table->integer('id_caracteristica_persona')->nullable()->index('id_caracteristica_persona');
+            $table->integer('id_caract_persona')->nullable()->index('id_caract_persona');
             $table->integer('id_persona')->nullable()->index('id_persona');
         });
     }
