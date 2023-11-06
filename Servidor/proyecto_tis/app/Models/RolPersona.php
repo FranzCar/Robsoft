@@ -11,4 +11,9 @@ class RolPersona extends Model
     protected $table = 'Rol_persona';
     protected $primaryKey = 'id_rol_persona';
     use HasFactory;
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class, 'id_persona');
+    }
 }
