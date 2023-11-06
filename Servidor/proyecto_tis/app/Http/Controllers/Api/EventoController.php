@@ -16,8 +16,22 @@ class EventoController extends Controller
     
     public function index()
     {
-        $eventos = Evento::all();
-        return $eventos;
+        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])->get();
+        return $eventos->map(function ($evento) {
+            return [
+                'id_evento' => $evento->id_evento,
+                'TITULO' => $evento->TITULO,
+                'ESTADO' => $evento->ESTADO,
+                'FECHA_INICIO' => $evento->FECHA_INICIO,
+                'FECHA_FIN' => $evento->FECHA_FIN,
+                'DESCRIPCION' => $evento->DESCRIPCION,
+                'MOSTRAR' => $evento->MOSTRAR,
+                'AFICHE' => $evento->AFICHE,
+                'TIPO_EVENTO' => $evento->tipoEvento->NOMBRE, // Asumiendo que 'NOMBRE' es el campo en TIPO_EVENTO
+                'AUSPICIADORES' => $evento->auspiciadores->pluck('NOMBRE'), // Cambiar 'NOMBRE' por el campo correspondiente en AUSPICIADOR
+                'ORGANIZADORES' => $evento->organizadores->pluck('NOMBRE') // Cambiar 'NOMBRE' por el campo correspondiente en ROL_PERSONA
+            ];
+        });
     }
 
     

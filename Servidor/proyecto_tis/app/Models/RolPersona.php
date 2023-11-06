@@ -9,5 +9,6 @@ class RolPersona extends Model
 {
     public $timestamps = false;
     protected $table = 'Rol_persona';
+    protected $primaryKey = 'id_rol_persona';
     use HasFactory;
 }
