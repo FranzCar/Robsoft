@@ -24,8 +24,8 @@ class EstudianteCaracteristicasHandler implements PersonaCaracteristicasHandler 
             if ($valor) {
                 $caracteristicaTexto = new CaracteristicaTextoPersona([
                     'valor_texto_persona' => $valor,
-                    'id_caracteristica_persona' => $caracteristicasEstudiante[$caracteristica],
-                    'id_persona' => $persona->id,
+                    'id_caract_per' => $caracteristicasEstudiante[$caracteristica],
+                    'id_persona' => $persona->id_persona,
                 ]);
                 $caracteristicaTexto->save();
             }
@@ -36,8 +36,8 @@ class EstudianteCaracteristicasHandler implements PersonaCaracteristicasHandler 
         if ($valorFechaNacimiento) {
             $caracteristicaFecha = new CaracteristicaFechaPersona([
                 'valor_fecha_persona' => $valorFechaNacimiento,
-                'id_caracteristica_persona' => $caracteristicasEstudiante['fecha_nacimiento'],
-                'id_persona' => $persona->id,
+                'id_caract_per' => $caracteristicasEstudiante['fecha_nacimiento'],
+                'id_persona' => $persona->id_persona,
             ]);
             $caracteristicaFecha->save();
         }
@@ -48,8 +48,8 @@ class EstudianteCaracteristicasHandler implements PersonaCaracteristicasHandler 
             if ($valor) {
                 $caracteristicaLongtext = new CaracteristicaLongtextPersona([
                     'valor_longtext_persona' => $valor,
-                    'id_caracteristica_persona' => $caracteristicasEstudiante[$caracteristica],
-                    'id_persona' => $persona->id,
+                    'id_caract_per' => $caracteristicasEstudiante[$caracteristica],
+                    'id_persona' => $persona->id_persona,
                 ]);
                 $caracteristicaLongtext->save();
             }

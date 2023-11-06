@@ -19,7 +19,7 @@ class PersonaController extends Controller
             $handler->guardarCaracteristicas($persona, $request);
 
             DB::commit();
-            return response()->json(['message' => 'Estudiante guardado con éxito', 'id' => $persona->id]);
+            return response()->json(['message' => 'Estudiante guardado con éxito', 'id' => $persona->id_persona]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Error al guardar el estudiante', 'error' => $e->getMessage()], 500);
@@ -36,7 +36,7 @@ class PersonaController extends Controller
         $persona->telefono = $request->telefono;
         $persona->ci = $request->ci;
         $persona->genero = $request->genero;
-        $persona->id_tipo_persona = $tipoPersona ?? $request->id_tipo_persona; // Asigna '1' por defecto si no se proporciona un valor
+        $persona->id_tipo_per = $tipoPersona ?? $request->id_tipo_per; // Asigna '1' por defecto si no se proporciona un valor
         $persona->id_institucion = $request->id_institucion;
         // Guardar la instancia del modelo en la base de datos
         $persona->save();
