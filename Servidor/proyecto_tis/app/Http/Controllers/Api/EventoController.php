@@ -13,7 +13,7 @@ use Exception;
 
 class EventoController extends Controller
 {
-    
+    //agregue esto
     public function index()
     {
         $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])->get();

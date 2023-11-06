@@ -30,7 +30,6 @@ class PersonaController extends Controller
         $persona = new Persona();
 
         // Asignar los valores del request a los atributos del modelo
-        // Estos campos deben ser fillable en el modelo Persona
         $persona->nombre = $request->nombre;
         $persona->correo_electronico = $request->correo_electronico;
         $persona->telefono = $request->telefono;
