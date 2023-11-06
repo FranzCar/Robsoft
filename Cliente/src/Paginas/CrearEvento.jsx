@@ -43,8 +43,10 @@ export default function CrearEvento() {
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
-  const [listaUbicacion, setListaUbicacion] = useState([]);
   const [listaOrganizador, setListaOrganizador] = useState([]);
+  const [listaPatrocinador, setListaPatrocinador] = useState([]);
+  const [obtenerOrganizadores, setObtenerOrganizadores] = useState([]);
+  const [obtenerPatrocinadores, setObtenerPatrocinadores] = useState([]);
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -151,7 +153,8 @@ export default function CrearEvento() {
   //Obtener datos de la base de datos
   useEffect(() => {
     obtenerDatos();
-    obtenerUbicacion();
+    obtenerListaOrganizadores();
+    obtenerListaPatrocinadores();
   }, []);
 
   const obtenerDatos = () => {
@@ -186,20 +189,16 @@ export default function CrearEvento() {
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
     const fecha_fin = values.FECHA_FIN;
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
-    const hora = values.HORA;
-    const NUEVAHORA = hora.format("HH:mm:ss");
-    const TIPO = validarTipo(values.TIPO_EVENTO);
-    const organizadores = listaOrganizador[listaOrganizador.length -1];
+    const organizadores = listaOrganizador[listaOrganizador.length - 1];
+    const patrocinadores = listaPatrocinador[listaPatrocinador.length - 1];
     const datos = {
       TITULO: values.TITULO,
-      TIPO_EVENTO: TIPO,
+      id_tipo_evento: values.TIPO_EVENTO,
       FECHA_INICIO: NUEVAFECHA_INICIO,
       FECHA_FIN: NUEVAFECHA_FIN,
-      HORA: NUEVAHORA,
-      UBICACION: values.UBICACION,
       DESCRIPCION: values.DESCRIPCION,
-      ORGANIZADOR: organizadores,
-      PATROCINADOR: values.PATROCINADOR,
+      auspiciadores: patrocinadores,
+      organizadores: organizadores,
       AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
     return datos;
@@ -316,15 +315,36 @@ export default function CrearEvento() {
   }
 
   //3er sprint
-  const obtenerUbicacion = () => {
+  const obtenerListaOrganizadores = () => {
     axios
-      .get("http://localhost:8000/api/eventos")
+      .get("http://localhost:8000/api/lista-organizadores")
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
-          value: element.TITULO,
-          label: element.TITULO,
+          id: element.id_rol_persona,
+          nombre: element.nombre,
+          ci: element.ci,
+          value: element.nombre,
+          label: element.nombre,
         }));
-        setListaUbicacion(listaConFormato);
+        setObtenerOrganizadores(listaConFormato);
+        console.log("organizadores son ", listaConFormato);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const obtenerListaPatrocinadores = () => {
+    axios
+      .get("http://localhost:8000/api/lista-auspiciadores")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_auspiciador,
+          nombre: element.nombre_auspiciador,
+          value: element.nombre_auspiciador,
+          label: element.nombre_auspiciador,
+        }));
+        setObtenerPatrocinadores(listaConFormato);
       })
       .catch((error) => {
         console.error(error);
@@ -351,18 +371,56 @@ export default function CrearEvento() {
   }
   const handleChangeOrganizador = (value) => {
     const nuevaListaOrganizador = [...listaOrganizador];
-  
+    let idOrganizador = []
+    for( let i = 0; i < obtenerOrganizadores.length; i++){
+      for(let j = 0; j < value.length; j++){
+        if(obtenerOrganizadores[i].nombre === value[j]){
+          idOrganizador.push(obtenerOrganizadores[i].id);
+        }
+      }
+    }
     // Si `value` ya existe en la lista, elimínalo
-    if (nuevaListaOrganizador.includes(value)) {
-      const index = nuevaListaOrganizador.indexOf(value);
+    if (nuevaListaOrganizador.includes(idOrganizador)) {
+      const index = nuevaListaOrganizador.indexOf(idOrganizador);
       nuevaListaOrganizador.splice(index, 1);
     } else {
       // Si `value` no existe en la lista, agrégalo
-      nuevaListaOrganizador.push(value);
+      nuevaListaOrganizador.push(idOrganizador);
     }
-  
+
     setListaOrganizador(nuevaListaOrganizador);
-    console.log("El último valor en la lista de organizadores es ", nuevaListaOrganizador[nuevaListaOrganizador.length - 1]);
+    console.log(
+      "El último valor en la lista de organizadores es ",
+      nuevaListaOrganizador[nuevaListaOrganizador.length - 1]
+    );
+  };
+
+  const handleChangePatrocinador = (value) => {
+    const nuevaListaPatrocinador = [...listaPatrocinador];
+    console.log("patrocinadores ", obtenerPatrocinadores)
+    let idPatrocinador = []
+    for( let i = 0; i < obtenerPatrocinadores.length; i++){
+      for(let j = 0; j < value.length; j++){
+        if(obtenerPatrocinadores[i].nombre === value[j]){
+          idPatrocinador.push(obtenerPatrocinadores[i].id);
+        }
+      }
+    }
+
+    // Si `value` ya existe en la lista, elimínalo
+    if (nuevaListaPatrocinador.includes(idPatrocinador)) {
+      const index = nuevaListaPatrocinador.indexOf(idPatrocinador);
+      nuevaListaPatrocinador.splice(index, 1);
+    } else {
+      // Si `value` no existe en la lista, agrégalo
+      nuevaListaPatrocinador.push(idPatrocinador);
+    }
+
+    setListaPatrocinador(nuevaListaPatrocinador);
+    console.log(
+      "El último valor en la lista de patrocinadores es ",
+      nuevaListaPatrocinador[nuevaListaPatrocinador.length - 1]
+    );
   };
 
   return (
@@ -448,33 +506,6 @@ export default function CrearEvento() {
               />
             </Form.Item>*/}
           </div>
-          <Form.Item
-            label="Ubicaci&oacute;n"
-            name="UBICACION"
-            rules={[
-              {
-                required: true,
-                message: "Por favor seleccione una ubicación",
-              },
-            ]}
-          >
-            <Select
-              showSearch
-              placeholder="Seleciones una ubicación"
-              optionFilterProp="children"
-              onChange={onChange}
-              onSearch={onSearch}
-              filterOption={filterOption}
-              options={listaUbicacion}
-              allowClear
-            >
-              {listaUbicacion.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
 
           <Form.Item
             label="Organizador"
@@ -494,7 +525,7 @@ export default function CrearEvento() {
               }}
               placeholder="Selecione uno o mas organizadores"
               onChange={handleChangeOrganizador}
-              options={listaUbicacion}
+              options={obtenerOrganizadores}
             />
           </Form.Item>
 
@@ -506,8 +537,8 @@ export default function CrearEvento() {
                 width: "100%",
               }}
               placeholder="Selecione uno o mas patrocinadores"
-              onChange={handleChangeOrganizador}
-              options={listaUbicacion}
+              onChange={handleChangePatrocinador}
+              options={obtenerPatrocinadores}
             />
           </Form.Item>
         </div>
@@ -544,15 +575,15 @@ export default function CrearEvento() {
                 },
                 {
                   value: "4",
-                  label: "Sesión de reclutamiento",
+                  label: "Entrenamiento",
                 },
                 {
                   value: "5",
-                  label: "Torneo de programación",
+                  label: "Reclutamiento",
                 },
                 {
                   value: "6",
-                  label: "Entrenamientos",
+                  label: "Torneo de programación",
                 },
                 {
                   value: "7",

@@ -45,6 +45,12 @@ export default function DetalleEvento() {
   const [verEntenamiento, setVerEntenamiento] = useState(false);
   const [verOtros, setVerOtros] = useState(false);
   const [value, setValue] = useState(1);
+  const [value2, setValue2] = useState(1);
+  const [value3, setValue3] = useState(1);
+  const [value4, setValue4] = useState(1);
+  const [value5, setValue5] = useState(1);
+  const [value6, setValue6] = useState(1);
+  const [value7, setValue7] = useState(1);
   const [disabled, setDisabled] = useState(false);
   const handleCancelIMG = () => setPreviewOpen(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -96,23 +102,24 @@ export default function DetalleEvento() {
   };
   //Verificar cual es el tipo de evento
   const showDetalle = (record) => {
-    const tipoEvento = record.TIPO_EVENTO;
+    const tipoEvento = record.id_tipo_evento;
     console.log("El tipo de evento es ", tipoEvento);
-    if (tipoEvento === "Estilo ICPC") {
+    if (tipoEvento === 1) {
       setVerICPC(true);
-    } else if (tipoEvento === "Estilo Libre") {
+    } else if (tipoEvento === 2) {
       setVerLibre(true);
-    } else if (tipoEvento === "Taller de programación") {
+    } else if (tipoEvento === 3) {
       setVerProgramacion(true);
-    } else if (tipoEvento === "Sesión de reclutamiento") {
-      setVerReclutamiento(true);
-    } else if (tipoEvento === "Torneos de programación") {
-      setVerTorneo(true);
-    } else if (tipoEvento === "Entrenamientos") {
+    } else if (tipoEvento === 4) {
       setVerEntenamiento(true);
-    } else if (tipoEvento === "Otros") {
+    } else if (tipoEvento === 5) {
+      setVerReclutamiento(true);
+    } else if (tipoEvento === 6) {
+      setVerTorneo(true);
+    } else if (tipoEvento === 7) {
       setVerOtros(true);
     }
+
   };
 
   //Cerrar modal de cada tipo de evento
@@ -244,9 +251,39 @@ export default function DetalleEvento() {
     });
   };
 
-  const onChange = (e) => {
+  const onChangeICPC = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
+  };
+
+  const onChangeLibre = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue2(e.target.value);
+  };
+
+  const onChangeTaller = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue3(e.target.value);
+  };
+
+  const onChangeEntrenamiento = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue4(e.target.value);
+  };
+
+  const onChangeTorneo = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue5(e.target.value);
+  };
+
+  const onChangeOtros = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue6(e.target.value);
+  };
+
+  const onChangeEtapa = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue7(e.target.value);
   };
 
   const cerrarReservaHora = () => {
@@ -348,7 +385,7 @@ export default function DetalleEvento() {
         }}
       >
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
-        <Column title="Tipo" dataIndex="TIPO_EVENTO" key="tipo_evento" />
+        <Column title="Tipo" dataIndex="id_tipo_evento" key="tipo_evento" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
         <Column
           title="Fecha inicio"
@@ -392,7 +429,7 @@ export default function DetalleEvento() {
           <div className="modal-icpc">
             <div className="columna1-icpc">
               <Form.Item label="Modalidad">
-                <Radio.Group onChange={onChange} value={value}>
+                <Radio.Group onChange={onChangeICPC}  value={value}>
                   <Radio value={1}>Interno</Radio>
                   <Radio value={2}>Abierto</Radio>
                 </Radio.Group>
@@ -509,7 +546,7 @@ export default function DetalleEvento() {
       >
         <Form>
           <Form.Item label="Tipo">
-            <Radio.Group onChange={onChange} value={value}>
+            <Radio.Group onChange={onChangeLibre} value={value2}>
               <Radio value={1}>Interno</Radio>
               <Radio value={2}>Abierto</Radio>
             </Radio.Group>
@@ -571,7 +608,7 @@ export default function DetalleEvento() {
       >
         <Form>
           <Form.Item label="Tipo">
-            <Radio.Group onChange={onChange} value={value}>
+            <Radio.Group onChange={onChangeTaller} value={value3}>
               <Radio value={1}>Interno</Radio>
               <Radio value={2}>Abierto</Radio>
             </Radio.Group>
@@ -661,7 +698,7 @@ export default function DetalleEvento() {
       >
         <Form>
           <Form.Item label="Tipo">
-            <Radio.Group onChange={onChange} value={value}>
+            <Radio.Group onChange={onChangeTorneo} value={value4}>
               <Radio value={1}>Interno</Radio>
               <Radio value={2}>Abierto</Radio>
             </Radio.Group>
@@ -723,7 +760,7 @@ export default function DetalleEvento() {
       >
         <Form>
           <Form.Item label="Tipo">
-            <Radio.Group onChange={onChange} value={value}>
+            <Radio.Group onChange={onChangeEntrenamiento} value={value5}>
               <Radio value={1}>Interno</Radio>
               <Radio value={2}>Abierto</Radio>
             </Radio.Group>
@@ -786,7 +823,7 @@ export default function DetalleEvento() {
       >
         <Form>
           <Form.Item label="Tipo">
-            <Radio.Group onChange={onChange} value={value}>
+            <Radio.Group onChange={onChangeOtros} value={value6}>
               <Radio value={1}>Interno</Radio>
               <Radio value={2}>Abierto</Radio>
             </Radio.Group>
@@ -851,7 +888,7 @@ export default function DetalleEvento() {
           <Input placeholder="Ingrese el nombre de la etapa" />
         </Form.Item>
         <Form.Item label="Modalidad de la etapa">
-          <Radio.Group onChange={onChange} value={value}>
+          <Radio.Group onChange={onChangeEtapa} value={value7}>
             <Radio value={1}>En linea</Radio>
             <Radio value={2}>Presencial</Radio>
           </Radio.Group>

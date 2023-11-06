@@ -12,23 +12,30 @@ export default function Evento() {
   const [show] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState([]);
+  const [tipo, setTipo] = useState([])
 
   //Obtener datos de la base de datos
   useEffect(() => {
     obtenerDatos();
+    
   }, []);
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-mostrar")
+      .get("http://localhost:8000/api/eventos")
       .then((response) => {
         setData(response.data);
-        console.log("El valor de la data es ", data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
+
+  const nuevosDatos = () =>{
+    const nuevaLista = data.map(item => ({ TITULO: item.TITULO, id_tipo_evento: item.id_tipo_evento }));
+    setTipo(nuevaLista)
+    console.log("El titulo es ",nuevaLista )
+  }
 
   //Ver mas informacion de un evento
 
@@ -43,7 +50,7 @@ export default function Evento() {
   function showInfo(record) {
     setInfo(record);
     setVerImagen(record.AFICHE);
-    console.log("Informacion obtenida de show ", info);
+    console.log("Informacion obtenida de show ", record);
     setIsModalOpen(true);
   }
 
@@ -51,11 +58,7 @@ export default function Evento() {
     setIsModalOpen(false);
     show.resetFields();
   };
-  const [expanded, setExpanded] = useState(false);
 
-  const expandDescription = () => {
-    setExpanded(true);
-  };
 
   return (
     <div className="pagina-evento">
@@ -77,7 +80,7 @@ export default function Evento() {
         }}
       >
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
-        <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo" />
+        <Column title="Tipo" dataIndex="id_tipo_evento" key="titulo" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
         <Column
           title="Fecha inicio"
@@ -126,16 +129,13 @@ export default function Evento() {
             <p>{info.TITULO}</p>
             <br />
             <h3>Tipo :</h3>
-            <p>{info.TIPO_EVENTO}</p>
+            <p>{info.id_tipo_evento}</p>
             <br />
             <h3>Fecha inicio:</h3>
             <p>{info.FECHA_INICIO}</p>
             <br />
-            <h3>Hora :</h3>
-            <p>{info.HORA}</p>
-            <br />
-            <h3>Ubicación :</h3>
-            <p>{info.UBICACION}</p>
+            <h3>Fecha fin:</h3>
+            <p>{info.FECHA_FIN}</p>
             <br />
             <h3>Organizador :</h3>
             <p>{info.ORGANIZADOR}</p>

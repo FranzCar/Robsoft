@@ -37,6 +37,7 @@ export default function EliminarEvento() {
       .get("http://localhost:8000/api/eventos-modificables")
       .then((response) => {
         setData(response.data);
+        console.log("los datos de la base de daatos son ", response)
       })
       .catch((error) => {
         console.error(error);
@@ -70,8 +71,9 @@ export default function EliminarEvento() {
       centered: "true",
 
       onOk() {
+        console.log("el estado", record.id_evento)
         handleOk();
-        eliminarEvento(record);
+        eliminarEvento(record.id_evento);
       },
       onCancel() {},
     });
@@ -107,7 +109,7 @@ export default function EliminarEvento() {
           render={(record) => (
             <Space size="middle">
               {/* Boton para eliminar */}
-              <Button type="link" onClick={() => showDelete(record.id)}>
+              <Button type="link" onClick={() => showDelete(record)}>
                 <DeleteOutlined
                   style={{ fontSize: "25px", color: "#E51919" }}
                 />

@@ -8,7 +8,6 @@
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     padding: 0;
-    
 }
 
 .boton-registrar{
@@ -169,7 +168,7 @@
     float: left;
 }
 .botones-crear-evento{
-    margin-top: 37.6%;
+    margin-top: 23%;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
