@@ -16,8 +16,37 @@ class EventoController extends Controller
     
     public function index()
     {
-        $eventos = Evento::all();
-        return $eventos;
+        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])->get();
+        return $eventos->map(function ($evento) {
+            return [
+                'id_evento' => $evento->id_evento,
+                'TITULO' => $evento->TITULO,
+                'ESTADO' => $evento->ESTADO,
+                'FECHA_INICIO' => $evento->FECHA_INICIO,
+                'FECHA_FIN' => $evento->FECHA_FIN,
+                'DESCRIPCION' => $evento->DESCRIPCION,
+                'MOSTRAR' => $evento->MOSTRAR,
+                'AFICHE' => $evento->AFICHE,
+                'TIPO_EVENTO' => [
+                    'id' => $evento->tipoEvento->id_tipo_evento,
+                    'nombre' => $evento->tipoEvento->nombre_tipo_evento
+                ],
+                'AUSPICIADORES' => $evento->auspiciadores->map(function ($auspiciador) {
+                    return [
+                        'id' => $auspiciador->id_auspiciador,
+                        'nombre' => $auspiciador->nombre_auspiciador // Asumiendo que el campo es 'nombre_auspiciador' en la tabla
+                    ];
+                }),
+                'ORGANIZADORES' => $evento->organizadores->map(function ($rolPersona) { // Asegúrate de que $rolPersona está definido aquí como parámetro de la función anónima
+                    // Accede al objeto persona relacionado y obtén el nombre
+                    $persona = $rolPersona->persona; // Usamos $rolPersona aquí, que es el parámetro de la función anónima
+                    return [
+                        'id' => $rolPersona->id_rol_persona, // Este id debe coincidir con la columna de tu tabla RolPersona
+                        'nombre' => $persona ? $persona->nombre : 'Nombre no disponible',
+                    ];
+                }),
+            ];
+        });
     }
 
     
@@ -119,10 +148,41 @@ class EventoController extends Controller
     }
 
     public function show($id)
-    {
-        $evento = Evento::find($id);
-        return $evento;
+{
+    $evento = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])->find($id);
+
+    if (!$evento) {
+        return response()->json(['message' => 'Evento no encontrado'], 404);
     }
+
+    return [
+        'id_evento' => $evento->id_evento,
+        'TITULO' => $evento->TITULO,
+        'ESTADO' => $evento->ESTADO,
+        'FECHA_INICIO' => $evento->FECHA_INICIO,
+        'FECHA_FIN' => $evento->FECHA_FIN,
+        'DESCRIPCION' => $evento->DESCRIPCION,
+        'MOSTRAR' => $evento->MOSTRAR,
+        'AFICHE' => $evento->AFICHE,
+        'TIPO_EVENTO' => [
+            'id' => $evento->tipoEvento->id_tipo_evento ?? null,
+            'nombre' => $evento->tipoEvento->nombre_tipo_evento ?? 'Tipo no disponible'
+        ],
+        'AUSPICIADORES' => $evento->auspiciadores->map(function ($auspiciador) {
+            return [
+                'id' => $auspiciador->id_auspiciador,
+                'nombre' => $auspiciador->nombre_auspiciador
+            ];
+        }),
+        'ORGANIZADORES' => $evento->organizadores->map(function ($rolPersona) {
+            $persona = $rolPersona->persona;
+            return [
+                'id' => $rolPersona->id_rol_persona,
+                'nombre' => $persona ? $persona->nombre : 'Nombre no disponible',
+            ];
+        }),
+    ];
+}
 
     
     public function update(Request $request, $id)

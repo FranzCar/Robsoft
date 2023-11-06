@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PersonaController;
 use App\Http\Controllers\Api\EquipoController;
 use App\Http\Controllers\Api\AuspiciadorController;
 use App\Http\Controllers\Api\RolPersonaController;
+use App\Http\Controllers\Api\InstitucionController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -30,3 +31,4 @@ Route::get('eventos-modificables', [EventoController::class, 'getEventosEnEspera
 Route::get('lista-organizadores',[RolPersonaController::class, 'listaOrganizadores']);
 Route::get('lista-coach',[RolPersonaController::class, 'listaCoach']);
 Route::get('lista-auspiciadores',[AuspiciadorController::class, 'listaAuspiciadores']);
+Route::get('lista-instituciones',[InstitucionController::class, 'listaInstitucion']);
