@@ -11,7 +11,7 @@ class EstudianteCaracteristicasHandler implements PersonaCaracteristicasHandler 
     public function guardarCaracteristicas($persona, $request) {
         $caracteristicasEstudiante = [
             'semestre' => 1, // id de la característica 'semestre'
-            'talla polera' => 2, // id de la característica 'talla polera'
+            'talla_polera' => 2, // id de la característica 'talla polera'
             'codigoSIS' => 3, // id de la característica 'codigoSIS'
             'fecha_nacimiento' => 4, // id de la característica 'fecha_nacimiento'
             'foto' => 5, // id de la característica 'foto'
@@ -19,7 +19,7 @@ class EstudianteCaracteristicasHandler implements PersonaCaracteristicasHandler 
         ];
 
         // Guardar características de texto
-        foreach(['semestre', 'talla polera', 'codigoSIS'] as $caracteristica) {
+        foreach(['semestre', 'talla_polera', 'codigoSIS'] as $caracteristica) {
             $valor = $request->input($caracteristica); // Asegúrate de hacer validación
             if ($valor) {
                 $caracteristicaTexto = new CaracteristicaTextoPersona([

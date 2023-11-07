@@ -77,9 +77,27 @@ export default function Participante() {
     obtenerParticipantesCI();
     obtenerEntrenadores();
     obtenerGrupos();
+    obtenerInstituciones();
   }, []);
 
 //*Kevin
+ const [instituciones, setInstituciones] = useState([]);
+
+//Obtener instituciones
+  const obtenerInstituciones = () => {
+    axios
+      .get("http://localhost:8000/api/lista-instituciones")
+      .then((response) => {
+        const lista = response.data.map((element) => ({
+         value: element.id_institucion,
+          label: element.nombre_institucion
+        }));
+        setInstituciones(lista);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 const options = [
     { value: "1er semestre", label: "1er semestre" },
     { value: "2do semestre", label: "2do semestre" },
@@ -240,12 +258,12 @@ const validarDuplicadoCI = (values) => {
       telefono: values.TELEFONO,
       genero: values.GENERO,
       semestre: values.SEMESTRE,
-      institucion: values.INSTITUCION,
-      fechaNacimiento: NUEVAFECHA,
+      id_institucion: values.INSTITUCION,
+      fecha_nacimiento: NUEVAFECHA,
       talla_polera: values.TALLA_POLERA,
       codigoSIS: values.CODIGOSIS,
       foto: fileList1.length > 0 ? fileList1[0].thumbUrl : null,
-      certificado: fileList.length > 0 ? fileList[0].thumbUrl : null,
+      certificado_estudiante: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
     return datos;
   };
@@ -764,7 +782,7 @@ function onlyLetters(event) {
                 rules={[
                   {
                     required: true,
-                    message: "Por favor ingrese su nro de carnet",
+                    message: "Por favor ingrese su numero de carnet",
                   },
                   { validator: validarMinimoCI },
                 ]}
@@ -772,8 +790,8 @@ function onlyLetters(event) {
                 <Input
                   maxLength={8}
                   minLength={7}
-                  style={{ width: "175px" }}
-                  placeholder="Ingrese su nro de carnet"
+                  style={{ width: "210px" }}
+                  placeholder="Ingrese su numero de carnet"
                   onKeyPress={onlyNumbers}
                 ></Input>
               </Form.Item>
@@ -815,12 +833,10 @@ function onlyLetters(event) {
                   },
                 ]}
               >
-                <Input
-                  placeholder="Ingrese el nombre de la Institucion"
-                  maxLength={60}
-                  minLength={4}
-                  onKeyPress={onlyLetters}
-                ></Input>
+                <Select
+                placeholder="Seleccione una institucion."
+                options={instituciones}
+                />
               </Form.Item>
               <Form.Item
                 label="Semestre"
@@ -879,7 +895,7 @@ function onlyLetters(event) {
                   },
                 ]}
               >
-                <Select>
+                <Select  placeholder="Seleccione un genero.">
                   <Select.Option value="Femenino">Femenino</Select.Option>
                   <Select.Option value="Masculino">Masculino</Select.Option>
                 </Select>
@@ -923,9 +939,8 @@ function onlyLetters(event) {
               <Form.Item
                 label="Talla de polera"
                 name="TALLA_POLERA"
-                style={{ width: "190px" }}
               >
-                <Select>
+                <Select placeholder="Seleccione una talla de polera">
                   <Select.Option value="S">S</Select.Option>
                   <Select.Option value="M">M</Select.Option>
                   <Select.Option value="L">L</Select.Option>
