@@ -12,30 +12,34 @@ export default function Evento() {
   const [show] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState([]);
-  const [tipo, setTipo] = useState([])
+  const [tipo, setTipo] = useState([]);
 
   //Obtener datos de la base de datos
   useEffect(() => {
     obtenerDatos();
-    
+    nuevosDatos();
   }, []);
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos")
+      .get("http://localhost:8000/api/eventos-mostrar")
       .then((response) => {
         setData(response.data);
+        console.log("los datos ", response.data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  const nuevosDatos = () =>{
-    const nuevaLista = data.map(item => ({ TITULO: item.TITULO, id_tipo_evento: item.id_tipo_evento }));
-    setTipo(nuevaLista)
-    console.log("El titulo es ",nuevaLista )
-  }
+  const nuevosDatos = () => {
+    const nuevaLista = data.map((item) => ({
+      TITULO: item.TITULO,
+      TIPO_EVENTO: item.TIPO_EVENTO.nombre,
+    }));
+    setTipo(nuevaLista);
+    console.log("El titulo es ", nuevaLista);
+  };
 
   //Ver mas informacion de un evento
 
@@ -48,9 +52,17 @@ export default function Evento() {
   };
 
   function showInfo(record) {
-    setInfo(record);
+    const id = record.id_evento;
+    axios
+      .get(`http://localhost:8000/api/evento/${id}`)
+      .then((response) => {
+        setInfo(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     setVerImagen(record.AFICHE);
-    console.log("Informacion obtenida de show ", record);
+    console.log("Informacion obtenida de show ", info);
     setIsModalOpen(true);
   }
 
@@ -58,7 +70,6 @@ export default function Evento() {
     setIsModalOpen(false);
     show.resetFields();
   };
-
 
   return (
     <div className="pagina-evento">
@@ -80,7 +91,7 @@ export default function Evento() {
         }}
       >
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
-        <Column title="Tipo" dataIndex="id_tipo_evento" key="titulo" />
+        <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
         <Column
           title="Fecha inicio"
@@ -129,7 +140,7 @@ export default function Evento() {
             <p>{info.TITULO}</p>
             <br />
             <h3>Tipo :</h3>
-            <p>{info.id_tipo_evento}</p>
+            {info.TIPO_EVENTO && <p>{info.TIPO_EVENTO.nombre}</p>}
             <br />
             <h3>Fecha inicio:</h3>
             <p>{info.FECHA_INICIO}</p>
@@ -137,11 +148,23 @@ export default function Evento() {
             <h3>Fecha fin:</h3>
             <p>{info.FECHA_FIN}</p>
             <br />
-            <h3>Organizador :</h3>
-            <p>{info.ORGANIZADOR}</p>
+            <h3>Organizadores :</h3>
+            <ul>
+              {info &&
+                info.ORGANIZADORES &&
+                info.ORGANIZADORES.map((organizador, index) => (
+                  <li key={index}>{organizador.nombre}</li>
+                ))}
+            </ul>
             <br />
-            <h3>Patrocinador :</h3>
-            <p>{info.PATROCINADOR}</p>
+            <h3>Patrocinadores :</h3>
+            <ul>
+              {info &&
+                info.AUSPICIADORES &&
+                info.AUSPICIADORES.map((patrocinador, index) => (
+                  <li key={index}>{patrocinador.nombre}</li>
+                ))}
+            </ul>
             <br />
             <h3>Descripción :</h3>
             <div className="description-container">

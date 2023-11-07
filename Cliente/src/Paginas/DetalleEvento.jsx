@@ -102,21 +102,21 @@ export default function DetalleEvento() {
   };
   //Verificar cual es el tipo de evento
   const showDetalle = (record) => {
-    const tipoEvento = record.id_tipo_evento;
+    const tipoEvento = record.TIPO_EVENTO;
     console.log("El tipo de evento es ", tipoEvento);
-    if (tipoEvento === 1) {
+    if (tipoEvento === 'Competencia estilo ICPC') {
       setVerICPC(true);
-    } else if (tipoEvento === 2) {
+    } else if (tipoEvento === 'Competencia estilo libre') {
       setVerLibre(true);
-    } else if (tipoEvento === 3) {
+    } else if (tipoEvento === 'Taller de Programacion') {
       setVerProgramacion(true);
-    } else if (tipoEvento === 4) {
+    } else if (tipoEvento === 'Entrenamiento') {
       setVerEntenamiento(true);
-    } else if (tipoEvento === 5) {
+    } else if (tipoEvento === 'Reclutamiento') {
       setVerReclutamiento(true);
-    } else if (tipoEvento === 6) {
+    } else if (tipoEvento === 'Torneo') {
       setVerTorneo(true);
-    } else if (tipoEvento === 7) {
+    } else if (tipoEvento === 'Otro') {
       setVerOtros(true);
     }
 
@@ -385,7 +385,7 @@ export default function DetalleEvento() {
         }}
       >
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
-        <Column title="Tipo" dataIndex="id_tipo_evento" key="tipo_evento" />
+        <Column title="Tipo" dataIndex="TIPO_EVENTO" key="tipo_evento" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
         <Column
           title="Fecha inicio"
