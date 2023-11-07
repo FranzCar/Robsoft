@@ -17,7 +17,7 @@ BEGIN
     SELECT * FROM TIPO_EVENTO as te
     JOIN evento as e ON te.id_tipo_evento = e.id_tipo_evento
     WHERE MOSTRAR = 1 AND ESTADO = 'En espera'
-    ORDER BY e.TITULO ASC, te.nombre_tipo_evento ASC, e.ESTADO ASC;
+    ORDER BY e.id_evento DESC;
 END");
     }
 
