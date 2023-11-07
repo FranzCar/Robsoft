@@ -50,7 +50,7 @@ export default function EditarEvento() {
   const handleOkEdit = () => {
     setIsModalOpenEdit(false);
   };
-  const [actual, setActual] = useState("")
+  const [actual, setActual] = useState("");
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   const [fileList, setFileList] = useState([]);
@@ -58,6 +58,78 @@ export default function EditarEvento() {
   const customRequest = ({ fileList, onSuccess }) => {
     onSuccess();
   };
+  const [obtenerOrganizadores, setObtenerOrganizadores] = useState([]);
+  const [listaOrganizador, setListaOrganizador] = useState([]);
+  const [selectedValues, setSelectedValues] = useState([]);
+  const [listaPatrocinador, setListaPatrocinador] = useState([]);
+  const [obtenerPatrocinadores, setObtenerPatrocinadores] = useState([]);
+
+  //Obtener datos de la base de datos
+  useEffect(() => {
+    obtenerDatos();
+    obtenerDatosEditar();
+    obtenerListaOrganizadores();
+    obtenerListaPatrocinadores()
+  }, []);
+
+  const obtenerDatos = () => {
+    axios
+      .get("http://localhost:8000/api/eventos-modificables")
+      .then((response) => {
+        setData(response.data);
+        console.log("los datos de la base de daatos son ", response)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const obtenerDatosEditar = () => {
+    axios
+      .get("http://localhost:8000/api/eventos")
+      .then((response) => {
+        setDataEditar(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  const obtenerListaOrganizadores = () => {
+    axios
+      .get("http://localhost:8000/api/lista-organizadores")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_rol_persona,
+          nombre: element.nombre,
+          ci: element.ci,
+          value: element.nombre,
+          label: element.nombre,
+        }));
+        setObtenerOrganizadores(listaConFormato);
+        console.log("organizadores son ", listaConFormato);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const obtenerListaPatrocinadores = () => {
+    axios
+      .get("http://localhost:8000/api/lista-auspiciadores")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_auspiciador,
+          nombre: element.nombre_auspiciador,
+          value: element.nombre_auspiciador,
+          label: element.nombre_auspiciador,
+        }));
+        setObtenerPatrocinadores(listaConFormato);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   const uploadButton = (
     <div>
       <PlusOutlined />
@@ -108,31 +180,43 @@ export default function EditarEvento() {
   };
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
+
+
   const showEdit = (record) => {
-    form.resetFields(['FECHAsINI']);
+    const id = record.id_evento;
+    console.log("el id es ", record.id_evento)
+    axios
+    .get(`http://localhost:8000/api/evento/${id}`)
+    .then((response) => {
+      setInfo(response.data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+    console.log("datos recuperados ", info)
+    form.resetFields(["FECHAsINI"]);
     const fechaEventoInicio = moment(record.FECHA_INICIO);
     const fechaEventoFin = moment(record.FECHA_FIN);
-    console.log("El valor de la fecha es", record.FECHA_INICIO)
+    console.log("El valor de los datos es", record);
     const horaEvento = moment(record.HORA, "HH:mm:ss");
     const TIPO = record.TIPO_EVENTO;
     setVerImagen(record.AFICHE);
+   
     const datos = {
       TITULO: record.TITULO,
       TIPO_EVENTO: TIPO,
       UBICACION: record.UBICACION,
       DESCRIPCION: record.DESCRIPCION,
-      ORGANIZADOR: record.ORGANIZADOR,
-      PATROCINADOR: record.PATROCINADOR,
+      ORGANIZADOR: record.organizadores,
+      PATROCINADOR: record.auspiciadores,
       AFICHE: record.AFICHE,
     };
-    form.setFieldsValue({ FECHAsINI: fechaEventoInicio});
-    form.setFieldsValue({ FECHAsFIN: fechaEventoFin});
-    console.log("Fecha",fechaEventoInicio)
+    form.setFieldsValue({ FECHAsINI: fechaEventoInicio });
+    form.setFieldsValue({ FECHAsFIN: fechaEventoFin });
     form.setFieldsValue({ HORAs: horaEvento });
     form.setFieldsValue({ TIPO_EVENTO: TIPO });
-    form.setFieldsValue(datos);
-    setActual(record.TITULO)
-    console.log("Los datos son ", record.AFICHE);
+    form.setFieldsValue(info);
+    setActual(record.TITULO);
     setId(record.id);
     setIsModalOpenEdit(true);
   };
@@ -145,7 +229,7 @@ export default function EditarEvento() {
   const actualizarEvento = (values) => {
     confirm({
       title: "¿Desea actualizar el evento?",
-      icon: <ExclamationCircleFilled />,//
+      icon: <ExclamationCircleFilled />, //
       content: "Se guardarán los nuevos datos del evento",
       okText: "Si",
       cancelText: "No",
@@ -154,24 +238,24 @@ export default function EditarEvento() {
       onOk() {
         actualizar(values, id);
       },
-      onCancel() { },
+      onCancel() {},
     });
   };
 
   const cerrarEdit = () => {
-    confirm({ 
+    confirm({
       title: "¿Está seguro de que desea cancelar la edición del evento?",
-      icon: <ExclamationCircleFilled />,//
+      icon: <ExclamationCircleFilled />, //
       content: "Todos los cambios se perderán",
       okText: "Si",
       cancelText: "No",
       centered: "true",
 
-      onOk(){
+      onOk() {
         setIsModalOpenEdit(false);
       },
-      onCancel(){},
-    })
+      onCancel() {},
+    });
     //setIsModalOpenEdit(false);
     //setFileList([])
     //form.resetFields();
@@ -191,7 +275,6 @@ export default function EditarEvento() {
   };
 
   const datosEvento = (values) => {
-
     const fecha = values.FECHAsINI;
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
     const fecha_fin = values.FECHAsFIN;
@@ -211,7 +294,7 @@ export default function EditarEvento() {
       ORGANIZADOR: values.ORGANIZADOR,
       PATROCINADOR: values.PATROCINADOR,
       AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
-    }
+    };
     return datos;
   };
 
@@ -233,21 +316,20 @@ export default function EditarEvento() {
       }
     }
 
-
     return resultado;
   };
 
   function actualizar(values, id) {
     const duplicado = validarDuplicado(values);
     const datos = datosEvento(values);
-    console.log("El valor de duplicado es ", duplicado)
+    console.log("El valor de duplicado es ", duplicado);
     if (duplicado === true) {
       console.log(
         "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
       );
       setIsModalOpenEdit(true);
       message.error("Exite un evento con el mismo título");
-      setFileList([])
+      setFileList([]);
     } else {
       axios
         .put(`http://localhost:8000/api/evento/${id}`, datos)
@@ -261,34 +343,6 @@ export default function EditarEvento() {
         });
     }
   }
-
-  //Obtener datos de la base de datos
-  useEffect(() => {
-    obtenerDatos();
-    obtenerDatosEditar();
-  }, []);
-
-  const obtenerDatos = () => {
-    axios
-      .get("http://localhost:8000/api/eventos-modificables")
-      .then((response) => {
-        setData(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
-  const obtenerDatosEditar = () => {
-    axios
-      .get("http://localhost:8000/api/eventos")
-      .then((response) => {
-        setDataEditar(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
 
   //Validaciones de los campos input
   const validarMinimo = (_, value, callback) => {
@@ -342,20 +396,76 @@ export default function EditarEvento() {
     return [];
   };
 
-   //validacion de caracteres especiales en titulo
-   const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9\-&*" ]+$/;
-   function validarCaracteresPermitidos(_, value) {
-     if (value && !caracteresPermitidos.test(value)) {
-       return Promise.reject("Este campo solo acepta los siguientes caracteres especiales: -&*\"");
-     }
-     return Promise.resolve();
-   }
+  //validacion de caracteres especiales en titulo
+  const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9\-&*" ]+$/;
+  function validarCaracteresPermitidos(_, value) {
+    if (value && !caracteresPermitidos.test(value)) {
+      return Promise.reject(
+        'Este campo solo acepta los siguientes caracteres especiales: -&*"'
+      );
+    }
+    return Promise.resolve();
+  }
+
+  const handleChangeOrganizador = (value) => {
+    const nuevaListaOrganizador = [...listaOrganizador];
+    let idOrganizador = [];
+    for (let i = 0; i < obtenerOrganizadores.length; i++) {
+      for (let j = 0; j < value.length; j++) {
+        if (obtenerOrganizadores[i].nombre === value[j]) {
+          idOrganizador.push(obtenerOrganizadores[i].id);
+        }
+      }
+    }
+    // Si `value` ya existe en la lista, elimínalo
+    if (nuevaListaOrganizador.includes(idOrganizador)) {
+      const index = nuevaListaOrganizador.indexOf(idOrganizador);
+      nuevaListaOrganizador.splice(index, 1);
+    } else {
+      // Si `value` no existe en la lista, agrégalo
+      nuevaListaOrganizador.push(idOrganizador);
+    }
+
+    setListaOrganizador(nuevaListaOrganizador);
+    console.log(
+      "El último valor en la lista de organizadores es ",
+      nuevaListaOrganizador[nuevaListaOrganizador.length - 1]
+    );
+  };
+
+  const handleChangePatrocinador = (value) => {
+    const nuevaListaPatrocinador = [...listaPatrocinador];
+    console.log("patrocinadores ", obtenerPatrocinadores);
+    let idPatrocinador = [];
+    for (let i = 0; i < obtenerPatrocinadores.length; i++) {
+      for (let j = 0; j < value.length; j++) {
+        if (obtenerPatrocinadores[i].nombre === value[j]) {
+          idPatrocinador.push(obtenerPatrocinadores[i].id);
+        }
+      }
+    }
+
+    // Si `value` ya existe en la lista, elimínalo
+    if (nuevaListaPatrocinador.includes(idPatrocinador)) {
+      const index = nuevaListaPatrocinador.indexOf(idPatrocinador);
+      nuevaListaPatrocinador.splice(index, 1);
+    } else {
+      // Si `value` no existe en la lista, agrégalo
+      nuevaListaPatrocinador.push(idPatrocinador);
+    }
+
+    setListaPatrocinador(nuevaListaPatrocinador);
+    console.log(
+      "El último valor en la lista de patrocinadores es ",
+      nuevaListaPatrocinador[nuevaListaPatrocinador.length - 1]
+    );
+  };
 
   return (
     <div>
-       <div className="tabla-descripcion-editarEv">
-      <p>EDITAR EVENTOS REGISTRADOS</p>
-       </div>
+      <div className="tabla-descripcion-editarEv">
+        <p>EDITAR EVENTOS REGISTRADOS</p>
+      </div>
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
@@ -490,7 +600,7 @@ export default function EditarEvento() {
                 disabledDate={disabledDate}
               />
             </Form.Item>
-             <Form.Item
+            <Form.Item
               label="Fecha fin"
               name="FECHAsFIN"
               rules={[
@@ -530,7 +640,7 @@ export default function EditarEvento() {
           </div>
 
           <div className="form-edit-columna2">
-            <Form.Item
+            {/*  <Form.Item
               label="Ubicaci&oacute;n"
               name="UBICACION"
               rules={[
@@ -546,32 +656,48 @@ export default function EditarEvento() {
                 minLength={5}
                 placeholder="Ingrese la ubicación del evento"
               ></Input>
-            </Form.Item>
-
+            </Form.Item>*/}
             <Form.Item
               label="Organizador"
               name="ORGANIZADOR"
               rules={[
                 {
                   required: true,
-                  message: "Por favor ingrese un organizador",
+                  message: "Por favor seleccione al menos un organizador",
                 },
-                { validator: validarMinimo },
               ]}
             >
-              <Input
-                placeholder="Ingrese el nombre del organizador"
-                maxLength={20}
-                minLength={5}
-              ></Input>
+              <Select
+                mode="multiple"
+                allowClear
+                style={{
+                  width: "100%",
+                }}
+                placeholder="Selecione uno o mas organizadores"
+                onChange={handleChangeOrganizador}
+                options={obtenerOrganizadores.map((organizador) => ({
+                  value: organizador.nombre,
+                  label: organizador.nombre,
+                }))}
+                value={selectedValues}
+              />
             </Form.Item>
 
             <Form.Item label="Patrocinador" name="PATROCINADOR">
-              <Input
-                placeholder="Ingrese el nombre del patrocinador"
-                maxLength={20}
-                minLength={5}
-              ></Input>
+              <Select
+                mode="multiple"
+                allowClear
+                style={{
+                  width: "100%",
+                }}
+                placeholder="Selecione uno o mas organizadores"
+                onChange={handleChangePatrocinador}
+                options={obtenerPatrocinadores.map((patrocinador) => ({
+                  value: patrocinador.nombre,
+                  label: patrocinador.nombre,
+                }))}
+                value={selectedValues}
+              />
             </Form.Item>
             <Form.Item
               label="Descripci&oacute;n"
