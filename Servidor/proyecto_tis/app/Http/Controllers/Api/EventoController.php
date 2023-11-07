@@ -15,36 +15,40 @@ class EventoController extends Controller
 {
     //agregue esto
     public function index()
-    {
-        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])->get();
-        return $eventos->map(function ($evento) {
-            return [
-                'id_evento' => $evento->id_evento,
-                'TITULO' => $evento->TITULO,
-                'ESTADO' => $evento->ESTADO,
-                'FECHA_INICIO' => $evento->FECHA_INICIO,
-                'FECHA_FIN' => $evento->FECHA_FIN,
-                'DESCRIPCION' => $evento->DESCRIPCION,
-                'MOSTRAR' => $evento->MOSTRAR,
-                'AFICHE' => $evento->AFICHE,
-                'TIPO_EVENTO' => $evento->tipoEvento->nombre_tipo_evento,
-                'AUSPICIADORES' => $evento->auspiciadores->map(function ($auspiciador) {
-                    return [
-                        'id' => $auspiciador->id_auspiciador,
-                        'nombre' => $auspiciador->nombre_auspiciador // Asumiendo que el campo es 'nombre_auspiciador' en la tabla
-                    ];
-                }),
-                'ORGANIZADORES' => $evento->organizadores->map(function ($rolPersona) { // Asegúrate de que $rolPersona está definido aquí como parámetro de la función anónima
-                    // Accede al objeto persona relacionado y obtén el nombre
-                    $persona = $rolPersona->persona; // Usamos $rolPersona aquí, que es el parámetro de la función anónima
-                    return [
-                        'id' => $rolPersona->id_rol_persona, // Este id debe coincidir con la columna de tu tabla RolPersona
-                        'nombre' => $persona ? $persona->nombre : 'Nombre no disponible',
-                    ];
-                }),
-            ];
-        });
-    }
+{
+    $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])->get();
+    return $this->transformarEventos($eventos);
+}
+
+private function transformarEventos($eventos)
+{
+    return $eventos->map(function ($evento) {
+        return [
+            'id_evento' => $evento->id_evento,
+            'TITULO' => $evento->TITULO,
+            'ESTADO' => $evento->ESTADO,
+            'FECHA_INICIO' => $evento->FECHA_INICIO,
+            'FECHA_FIN' => $evento->FECHA_FIN,
+            'DESCRIPCION' => $evento->DESCRIPCION,
+            'MOSTRAR' => $evento->MOSTRAR,
+            'AFICHE' => $evento->AFICHE,
+            'TIPO_EVENTO' => $evento->tipoEvento->nombre_tipo_evento,
+            'AUSPICIADORES' => $evento->auspiciadores->map(function ($auspiciador) {
+                return [
+                    'id' => $auspiciador->id_auspiciador,
+                    'nombre' => $auspiciador->nombre_auspiciador
+                ];
+            }),
+            'ORGANIZADORES' => $evento->organizadores->map(function ($organizador) {
+                $persona = $organizador->persona;
+                return [
+                    'id' => $organizador->id_rol_persona,
+                    'nombre' => $persona ? $persona->nombre : 'Nombre no disponible',
+                ];
+            }),
+        ];
+    });
+}
 
     
     public function validarFormulario(Request $request) {
@@ -263,14 +267,23 @@ class EventoController extends Controller
     }
 
     public function getEventosNoMostrar() {
-        $eventos = DB::select('CALL EventosNoMostrar()');
-        return response()->json($eventos);
-    }
+        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
+                     ->where('MOSTRAR', 0)
+                     ->orderBy('id_evento', 'desc')
+                     ->get();
+            
+            return $this->transformarEventos($eventos);
 
-    public function getEventosMostrar() {
-        $eventos = DB::select('CALL EventosMostrar()');
-        return response()->json($eventos);
-    }
+    }               
+    public function getEventosMostrar() 
+{
+    $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
+                     ->where('MOSTRAR', 1)
+                     ->orderBy('id_evento', 'desc')
+                     ->get();
+
+    return $this->transformarEventos($eventos);
+}
     public function quitarEvento($id)
     {
         $this->actualizarEstadoTodos();
@@ -317,8 +330,13 @@ class EventoController extends Controller
         return response()->json(['success' => true]);
     }
     public function getEventosEnEspera() {
-        $eventos = DB::select('CALL EventosEnEspera()');
-        return response()->json($eventos);
-    }
+        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
+                    ->where('MOSTRAR', 1)
+                    ->where('ESTADO', 'En espera')
+                    ->orderBy('id_evento', 'desc')
+                    ->get();
+
+        return $this->transformarEventos($eventos);
+    }               
 }
 

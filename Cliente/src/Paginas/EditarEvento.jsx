@@ -183,16 +183,7 @@ export default function EditarEvento() {
 
 
   const showEdit = (record) => {
-    const id = record.id_evento;
-    console.log("el id es ", record.id_evento)
-    axios
-    .get(`http://localhost:8000/api/evento/${id}`)
-    .then((response) => {
-      setInfo(response.data);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    
     console.log("datos recuperados ", info)
     form.resetFields(["FECHAsINI"]);
     const fechaEventoInicio = moment(record.FECHA_INICIO);
@@ -201,7 +192,7 @@ export default function EditarEvento() {
     const horaEvento = moment(record.HORA, "HH:mm:ss");
     const TIPO = record.TIPO_EVENTO;
     setVerImagen(record.AFICHE);
-   
+    
     const datos = {
       TITULO: record.TITULO,
       TIPO_EVENTO: TIPO,
@@ -215,7 +206,7 @@ export default function EditarEvento() {
     form.setFieldsValue({ FECHAsFIN: fechaEventoFin });
     form.setFieldsValue({ HORAs: horaEvento });
     form.setFieldsValue({ TIPO_EVENTO: TIPO });
-    form.setFieldsValue(info);
+    form.setFieldsValue(datos);
     setActual(record.TITULO);
     setId(record.id);
     setIsModalOpenEdit(true);
