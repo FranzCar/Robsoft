@@ -186,78 +186,53 @@ private function transformarEventos($eventos)
 }
 
     
-    public function update(Request $request, $id)
-    {
-       /* // Validar los datos de entrada
-        $rules = [
-            'TITULO' => [
-                'required',
-                'string',
-                'min:5',
-                'max:50',
-                'regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-                function ($attribute, $value, $fail) {
-                    $exists = DB::table('eventos')->where('TITULO', $value)->exists();
-                    if ($exists) {
-                        $fail("El evento con título '{$value}' ya existe.");
-                    }
-                },
-            ],
-            'UBICACION' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            'DESCRIPCION' => 'required|string|min:5|max:300|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            'ORGANIZADOR' => 'required|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-           // 'PATROCINADOR' => 'sometimes|string|min:5|max:20|regex:/^[\pL\pN\s.,!?@:;\'-]+$/u',
-            // Puedes agregar las demás reglas de los otros campos aquí si es necesario
-        ];
+public function update(Request $request, $id) {
+    return DB::transaction(function() use ($request, $id) {
+        try {
+            $evento = Evento::findOrFail($id);
 
-        // Mensajes de error personalizados en español
-        $messages = [
-            'required' => 'El campo :attribute es obligatorio.',
-            'min' => 'El campo :attribute debe tener al menos :min caracteres.',
-            'max' => 'El campo :attribute debe tener como máximo :max caracteres.',
-            'regex' => 'El campo :attribute contiene caracteres no permitidos.',
-        ];
+            $evento->TITULO = $request->TITULO;
+            $evento->FECHA_INICIO = $request->FECHA_INICIO;
+            $evento->FECHA_FIN = $request->FECHA_FIN;
+            $evento->DESCRIPCION = $request->DESCRIPCION;
+            $evento->AFICHE = $request->AFICHE;
+            $evento->id_tipo_evento = $request->id_tipo_evento;
+            $evento->save();
 
-        $request->validate($rules, $messages);*/
+            // Eliminar relaciones existentes de auspiciadores y organizadores
+            DB::table('EVENTO_AUSPICIADOR')->where('id_evento', $evento->id_evento)->delete();
+            DB::table('ROL_PERSONA_EN_EVENTO')->where('id_evento', $evento->id_evento)->delete();
 
-        // Buscar el evento
-        $evento = Evento::findOrFail($id);
-
-        // Actualizar los datos del evento
-        $evento->TITULO = $request->TITULO;
-        $evento->FECHA_INICIO = $request->FECHA_INICIO;
-        $evento->FECHA_FIN = $request->FECHA_FIN;
-        $evento->DESCRIPCION = $request->DESCRIPCION;
-        $evento->AFICHE = $request->AFICHE;
-        $evento->id_tipo_evento = $request->id_tipo_evento;
-
-        // Guardar el evento
-        $evento->save();
-
-        // Asociar Patrocinador al evento
-        if ($request->has('auspiciadores')) {
-            foreach ($request->auspiciadores as $id_auspiciador) {
-                DB::table('EVENTO_AUSPICIADOR')->insert([
-                    'id_evento' => $evento->id_evento,
-                    'id_auspiciador' => $id_auspiciador,
-                ]);
+            // Asociar los nuevos auspiciadores al evento
+            if ($request->has('auspiciadores')) {
+                foreach ($request->auspiciadores as $id_auspiciador) {
+                    DB::table('EVENTO_AUSPICIADOR')->insert([
+                        'id_evento' => $evento->id_evento,
+                        'id_auspiciador' => $id_auspiciador,
+                    ]);
+                }
             }
-        }
-        // Asociar Organizador al evento
-        if ($request->has('organizadores')) {
-            foreach ($request->organizadores as $id_rol_persona) {
-                DB::table('ROL_PERSONA_EN_EVENTO')->insert([
-                    'id_rol_persona' => $id_rol_persona,
-                    'id_evento' => $evento->id_evento, 
-                ]);
-            }
-        }
 
-        return response()->json([
-            'message' => 'Evento editado con exito',
-            'id' => $evento->id,
-        ]);
-    }
+            // Asociar los nuevos organizadores al evento
+            if ($request->has('organizadores')) {
+                foreach ($request->organizadores as $id_rol_persona) {
+                    DB::table('ROL_PERSONA_EN_EVENTO')->insert([
+                        'id_rol_persona' => $id_rol_persona,
+                        'id_evento' => $evento->id_evento, 
+                    ]);
+                }
+            }
+
+            $this->actualizarEstadoTodos();
+
+            return response()->json(['status' => 'success', 'message' => 'Evento actualizado con éxito']);
+
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar evento: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Hubo un error al actualizar el evento', 'error_detail' => $e->getMessage()], 500);
+        }
+    });
+}
 
     
     public function destroy($id)
