@@ -81,6 +81,16 @@ export default function Participante() {
   }, []);
 
 //*Kevin
+
+const [isInstitucionDisabled, setIsInstitucionDisabled] = useState(true);
+
+  const onInstitutionChange = (value) => {
+    if (value !== 1) {
+      setIsInstitucionDisabled(true);
+    } else {
+      setIsInstitucionDisabled(false);
+    }
+  };
  const [instituciones, setInstituciones] = useState([]);
 
 //Obtener instituciones
@@ -672,6 +682,7 @@ function onlyLetters(event) {
   };
   //validar CodigoSis
   const validarCodigoSis = (_, value, callback) => {
+   if(isInstitucionDisabled==false){
     const anoActual = new Date().getFullYear();
 
   // Obtener el año del código de estudiante
@@ -686,7 +697,11 @@ function onlyLetters(event) {
   } else {
     callback();//sin error
   }
+}else{
+  callback();//sin error
+}
   };
+  
   return (
     <div className="pagina-evento">
       <Row gutter={[16, 8]}>
@@ -739,7 +754,7 @@ function onlyLetters(event) {
             </Button>
           </Form>,
         ]}
-      >
+       >
         <Form
           className="form-persona"
           name="formulario_persona"
@@ -747,31 +762,34 @@ function onlyLetters(event) {
           onFinishFailed={onFinishFailed}
           form={form}
         >
-          <Form.Item
+          
+          <Row gutter={[16, 8]}>
+            <Col span={12}>
+            <Form.Item
             label="Nombre completo"
             name="NOMBRE"
             rules={[
               { required: true, message: "Ingrese un nombre, por favor." },
               { validator: validarMinimo },
             ]}
-          >
+           >
             <Input
               maxLength={50}
               minLength={5}
               placeholder="Ingrese su nombre completo."
-              style={{ width: "370px" }}
+              style={{maxWidth: "100%"}}
               onKeyPress={onlyLetters}
             ></Input>
           </Form.Item>
-          <Form.Item
+              <Form.Item
             label="Fecha de nacimiento"
             name="FECHA"
             rules={[
               { required: true, message: "Ingrese una fecha, por favor." },
             ]}
-          >
+           >
             <DatePicker
-              style={{ width: "178px" }}
+              style={{ width: "200px", maxWidth: "100%" }}
               placeholder="Selecciona una fecha"
               disabledDate={disabledDate}
             />
@@ -790,20 +808,14 @@ function onlyLetters(event) {
                 <Input
                   maxLength={8}
                   minLength={7}
-                  style={{ width: "210px" }}
                   placeholder="Ingrese su numero de carnet"
                   onKeyPress={onlyNumbers}
                 ></Input>
               </Form.Item>
 
-          <Row gutter={[16, 8]}>
-            <Col span={12}>
-              
-
               <Form.Item
                 label="Celular"
                 name="TELEFONO"
-                style={{ width: "280px" ,maxWidth: "100%"}}
                 rules={[
                   {
                     required: true,
@@ -818,11 +830,73 @@ function onlyLetters(event) {
                   placeholder="Ingrese el telefono"
                   maxLength={8}
                   minLength={8}
-                  style={{ width: "175px" }}
+                  style={{ maxWidth: "100%"}}
                   onKeyPress={onlyNumbers}
                 ></Input>
               </Form.Item>
 
+              <Form.Item
+                label="Genero"
+                name="GENERO"
+                style={{ maxWidth: "100%" }}
+                rules={[
+                  {
+                    required: true,message: "Por favor seleccione un genero ",
+                  },
+                ]}
+               >
+                <Select  placeholder="Seleccione un genero.">
+                  <Select.Option value="Femenino">Femenino</Select.Option>
+                  <Select.Option value="Masculino">Masculino</Select.Option>
+                </Select>
+              </Form.Item>
+              <Form.Item label="Foto" name="FOTO">
+                <Upload
+                  name="FOTO"
+                  customRequest={customRequest1}
+                  listType="picture-card"
+                  onPreview={handlePreview1}
+                  onChange={handleChange1}
+                  fileList={fileList1}
+                  maxCount={1}
+                >
+                  {fileList1.length >= 1 ? null : uploadButton1}
+                </Upload>
+                <Modal
+                  open={previewOpen}
+                  title={previewTitle}
+                  footer={null}
+                  onCancel={handleCancelIMG}
+                >
+                  <img
+                    alt="example"
+                    style={{
+                      width: "auto",
+                      height: "300px",
+                    }}
+                    src={previewImage}
+                  />
+                </Modal>
+              </Form.Item>
+              
+            </Col>
+            <Col span={10}>
+              <Form.Item 
+                label="Correo electronico" 
+                name="CORREO"
+                rules={[
+                  {
+                          type: "email",
+                          message: "El correo electrónico no es válido.",
+                        },
+                ]}
+                  >
+                  <Input
+                  placeholder="Ingrese su correo"
+                  maxLength={30}
+                  minLength={5}
+                ></Input>
+              </Form.Item>
               <Form.Item
                 label="Institucion"
                 name="INSTITUCION"
@@ -832,10 +906,11 @@ function onlyLetters(event) {
                     message: "Por favor ingrese la institucion",
                   },
                 ]}
-              >
+               >
                 <Select
                 placeholder="Seleccione una institucion."
                 options={instituciones}
+                onChange={onInstitutionChange}
                 />
               </Form.Item>
               <Form.Item
@@ -847,9 +922,42 @@ function onlyLetters(event) {
                     message: "Por favor ingrese el semestre",
                   },
                 ]}
-              >
+               >
                 <Select placeholder="Ingrese el semestre" options={options} />
   
+              </Form.Item>
+              
+
+              <Form.Item
+                label="Codigo SIS"
+                name="CODIGOSIS"
+                style={{maxWidth: "100%"}}
+                 rules={[
+                  {
+                    requires:false,
+                    validator:validarCodigoSis,
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Ingrese su codigo sis"
+                  maxLength={9}
+                  minLength={9}
+                  onKeyPress={onlyNumbers}
+                  disabled={isInstitucionDisabled}
+                ></Input>
+              </Form.Item>
+              <Form.Item
+                label="Talla de polera"
+                name="TALLA_POLERA"
+              >
+                <Select placeholder="Seleccione una talla de polera">
+                  <Select.Option value="S">S</Select.Option>
+                  <Select.Option value="M">M</Select.Option>
+                  <Select.Option value="L">L</Select.Option>
+                  <Select.Option value="XL">XL</Select.Option>
+                  <Select.Option value="XXL">XXL</Select.Option>
+                </Select>
               </Form.Item>
 
               <Form.Item
@@ -883,100 +991,7 @@ function onlyLetters(event) {
                   />
                 </Modal>
               </Form.Item>
-            </Col>
-            <Col span={10}>
-              <Form.Item
-                label="Genero"
-                name="GENERO"
-                style={{ width: "270px",maxWidth: "100%" }}
-                rules={[
-                  {
-                    required: true,message: "Por favor seleccione un genero ",
-                  },
-                ]}
-              >
-                <Select  placeholder="Seleccione un genero.">
-                  <Select.Option value="Femenino">Femenino</Select.Option>
-                  <Select.Option value="Masculino">Masculino</Select.Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item 
-                label="Correo electronico" 
-                name="CORREO"
-                rules={[
-                  {
-                          type: "email",
-                          message: "El correo electrónico no es válido.",
-                        },
-                ]}
-                  >
-                  <Input
-                  placeholder="Ingrese su correo"
-                  maxLength={30}
-                  minLength={5}
-                ></Input>
-              </Form.Item>
-
-             {/* <Form.Item
-                label="Codigo SIS"
-                name="CODIGOSIS"
-                style={{ width: "230px" ,maxWidth: "100%"}}
-                 rules={[
-                  {
-                    requires:false,
-                    validator:validarCodigoSis,
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Ingrese su codigo sis"
-                  maxLength={9}
-                  minLength={9}
-                  onKeyPress={onlyNumbers}
-                ></Input>
-              </Form.Item>*/}
-              <Form.Item
-                label="Talla de polera"
-                name="TALLA_POLERA"
-              >
-                <Select placeholder="Seleccione una talla de polera">
-                  <Select.Option value="S">S</Select.Option>
-                  <Select.Option value="M">M</Select.Option>
-                  <Select.Option value="L">L</Select.Option>
-                  <Select.Option value="XL">XL</Select.Option>
-                  <Select.Option value="XXL">XXL</Select.Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item label="Foto" name="FOTO">
-                <Upload
-                  name="FOTO"
-                  customRequest={customRequest1}
-                  listType="picture-card"
-                  onPreview={handlePreview1}
-                  onChange={handleChange1}
-                  fileList={fileList1}
-                  maxCount={1}
-                >
-                  {fileList1.length >= 1 ? null : uploadButton1}
-                </Upload>
-                <Modal
-                  open={previewOpen}
-                  title={previewTitle}
-                  footer={null}
-                  onCancel={handleCancelIMG}
-                >
-                  <img
-                    alt="example"
-                    style={{
-                      width: "auto",
-                      height: "300px",
-                    }}
-                    src={previewImage}
-                  />
-                </Modal>
-              </Form.Item>
+              
             </Col>
           </Row>
         </Form>
