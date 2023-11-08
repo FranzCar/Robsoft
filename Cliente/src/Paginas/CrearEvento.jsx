@@ -6,19 +6,17 @@ import {
   Input,
   Select,
   DatePicker,
-  TimePicker,
   Upload,
   message,
-  Space,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import { PlusOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+
 const { TextArea } = Input;
 const { confirm } = Modal;
-const { Option } = Select;
 
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -38,7 +36,6 @@ export default function CrearEvento() {
   const [previewTitle, setPreviewTitle] = useState("");
   const handleCancelIMG = () => setPreviewOpen(false);
   const [fileList, setFileList] = useState([]);
-  const [show] = Form.useForm();
   const [data, setData] = useState([]);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
@@ -371,10 +368,10 @@ export default function CrearEvento() {
   }
   const handleChangeOrganizador = (value) => {
     const nuevaListaOrganizador = [...listaOrganizador];
-    let idOrganizador = []
-    for( let i = 0; i < obtenerOrganizadores.length; i++){
-      for(let j = 0; j < value.length; j++){
-        if(obtenerOrganizadores[i].nombre === value[j]){
+    let idOrganizador = [];
+    for (let i = 0; i < obtenerOrganizadores.length; i++) {
+      for (let j = 0; j < value.length; j++) {
+        if (obtenerOrganizadores[i].nombre === value[j]) {
           idOrganizador.push(obtenerOrganizadores[i].id);
         }
       }
@@ -397,11 +394,11 @@ export default function CrearEvento() {
 
   const handleChangePatrocinador = (value) => {
     const nuevaListaPatrocinador = [...listaPatrocinador];
-    console.log("patrocinadores ", obtenerPatrocinadores)
-    let idPatrocinador = []
-    for( let i = 0; i < obtenerPatrocinadores.length; i++){
-      for(let j = 0; j < value.length; j++){
-        if(obtenerPatrocinadores[i].nombre === value[j]){
+    console.log("patrocinadores ", obtenerPatrocinadores);
+    let idPatrocinador = [];
+    for (let i = 0; i < obtenerPatrocinadores.length; i++) {
+      for (let j = 0; j < value.length; j++) {
+        if (obtenerPatrocinadores[i].nombre === value[j]) {
           idPatrocinador.push(obtenerPatrocinadores[i].id);
         }
       }
@@ -439,7 +436,10 @@ export default function CrearEvento() {
             label="T&iacute;tulo"
             name="TITULO"
             rules={[
-              { required: true, message: "Por favor, ingrese un titulo" },
+              {
+                required: true,
+                message: "Por favor, ingrese un titulo",
+              },
               { validator: validarMinimo },
               { validator: validarCaracteresPermitidos },
             ]}
@@ -485,26 +485,26 @@ export default function CrearEvento() {
             </Form.Item>
 
             {/*<Form.Item
-              label="Hora"
-              name="HORA"
-              className="fecha-hora"
-              rules={[
-                {
-                  required: true,
-                  message: "Por favor ingrese una hora",
-                },
-              ]}
-            >
-              <TimePicker
-                className="fecha-hora"
-                placeholder="Seleccione una hora"
-                format="HH:mm"
-                showNow={false}
-                inputReadOnly={true}
-                disabledHours={disabledHours}
-                disabledMinutes={disabledMinutes}
-              />
-            </Form.Item>*/}
+                      label="Hora"
+                      name="HORA"
+                      className="fecha-hora"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Por favor ingrese una hora",
+                        },
+                      ]}
+                    >
+                      <TimePicker
+                        className="fecha-hora"
+                        placeholder="Seleccione una hora"
+                        format="HH:mm"
+                        showNow={false}
+                        inputReadOnly={true}
+                        disabledHours={disabledHours}
+                        disabledMinutes={disabledMinutes}
+                      />
+                    </Form.Item>*/}
           </div>
 
           <Form.Item
@@ -563,11 +563,11 @@ export default function CrearEvento() {
               options={[
                 {
                   value: "1",
-                  label: "Estilo ICPC",
+                  label: "Competencia estilo ICPC",
                 },
                 {
                   value: "2",
-                  label: "Estilo libre",
+                  label: "Competencia estilo libre",
                 },
                 {
                   value: "3",
@@ -583,11 +583,11 @@ export default function CrearEvento() {
                 },
                 {
                   value: "6",
-                  label: "Torneo de programación",
+                  label: "Torneo",
                 },
                 {
                   value: "7",
-                  label: "Otros",
+                  label: "Otro",
                 },
               ]}
             />

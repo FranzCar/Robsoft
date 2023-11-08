@@ -69,7 +69,7 @@ export default function EditarEvento() {
     obtenerDatos();
     obtenerDatosEditar();
     obtenerListaOrganizadores();
-    obtenerListaPatrocinadores()
+    obtenerListaPatrocinadores();
   }, []);
 
   const obtenerDatos = () => {
@@ -77,7 +77,7 @@ export default function EditarEvento() {
       .get("http://localhost:8000/api/eventos-modificables")
       .then((response) => {
         setData(response.data);
-        console.log("los datos de la base de daatos son ", response)
+        console.log("los datos de la base de daatos son ", response);
       })
       .catch((error) => {
         console.error(error);
@@ -180,32 +180,29 @@ export default function EditarEvento() {
   };
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
-
-
   const showEdit = (record) => {
-    
-    console.log("datos recuperados ", info)
+    console.log("datos recuperados ", info);
     form.resetFields(["FECHAsINI"]);
     const fechaEventoInicio = moment(record.FECHA_INICIO);
     const fechaEventoFin = moment(record.FECHA_FIN);
     console.log("El valor de los datos es", record);
     const horaEvento = moment(record.HORA, "HH:mm:ss");
-    const TIPO = record.TIPO_EVENTO;
     setVerImagen(record.AFICHE);
-    
+    const organizadores = record.ORGANIZADORES.map((organizador) => organizador.nombre);
+    const patrocinadores = record.AUSPICIADORES.map((auspiciador) => auspiciador.nombre);
     const datos = {
       TITULO: record.TITULO,
-      TIPO_EVENTO: TIPO,
+      TIPO_EVENTO: record.TIPO_EVENTO,
       UBICACION: record.UBICACION,
       DESCRIPCION: record.DESCRIPCION,
-      ORGANIZADOR: record.organizadores,
-      PATROCINADOR: record.auspiciadores,
+      ORGANIZADOR: organizadores,
+      PATROCINADOR: patrocinadores,
       AFICHE: record.AFICHE,
     };
     form.setFieldsValue({ FECHAsINI: fechaEventoInicio });
     form.setFieldsValue({ FECHAsFIN: fechaEventoFin });
     form.setFieldsValue({ HORAs: horaEvento });
-    form.setFieldsValue({ TIPO_EVENTO: TIPO });
+    form.setFieldsValue({ TIPO_EVENTO: record.TIPO_EVENTO });
     form.setFieldsValue(datos);
     setActual(record.TITULO);
     setId(record.id);
@@ -247,20 +244,17 @@ export default function EditarEvento() {
       },
       onCancel() {},
     });
-    //setIsModalOpenEdit(false);
-    //setFileList([])
-    //form.resetFields();
   };
 
   const validarTipo = (tipo) => {
     if (tipo >= 1 && tipo <= 7) {
-      if (tipo === "1") return "Estilo ICPC";
-      if (tipo === "2") return "Estilo Libre";
+      if (tipo === "1") return "Competencia estilo ICPC";
+      if (tipo === "2") return "Competencia estilo libre";
       if (tipo === "3") return "Taller de programación";
-      if (tipo === "4") return "Sesión de reclutamiento";
-      if (tipo === "5") return "Torneos de programación";
-      if (tipo === "6") return "Entrenamientos";
-      if (tipo === "7") return "Otros";
+      if (tipo === "4") return "Entrenamiento";
+      if (tipo === "5") return "Reclutamiento";
+      if (tipo === "6") return "Torneo";
+      if (tipo === "7") return "Otro";
     }
     return tipo;
   };
@@ -546,11 +540,11 @@ export default function EditarEvento() {
                 options={[
                   {
                     value: "1",
-                    label: "Estilo ICPC",
+                    label: "Competencia estilo ICPC",
                   },
                   {
                     value: "2",
-                    label: "Estilo libre",
+                    label: "Competencia estilo libre",
                   },
                   {
                     value: "3",
@@ -558,19 +552,19 @@ export default function EditarEvento() {
                   },
                   {
                     value: "4",
-                    label: "Sesión de reclutamiento",
+                    label: "Entrenamiento",
                   },
                   {
                     value: "5",
-                    label: "Torneos de programación",
+                    label: "Reclutamiento",
                   },
                   {
                     value: "6",
-                    label: "Entrenamientos",
+                    label: "Torneo",
                   },
                   {
                     value: "7",
-                    label: "Otros",
+                    label: "Otro",
                   },
                 ]}
               />
