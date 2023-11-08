@@ -52,15 +52,7 @@ export default function Evento() {
   };
 
   function showInfo(record) {
-    const id = record.id_evento;
-    axios
-      .get(`http://localhost:8000/api/evento/${id}`)
-      .then((response) => {
-        setInfo(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    setInfo(record);
     setVerImagen(record.AFICHE);
     console.log("Informacion obtenida de show ", info);
     setIsModalOpen(true);
@@ -140,7 +132,7 @@ export default function Evento() {
             <p>{info.TITULO}</p>
             <br />
             <h3>Tipo :</h3>
-            {info.TIPO_EVENTO && <p>{info.TIPO_EVENTO.nombre}</p>}
+            <p>{info.TIPO_EVENTO }</p>
             <br />
             <h3>Fecha inicio:</h3>
             <p>{info.FECHA_INICIO}</p>

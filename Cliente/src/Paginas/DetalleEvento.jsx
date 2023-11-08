@@ -14,6 +14,7 @@ import {
   Slider,
   message,
   Upload,
+  Tabs,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
@@ -23,6 +24,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
+const { TabPane } = Tabs;
 const { Column } = Table;
 const { confirm } = Modal;
 
@@ -61,6 +63,12 @@ export default function DetalleEvento() {
   const [verHoraReserva, setVerHoraReserva] = useState(false);
   const [selectionType, setSelectionType] = useState("checkbox");
   const [selectedRows, setSelectedRows] = useState([]);
+  const [mostrarPestanias, setMostrarPestanias] = useState(false);
+  const [activeTab, setActiveTab] = useState("1");
+  const [formularioSegundaPestana, setFormularioSegundaPestana] =
+    useState(null);
+    const [formularioPrimeraPestana, setFormularioPrimeraPestana] =
+    useState(null);
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -100,26 +108,207 @@ export default function DetalleEvento() {
         console.error(error);
       });
   };
-  //Verificar cual es el tipo de evento
   const showDetalle = (record) => {
     const tipoEvento = record.TIPO_EVENTO;
     console.log("El tipo de evento es ", tipoEvento);
-    if (tipoEvento === 'Competencia estilo ICPC') {
-      setVerICPC(true);
-    } else if (tipoEvento === 'Competencia estilo libre') {
-      setVerLibre(true);
-    } else if (tipoEvento === 'Taller de Programacion') {
-      setVerProgramacion(true);
-    } else if (tipoEvento === 'Entrenamiento') {
-      setVerEntenamiento(true);
-    } else if (tipoEvento === 'Reclutamiento') {
-      setVerReclutamiento(true);
-    } else if (tipoEvento === 'Torneo') {
-      setVerTorneo(true);
-    } else if (tipoEvento === 'Otro') {
-      setVerOtros(true);
-    }
-
+    setMostrarPestanias(true); // Abre el Modal
+    setFormularioPrimeraPestana(
+      <Form>
+      <Form.Item label="Nombre de la etapa">
+        <Input placeholder="Ingrese el nombre de la etapa" />
+      </Form.Item>
+      <Form.Item label="Modalidad de la etapa">
+        <Radio.Group onChange={onChangeEtapa} value={value7}>
+          <Radio value={1}>En linea</Radio>
+          <Radio value={2}>Presencial</Radio>
+        </Radio.Group>
+      </Form.Item>
+      <Form.Item label="Fecha de etapa">
+        <DatePicker placeholder="Seleccione la fecha de la etapa" />
+      </Form.Item>
+      <Form.Item label="Ubicación">
+        <Select
+          allowClear
+          options={[
+            {
+              value: "1",
+              label: "Auditorio",
+            },
+            {
+              value: "2",
+              label: "Laboratorio 1",
+            },
+            {
+              value: "3",
+              label: "Laboratorio 2",
+            },
+          ]}
+        />
+      </Form.Item>
+      <Form.Item>
+        <Button onClick={reservarHora}>Reservar hora</Button>
+        <Input></Input>
+      </Form.Item>
+    </Form>
+    )
+    // Configura el formulario para la segunda pestaña basado en el tipo de evento
+    if (tipoEvento === "Competencia estilo ICPC") {
+      setFormularioSegundaPestana(
+        <Form>
+          <div className="modal-icpc">
+            <div className="columna1-icpc">
+              <Form.Item label="Modalidad">
+                <Radio.Group onChange={onChangeICPC} value={value}>
+                  <Radio value={1}>Interno</Radio>
+                  <Radio value={2}>Abierto</Radio>
+                </Radio.Group>
+              </Form.Item>
+              <Form.Item label="Fecha límite de inscripción">
+                <DatePicker
+                  style={{ width: "180px" }}
+                  placeholder="Selecione una fecha"
+                />
+              </Form.Item>
+              <Form.Item label="Dirigido a">
+                <Select
+                  allowClear
+                  options={[
+                    {
+                      value: "1",
+                      label: "Universitarios",
+                    },
+                    {
+                      value: "2",
+                      label: "Colegio",
+                    },
+                    {
+                      value: "3",
+                      label: "Profesionales",
+                    },
+                    {
+                      value: "4",
+                      label: "Técnico",
+                    },
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item label="Cupos">
+                <Slider min={5} max={100} />
+              </Form.Item>
+              <Form.Item label="Bases del evento reglas y premios">
+                <Upload
+                  {...uploadProps}
+                  customRequest={customRequest}
+                  listType="picture-card"
+                  onPreview={handlePreview}
+                  onChange={handleChange}
+                  fileList={fileList}
+                  maxCount={1}
+                >
+                  {fileList.length >= 1 ? null : uploadButton}
+                </Upload>
+                <Modal
+                  open={previewOpen}
+                  title={previewTitle}
+                  footer={null}
+                  onCancel={handleCancelIMG}
+                >
+                  <img
+                    alt="example"
+                    style={{
+                      width: "auto",
+                      height: "300px",
+                    }}
+                    src={previewImage}
+                  />
+                </Modal>
+              </Form.Item>
+            </div>
+            <div>
+              <Form.Item label="Costo">
+                <Input placeholder="Ingrese el costo" />
+              </Form.Item>
+              <label>Añadir etapa</label>
+              <Button type="link" onClick={showEtapa}>
+                <PlusOutlined />
+              </Button>
+              <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
+                <Table
+                  //dataSource={horarios}
+                  pagination={false}
+                  locale={{
+                    emptyText: (
+                      <div style={{ padding: "30px", textAlign: "center" }}>
+                        No hay etapas
+                      </div>
+                    ),
+                  }}
+                >
+                  <Column title="Etapa" dataIndex="etapa" key="etapa" />
+                  <Column
+                    title="Ubicación"
+                    dataIndex="ubicacion"
+                    key="ubicacion"
+                  />
+                  <Column title="Horario" dataIndex="horario" key="horario" />
+                </Table>
+              </Form.Item>
+              <Form.Item label="Requisitos"></Form.Item>
+            </div>
+          </div>
+        </Form>
+      );
+    } else if (tipoEvento === "Entrenamiento") {
+      setFormularioSegundaPestana(
+        <Form>
+          <Form.Item label="Tipo">
+            <Radio.Group onChange={onChangeEntrenamiento} value={value5}>
+              <Radio value={1}>Interno</Radio>
+              <Radio value={2}>Abierto</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Entrenador">
+            <Input placeholder="Ingrese el nombre del entrenador" />
+          </Form.Item>
+          <Form.Item label="Fecha fin de inscripciones">
+            <DatePicker placeholder="Seleccione una fecha" />
+          </Form.Item>
+          <Form.Item label="Categoria">
+            <Select
+              allowClear
+              options={[
+                {
+                  value: "1",
+                  label: "Universitarios",
+                },
+                {
+                  value: "2",
+                  label: "Colegio",
+                },
+                {
+                  value: "3",
+                  label: "Profesionales",
+                },
+                {
+                  value: "4",
+                  label: "Técnico",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item label="Cupos">
+            <Input placeholder="Ingrese el limite de cupos" />
+          </Form.Item>
+          <Form.Item label="Costo">
+            <Input placeholder="Ingrese el costo" />
+          </Form.Item>
+          <Form.Item label="Contactos">
+            <QRCode value="Contactos del evento" />
+          </Form.Item>
+          <Form.Item label="Contenido"></Form.Item>
+        </Form>
+      );
+    } // ... Continúa con el resto de las condiciones para otros tipos de eventos
   };
 
   //Cerrar modal de cada tipo de evento
@@ -365,6 +554,14 @@ export default function DetalleEvento() {
     { key: 20, hora: "5:30 PM", estado: "Ocupado" },
   ];
 
+  function onChangeTabs(key) {
+    setActiveTab(key);
+  }
+
+  const handleCanceDetalle = () => {
+    setMostrarPestanias(false);
+  };
+
   return (
     <div>
       {/*Apartado de la tabla de los eventos creados */}
@@ -429,7 +626,7 @@ export default function DetalleEvento() {
           <div className="modal-icpc">
             <div className="columna1-icpc">
               <Form.Item label="Modalidad">
-                <Radio.Group onChange={onChangeICPC}  value={value}>
+                <Radio.Group onChange={onChangeICPC} value={value}>
                   <Radio value={1}>Interno</Radio>
                   <Radio value={2}>Abierto</Radio>
                 </Radio.Group>
@@ -884,41 +1081,43 @@ export default function DetalleEvento() {
           </Form>,
         ]}
       >
-        <Form.Item label="Nombre de la etapa">
-          <Input placeholder="Ingrese el nombre de la etapa" />
-        </Form.Item>
-        <Form.Item label="Modalidad de la etapa">
-          <Radio.Group onChange={onChangeEtapa} value={value7}>
-            <Radio value={1}>En linea</Radio>
-            <Radio value={2}>Presencial</Radio>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item label="Fecha de etapa">
-          <DatePicker placeholder="Seleccione la fecha de la etapa" />
-        </Form.Item>
-        <Form.Item label="Ubicación">
-          <Select
-            allowClear
-            options={[
-              {
-                value: "1",
-                label: "Auditorio",
-              },
-              {
-                value: "2",
-                label: "Laboratorio 1",
-              },
-              {
-                value: "3",
-                label: "Laboratorio 2",
-              },
-            ]}
-          />
-        </Form.Item>
-        <Form.Item>
-          <Button onClick={reservarHora}>Reservar hora</Button>
-          <Input></Input>
-        </Form.Item>
+        <Form>
+          <Form.Item label="Nombre de la etapa">
+            <Input placeholder="Ingrese el nombre de la etapa" />
+          </Form.Item>
+          <Form.Item label="Modalidad de la etapa">
+            <Radio.Group onChange={onChangeEtapa} value={value7}>
+              <Radio value={1}>En linea</Radio>
+              <Radio value={2}>Presencial</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Fecha de etapa">
+            <DatePicker placeholder="Seleccione la fecha de la etapa" />
+          </Form.Item>
+          <Form.Item label="Ubicación">
+            <Select
+              allowClear
+              options={[
+                {
+                  value: "1",
+                  label: "Auditorio",
+                },
+                {
+                  value: "2",
+                  label: "Laboratorio 1",
+                },
+                {
+                  value: "3",
+                  label: "Laboratorio 2",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button onClick={reservarHora}>Reservar hora</Button>
+            <Input></Input>
+          </Form.Item>
+        </Form>
       </Modal>
 
       {/*Modal para elegir las horas q se quiere reservar */}
@@ -955,6 +1154,30 @@ export default function DetalleEvento() {
             key="estado"
           />
         </Table>
+      </Modal>
+
+      {/*Modal para mostrar las pestañas */}
+      <Modal open={mostrarPestanias} onCancel={handleCanceDetalle} width={1000}>
+        <Tabs
+          onChange={onChangeTabs}
+          className="pestanias"
+          type="card"
+          width={1000}
+          activeKey={activeTab}
+        >
+          <TabPane tab={<span style={{ color: "black" }}>Tab 1</span>} key="1">
+            <div
+              className={`contenido ${activeTab === "1" ? "color1" : ""}`}
+            >
+              {formularioPrimeraPestana}
+            </div>
+          </TabPane>
+          <TabPane tab={<span style={{ color: "black" }}>Tab 2</span>} key="2">
+            <div className={`contenido ${activeTab === "2" ? "color2" : ""}`}>
+              {formularioSegundaPestana}
+            </div>
+          </TabPane>
+        </Tabs>
       </Modal>
     </div>
   );
