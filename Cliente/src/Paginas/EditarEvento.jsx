@@ -63,6 +63,8 @@ export default function EditarEvento() {
   const [selectedValues, setSelectedValues] = useState([]);
   const [listaPatrocinador, setListaPatrocinador] = useState([]);
   const [obtenerPatrocinadores, setObtenerPatrocinadores] = useState([]);
+  const [organizadoresRecuperados, setOrganizadoresRecuperados] = useState([]);
+  const [patrocinadorRecuperados, setPatrocinadorRecuperados] = useState([]);
 
   //Obtener datos de la base de datos
   useEffect(() => {
@@ -181,15 +183,18 @@ export default function EditarEvento() {
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const showEdit = (record) => {
-    console.log("datos recuperados ", info);
+    console.log("datos recuperados ", record);
     form.resetFields(["FECHAsINI"]);
     const fechaEventoInicio = moment(record.FECHA_INICIO);
     const fechaEventoFin = moment(record.FECHA_FIN);
-    console.log("El valor de los datos es", record);
     const horaEvento = moment(record.HORA, "HH:mm:ss");
     setVerImagen(record.AFICHE);
-    const organizadores = record.ORGANIZADORES.map((organizador) => organizador.nombre);
-    const patrocinadores = record.AUSPICIADORES.map((auspiciador) => auspiciador.nombre);
+    const organizadores = record.ORGANIZADORES.map(
+      (organizador) => organizador.nombre
+    );
+    const patrocinadores = record.AUSPICIADORES.map(
+      (auspiciador) => auspiciador.nombre
+    );
     const datos = {
       TITULO: record.TITULO,
       TIPO_EVENTO: record.TIPO_EVENTO,
@@ -205,12 +210,21 @@ export default function EditarEvento() {
     form.setFieldsValue({ TIPO_EVENTO: record.TIPO_EVENTO });
     form.setFieldsValue(datos);
     setActual(record.TITULO);
-    setId(record.id);
+    setId(record.id_evento);
+
+    const organizadoresBD = record.ORGANIZADORES.map(
+      (organizador) => organizador.id
+    );
+    const patrocinadoresBD = record.AUSPICIADORES.map(
+      (patrocinador) => patrocinador.id
+    );
+
+    setOrganizadoresRecuperados(organizadoresBD);
+    setPatrocinadorRecuperados(patrocinadoresBD);
     setIsModalOpenEdit(true);
   };
 
   const onFinish = (values) => {
-    console.log("Valores del formulario:", values);
     actualizarEvento(values);
   };
 
@@ -241,6 +255,9 @@ export default function EditarEvento() {
 
       onOk() {
         setIsModalOpenEdit(false);
+        setListaPatrocinador([]);
+        setListaOrganizador([]);
+        setFileList([]);
       },
       onCancel() {},
     });
@@ -248,36 +265,56 @@ export default function EditarEvento() {
 
   const validarTipo = (tipo) => {
     if (tipo >= 1 && tipo <= 7) {
-      if (tipo === "1") return "Competencia estilo ICPC";
-      if (tipo === "2") return "Competencia estilo libre";
-      if (tipo === "3") return "Taller de programación";
-      if (tipo === "4") return "Entrenamiento";
-      if (tipo === "5") return "Reclutamiento";
-      if (tipo === "6") return "Torneo";
-      if (tipo === "7") return "Otro";
+      return tipo;
+    } else {
+      if (tipo === "Competencia estilo ICPC") {
+        return "1";
+      } else if (tipo === "Competencia estilo libre") {
+        return "2";
+      } else if (tipo === "Taller de programación") {
+        return "3";
+      } else if (tipo === "Entrenamiento") {
+        return "4";
+      } else if (tipo === "Reclutamiento") {
+        return "5";
+      } else if (tipo === "Torneo") {
+        return "6";
+      } else if (tipo === "Otro") {
+        return "7";
+      } else {
+        return "Tipo desconocido";
+      }
     }
-    return tipo;
   };
 
   const datosEvento = (values) => {
+    let organizadores = [];
+    let patrocinadores = [];
     const fecha = values.FECHAsINI;
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
     const fecha_fin = values.FECHAsFIN;
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
-    const hora = values.HORAs;
-    const NUEVAHORA = hora.format("HH:mm:ss");
     const TIPO = validarTipo(values.TIPO_EVENTO);
+    console.log("el id de los organizadores es ", values.ORGANIZADOR);
+    if (listaOrganizador.length === 0) {
+      organizadores = organizadoresRecuperados;
+    } else {
+      organizadores.push(...listaOrganizador[listaOrganizador.length - 1]);
+    }
 
+    if (listaPatrocinador.length === 0) {
+      patrocinadores = patrocinadorRecuperados;
+    } else {
+      patrocinadores.push(...listaPatrocinador[listaPatrocinador.length - 1]);
+    }
     const datos = {
       TITULO: values.TITULO,
-      TIPO_EVENTO: TIPO,
+      id_tipo_evento: TIPO,
       FECHA_INICIO: NUEVAFECHA_INICIO,
       FECHA_FIN: NUEVAFECHA_FIN,
-      HORA: NUEVAHORA,
-      UBICACION: values.UBICACION,
       DESCRIPCION: values.DESCRIPCION,
-      ORGANIZADOR: values.ORGANIZADOR,
-      PATROCINADOR: values.PATROCINADOR,
+      organizadores: organizadores,
+      auspiciadores: patrocinadores,
       AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
     return datos;
@@ -307,7 +344,9 @@ export default function EditarEvento() {
   function actualizar(values, id) {
     const duplicado = validarDuplicado(values);
     const datos = datosEvento(values);
+    console.log("Valores del formulario:", datos);
     console.log("El valor de duplicado es ", duplicado);
+    console.log("el id es ", id);
     if (duplicado === true) {
       console.log(
         "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
@@ -322,6 +361,9 @@ export default function EditarEvento() {
           message.success("El evento se actualizó correctamente");
           obtenerDatos();
           setIsModalOpenEdit(false);
+          setFileList([]);
+          setListaPatrocinador([]);
+          setListaOrganizador([]);
         })
         .catch((error) => {
           console.log(error);
@@ -392,6 +434,13 @@ export default function EditarEvento() {
     return Promise.resolve();
   }
 
+  const options = [];
+  for (let i = 10; i < 36; i++) {
+    options.push({
+      label: i.toString(36) + i,
+      value: i.toString(36) + i,
+    });
+  }
   const handleChangeOrganizador = (value) => {
     const nuevaListaOrganizador = [...listaOrganizador];
     let idOrganizador = [];
