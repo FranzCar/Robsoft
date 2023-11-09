@@ -43,5 +43,15 @@ class PersonaController extends Controller
         // Retornar la instancia de la persona para su uso posterior
         return $persona;
     }
+
+    public function listParticipantes(Request $request) {
+        $participantes = Persona::select('id_persona', 'nombre', 'ci','correo_electronico')
+                        ->whereHas('RolPersona', function($query) {
+                         $query->where('id_roles', 6);
+                        })
+                         ->get();
+
+        return $participantes;           
+    }
 }
 

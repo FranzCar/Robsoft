@@ -24,7 +24,7 @@ Route::get('eventos-mostrar', [EventoController::class, 'getEventosMostrar']);
 Route::patch('quitar-evento/{id}', [EventoController::class, 'QuitarEvento']);
 Route::get('actualizar-estado',[EventoController::class, 'actualizarEstadoTodos']);
 Route::post('guardar-participante',[PersonaController::class, 'guardarEstudiante']);
-//Route::get('lista-participantes',[ParticipanteController::class, 'listParticipantes']);
+Route::get('lista-participantes',[PersonaController::class, 'listParticipantes']);
 //Route::post('guardar-equipo',[EquipoController::class, 'store']);
 Route::get('eventos-modificables', [EventoController::class, 'getEventosEnEspera']);
 //Route::get('lista-equipos',[EquipoController::class, 'listaEquipos']);
