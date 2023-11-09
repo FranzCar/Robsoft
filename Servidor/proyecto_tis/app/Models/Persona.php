@@ -12,4 +12,8 @@ class Persona extends Model
     protected $primaryKey = 'id_persona';
     public $incrementing = true;
     use HasFactory;
+    
+    public function RolPersona() {
+        return $this->hasMany(RolPersona::class, 'id_persona');
+    }
 }
