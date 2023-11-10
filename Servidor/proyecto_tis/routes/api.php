@@ -32,3 +32,5 @@ Route::get('lista-organizadores',[RolPersonaController::class, 'listaOrganizador
 Route::get('lista-coach',[RolPersonaController::class, 'listaCoach']);
 Route::get('lista-auspiciadores',[AuspiciadorController::class, 'listaAuspiciadores']);
 Route::get('lista-instituciones',[InstitucionController::class, 'listaInstitucion']);
+Route::post('detallar-evento/{id}',[EventoController::class, 'guardarCaracteristicasEvento']);
+Route::get('lista-facilitadores',[RolPersonaController::class, 'listaFacilitadores']);

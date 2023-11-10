@@ -28,6 +28,11 @@ class Evento extends Model
         // Asumiendo que tienes un modelo para RolPersona
         return $this->belongsToMany(RolPersona::class, 'ROL_PERSONA_EN_EVENTO', 'id_evento', 'id_rol_persona');
     }
+    public function facilitador()
+    {
+        return $this->belongsTo(RolPersona::class, 'ROL_PERSONA_EN_EVENTO', 'id_evento', 'id_rol_persona');
+    }
+
 
     // ...
 }
