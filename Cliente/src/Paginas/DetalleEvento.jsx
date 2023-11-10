@@ -67,7 +67,7 @@ export default function DetalleEvento() {
   const [activeTab, setActiveTab] = useState("1");
   const [formularioSegundaPestana, setFormularioSegundaPestana] =
     useState(null);
-    const [formularioPrimeraPestana, setFormularioPrimeraPestana] =
+  const [formularioPrimeraPestana, setFormularioPrimeraPestana] =
     useState(null);
 
   const rowSelection = {
@@ -108,50 +108,52 @@ export default function DetalleEvento() {
         console.error(error);
       });
   };
+
+  //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
     const tipoEvento = record.TIPO_EVENTO;
     console.log("El tipo de evento es ", tipoEvento);
-    setMostrarPestanias(true); // Abre el Modal
+    setMostrarPestanias(true); 
+    //Se asigna el form de Etapas a la primera pestaña
     setFormularioPrimeraPestana(
       <Form>
-      <Form.Item label="Nombre de la etapa">
-        <Input placeholder="Ingrese el nombre de la etapa" />
-      </Form.Item>
-      <Form.Item label="Modalidad de la etapa">
-        <Radio.Group onChange={onChangeEtapa} value={value7}>
-          <Radio value={1}>En linea</Radio>
-          <Radio value={2}>Presencial</Radio>
-        </Radio.Group>
-      </Form.Item>
-      <Form.Item label="Fecha de etapa">
-        <DatePicker placeholder="Seleccione la fecha de la etapa" />
-      </Form.Item>
-      <Form.Item label="Ubicación">
-        <Select
-          allowClear
-          options={[
-            {
-              value: "1",
-              label: "Auditorio",
-            },
-            {
-              value: "2",
-              label: "Laboratorio 1",
-            },
-            {
-              value: "3",
-              label: "Laboratorio 2",
-            },
-          ]}
-        />
-      </Form.Item>
-      <Form.Item>
-        <Button onClick={reservarHora}>Reservar hora</Button>
-        <Input></Input>
-      </Form.Item>
-    </Form>
-    )
-    // Configura el formulario para la segunda pestaña basado en el tipo de evento
+        <Form.Item label="Nombre de la etapa">
+          <Input placeholder="Ingrese el nombre de la etapa" />
+        </Form.Item>
+        <Form.Item label="Modalidad de la etapa">
+          <Radio.Group onChange={onChangeEtapa} value={value7}>
+            <Radio value={1}>En linea</Radio>
+            <Radio value={2}>Presencial</Radio>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item label="Fecha de etapa">
+          <DatePicker placeholder="Seleccione la fecha de la etapa" />
+        </Form.Item>
+        <Form.Item label="Ubicación">
+          <Select
+            allowClear
+            options={[
+              {
+                value: "1",
+                label: "Auditorio",
+              },
+              {
+                value: "2",
+                label: "Laboratorio 1",
+              },
+              {
+                value: "3",
+                label: "Laboratorio 2",
+              },
+            ]}
+          />
+        </Form.Item>
+        <Form.Item>
+          <Button onClick={reservarHora}>Reservar hora</Button>
+          <Input></Input>
+        </Form.Item>
+      </Form>
+    );
     if (tipoEvento === "Competencia estilo ICPC") {
       setFormularioSegundaPestana(
         <Form>
@@ -258,6 +260,105 @@ export default function DetalleEvento() {
           </div>
         </Form>
       );
+    } else if (tipoEvento === "Competencia estilo libre") {
+      setFormularioSegundaPestana(
+        <Form>
+          <Form.Item label="Tipo">
+            <Radio.Group onChange={onChangeLibre} value={value2}>
+              <Radio value={1}>Interno</Radio>
+              <Radio value={2}>Abierto</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Fecha fin de inscripciones">
+            <DatePicker placeholder="Seleccione una fecha" />
+          </Form.Item>
+          <Form.Item label="Categoria">
+            <Select
+              allowClear
+              options={[
+                {
+                  value: "1",
+                  label: "Universitarios",
+                },
+                {
+                  value: "2",
+                  label: "Colegio",
+                },
+                {
+                  value: "3",
+                  label: "Profesionales",
+                },
+                {
+                  value: "4",
+                  label: "Técnico",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item label="Cupos">
+            <Input placeholder="Ingrese el limite de cupos" />
+          </Form.Item>
+          <Form.Item label="Costo">
+            <Input placeholder="Ingrese el costo" />
+          </Form.Item>
+          <Form.Item label="Contactos">
+            <QRCode value="Contactos del evento" />
+          </Form.Item>
+          <Form.Item label="Reglas"></Form.Item>
+          <Form.Item label="Premios"></Form.Item>
+          <Form.Item label="Requisitos"></Form.Item>
+        </Form>
+      );
+    } else if (tipoEvento === "Taller de programacion") {
+      setFormularioSegundaPestana(
+        <Form>
+          <Form.Item label="Tipo">
+            <Radio.Group onChange={onChangeTaller} value={value3}>
+              <Radio value={1}>Interno</Radio>
+              <Radio value={2}>Abierto</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Fecha fin de inscripciones">
+            <DatePicker placeholder="Seleccione una fecha" />
+          </Form.Item>
+          <Form.Item label="Categoria">
+            <Select
+              allowClear
+              options={[
+                {
+                  value: "1",
+                  label: "Universitarios",
+                },
+                {
+                  value: "2",
+                  label: "Colegio",
+                },
+                {
+                  value: "3",
+                  label: "Profesionales",
+                },
+                {
+                  value: "4",
+                  label: "Técnico",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item label="Cupos">
+            <Input placeholder="Ingrese el limite de cupos" />
+          </Form.Item>
+          <Form.Item label="Costo">
+            <Input placeholder="Ingrese el costo" />
+          </Form.Item>
+          <Form.Item label="Facilitador">
+            <Input placeholder="Ingrese el nombre del facilitador" />
+          </Form.Item>
+          <Form.Item label="Contactos">
+            <QRCode value="Contactos del evento" />
+          </Form.Item>
+          <Form.Item label="Contenido"></Form.Item>
+        </Form>
+      );
     } else if (tipoEvento === "Entrenamiento") {
       setFormularioSegundaPestana(
         <Form>
@@ -308,7 +409,158 @@ export default function DetalleEvento() {
           <Form.Item label="Contenido"></Form.Item>
         </Form>
       );
-    } // ... Continúa con el resto de las condiciones para otros tipos de eventos
+    } else if (tipoEvento === "Reclutamiento") {
+      setFormularioSegundaPestana(
+        <Form>
+          <Form.Item label="Tipo">
+            <Radio.Group onChange={onChangeTorneo} value={value4}>
+              <Radio value={1}>Interno</Radio>
+              <Radio value={2}>Abierto</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Fecha fin de inscripciones">
+            <DatePicker placeholder="Seleccione una fecha" />
+          </Form.Item>
+          <Form.Item label="Categoria">
+            <Select
+              allowClear
+              options={[
+                {
+                  value: "1",
+                  label: "Universitarios",
+                },
+                {
+                  value: "2",
+                  label: "Colegio",
+                },
+                {
+                  value: "3",
+                  label: "Profesionales",
+                },
+                {
+                  value: "4",
+                  label: "Técnico",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item label="Cupos">
+            <Input placeholder="Ingrese el limite de cupos" />
+          </Form.Item>
+          <Form.Item label="Costo">
+            <Input placeholder="Ingrese el costo" />
+          </Form.Item>
+          <Form.Item label="Contactos">
+            <QRCode value="Contactos del evento" />
+          </Form.Item>
+          <Form.Item label="Reglas"></Form.Item>
+          <Form.Item label="Premios"></Form.Item>
+          <Form.Item label="Requisitos"></Form.Item>
+        </Form>
+      );
+    } else if (tipoEvento === "Torneo") {
+      setFormularioSegundaPestana(
+        <Form>
+          <Form.Item label="Tipo">
+            <Radio.Group onChange={onChangeTorneo} value={value4}>
+              <Radio value={1}>Interno</Radio>
+              <Radio value={2}>Abierto</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Fecha fin de inscripciones">
+            <DatePicker placeholder="Seleccione una fecha" />
+          </Form.Item>
+          <Form.Item label="Categoria">
+            <Select
+              allowClear
+              options={[
+                {
+                  value: "1",
+                  label: "Universitarios",
+                },
+                {
+                  value: "2",
+                  label: "Colegio",
+                },
+                {
+                  value: "3",
+                  label: "Profesionales",
+                },
+                {
+                  value: "4",
+                  label: "Técnico",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item label="Cupos">
+            <Input placeholder="Ingrese el limite de cupos" />
+          </Form.Item>
+          <Form.Item label="Costo">
+            <Input placeholder="Ingrese el costo" />
+          </Form.Item>
+          <Form.Item label="Contactos">
+            <QRCode value="Contactos del evento" />
+          </Form.Item>
+          <Form.Item label="Reglas"></Form.Item>
+          <Form.Item label="Premios"></Form.Item>
+          <Form.Item label="Requisitos"></Form.Item>
+        </Form>
+      );
+    } else if (tipoEvento === "Otro") {
+      setFormularioSegundaPestana(
+        <Form>
+          <Form.Item label="Tipo">
+            <Radio.Group onChange={onChangeOtros} value={value6}>
+              <Radio value={1}>Interno</Radio>
+              <Radio value={2}>Abierto</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Facilitador">
+            <Input placeholder="Ingrese el nombre del facilitador" />
+          </Form.Item>
+          <Form.Item label="Fecha fin de inscripciones">
+            <DatePicker placeholder="Seleccione una fecha" />
+          </Form.Item>
+          <Form.Item label="Categoria">
+            <Select
+              allowClear
+              options={[
+                {
+                  value: "1",
+                  label: "Universitarios",
+                },
+                {
+                  value: "2",
+                  label: "Colegio",
+                },
+                {
+                  value: "3",
+                  label: "Profesionales",
+                },
+                {
+                  value: "4",
+                  label: "Técnico",
+                },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item label="Cupos">
+            <Input placeholder="Ingrese el limite de cupos" />
+          </Form.Item>
+          <Form.Item label="Costo">
+            <Input placeholder="Ingrese el costo" />
+          </Form.Item>
+          <Form.Item label="Contactos">
+            <QRCode value="Contactos del evento" />
+          </Form.Item>
+          <Form.Item label="Contenido"></Form.Item>
+          <Form.Item label="Reglas"></Form.Item>
+          <Form.Item label="Premios"></Form.Item>
+          <Form.Item label="Requisitos"></Form.Item>
+        </Form>
+      );
+    }
   };
 
   //Cerrar modal de cada tipo de evento
@@ -1157,7 +1409,14 @@ export default function DetalleEvento() {
       </Modal>
 
       {/*Modal para mostrar las pestañas */}
-      <Modal open={mostrarPestanias} onCancel={handleCanceDetalle} width={1000}>
+      <Modal
+        open={mostrarPestanias}
+        onCancel={handleCanceDetalle}
+        width={1000}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
+      >
         <Tabs
           onChange={onChangeTabs}
           className="pestanias"
@@ -1165,10 +1424,12 @@ export default function DetalleEvento() {
           width={1000}
           activeKey={activeTab}
         >
-          <TabPane tab={<span style={{ color: "black" }}>Tab 1</span>} key="1">
-            <div
-              className={`contenido ${activeTab === "1" ? "color1" : ""}`}
-            >
+          <TabPane
+            tab={<span style={{ color: "black" }}>Tab 1</span>}
+            key="1"
+            className="tab1"
+          >
+            <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
               {formularioPrimeraPestana}
             </div>
           </TabPane>
