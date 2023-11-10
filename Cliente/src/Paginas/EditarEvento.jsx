@@ -21,10 +21,13 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import moment from "moment";
+import dayjs from "dayjs";
 
 const { Column } = Table;
 const { TextArea } = Input;
 const { confirm } = Modal;
+
+const dateFormat = "YYYY/MM/DD";
 
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -65,6 +68,8 @@ export default function EditarEvento() {
   const [obtenerPatrocinadores, setObtenerPatrocinadores] = useState([]);
   const [organizadoresRecuperados, setOrganizadoresRecuperados] = useState([]);
   const [patrocinadorRecuperados, setPatrocinadorRecuperados] = useState([]);
+  const [fechaInicioBD, setFechaInicioBD] = useState("");
+  const [fechaFinBD, setFechaFinBD] = useState("");
 
   //Obtener datos de la base de datos
   useEffect(() => {
@@ -183,11 +188,7 @@ export default function EditarEvento() {
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const showEdit = (record) => {
-    console.log("datos recuperados ", record);
-    form.resetFields(["FECHAsINI"]);
-    const fechaEventoInicio = moment(record.FECHA_INICIO);
-    const fechaEventoFin = moment(record.FECHA_FIN);
-    const horaEvento = moment(record.HORA, "HH:mm:ss");
+
     setVerImagen(record.AFICHE);
     const organizadores = record.ORGANIZADORES.map(
       (organizador) => organizador.nombre
@@ -204,9 +205,9 @@ export default function EditarEvento() {
       PATROCINADOR: patrocinadores,
       AFICHE: record.AFICHE,
     };
-    form.setFieldsValue({ FECHAsINI: fechaEventoInicio });
-    form.setFieldsValue({ FECHAsFIN: fechaEventoFin });
-    form.setFieldsValue({ HORAs: horaEvento });
+
+    setFechaInicioBD(record.FECHA_INICIO);
+    setFechaFinBD(record.FECHA_FIN)
     form.setFieldsValue({ TIPO_EVENTO: record.TIPO_EVENTO });
     form.setFieldsValue(datos);
     setActual(record.TITULO);
@@ -238,6 +239,7 @@ export default function EditarEvento() {
       centered: "true",
 
       onOk() {
+        console.log("LOs valores del form son : ", values);
         actualizar(values, id);
       },
       onCancel() {},
@@ -295,7 +297,6 @@ export default function EditarEvento() {
     const fecha_fin = values.FECHAsFIN;
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const TIPO = validarTipo(values.TIPO_EVENTO);
-    console.log("el id de los organizadores es ", values.ORGANIZADOR);
     if (listaOrganizador.length === 0) {
       organizadores = organizadoresRecuperados;
     } else {
@@ -315,7 +316,7 @@ export default function EditarEvento() {
       DESCRIPCION: values.DESCRIPCION,
       organizadores: organizadores,
       auspiciadores: patrocinadores,
-      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
+      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : values.AFICHE,
     };
     return datos;
   };
@@ -364,6 +365,8 @@ export default function EditarEvento() {
           setFileList([]);
           setListaPatrocinador([]);
           setListaOrganizador([]);
+          obtenerDatos();
+          obtenerDatosEditar();
         })
         .catch((error) => {
           console.log(error);
@@ -396,6 +399,14 @@ export default function EditarEvento() {
     maxDate.setDate(today.getDate() + 180);
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
+  };
+
+  const disabledDateFin = (current) => {
+    // Obtenemos la fecha seleccionada en "Fecha inicio"
+    const fechaInicioValue = form.getFieldValue("FECHAsINI");
+
+    // Si no hay fecha seleccionada en "Fecha inicio" o la fecha actual es anterior, deshabilitar
+    return !fechaInicioValue || current < fechaInicioValue;
   };
 
   //Restringir las horas
@@ -583,7 +594,17 @@ export default function EditarEvento() {
             >
               <Input maxLength={50} minLength={5}></Input>
             </Form.Item>
-            <Form.Item label="Tipo" name="TIPO_EVENTO" className="titulo-info">
+            <Form.Item
+              label="Tipo"
+              name="TIPO_EVENTO"
+              className="titulo-info"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, seleccione un tipo de evento",
+                },
+              ]}
+            >
               <Select
                 allowClear
                 options={[
@@ -629,6 +650,7 @@ export default function EditarEvento() {
               ]}
             >
               <DatePicker
+                defaultValue={dayjs(fechaInicioBD, dateFormat)}
                 style={{ width: "175px" }}
                 placeholder="Selecciona una fecha"
                 disabledDate={disabledDate}
@@ -645,9 +667,10 @@ export default function EditarEvento() {
               ]}
             >
               <DatePicker
+                defaultValue={dayjs(fechaFinBD, dateFormat)}
                 style={{ width: "175px" }}
                 placeholder="Selecciona una fecha"
-                disabledDate={disabledDate}
+                disabledDate={disabledDateFin}
               />
             </Form.Item>
 
@@ -744,7 +767,7 @@ export default function EditarEvento() {
                 { validator: validarMinimo },
               ]}
             >
-              <TextArea maxLength={300} minLength={5} rows={4} />
+              <TextArea showCount maxLength={300} minLength={5} rows={4} />
             </Form.Item>
           </div>
 
