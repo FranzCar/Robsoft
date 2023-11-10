@@ -18,6 +18,12 @@ class PersonaController extends Controller
             $handler = PersonaCaracteristicasFactory::getHandler('estudiante');
             $handler->guardarCaracteristicas($persona, $request);
 
+            //aqui registramos en ROL_PERSONA
+            DB::table('ROL_PERSONA')->insert([
+                'id_persona' => $persona->id_persona,
+                'id_roles' => 6, //6 es de participante
+            ]);
+
             DB::commit();
             return response()->json(['message' => 'Estudiante guardado con éxito', 'id' => $persona->id_persona]);
         } catch (\Exception $e) {

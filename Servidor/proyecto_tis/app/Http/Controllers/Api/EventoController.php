@@ -3,6 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Evento;
+use App\Models\CaracteristicasTipoEvento;
+use App\Models\CaracteristicaTextoEvento;
+use App\Models\CaracteristicaFechaEvento;
+use App\Models\CaracteristicaIntEvento;
+use App\Models\CaracteristicaDecimalEvento;
+use App\Models\CaracteristicaLongtextEvento;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -312,6 +318,86 @@ public function update(Request $request, $id) {
                     ->get();
 
         return $this->transformarEventos($eventos);
-    }               
+    }
+    public function guardarCaracteristicasEvento(Request $request, $id) {
+        // Encuentra el evento y su tipo
+        $evento = Evento::with('tipoEvento')->findOrFail($id);
+        $tipoEventoId = $evento->id_tipo_evento;
+
+        // Obtener las características asociadas al tipo de evento
+        $caracteristicas = CaracteristicasTipoEvento::where('id_tipo_evento', $tipoEventoId)->with('caracteristicaEvento')->get();
+    
+        // Inicia una transacción de base de datos
+        DB::beginTransaction();
+        try {
+            // Asociar Facilitador al evento
+            if ($request->has('Facilitador')) {
+                $id_rol_persona = $request->input('Facilitador');
+                DB::table('ROL_PERSONA_EN_EVENTO')->insert([
+                    'id_rol_persona' => $id_rol_persona,
+                    'id_evento' => $evento->id_evento, 
+                ]);
+            }
+
+            foreach ($caracteristicas as $caracteristica) {
+                $idCaracteristica = $caracteristica->id_caracteristica_evento;
+                $tipoDato = $caracteristica->caracteristicaEvento->tipo_dato_caracteristica_evento;
+                
+                // Verificar el tipo de dato y guardar en la tabla correspondiente
+                $valor = $request->input('caracteristica_'.$idCaracteristica);
+                if ($valor === null) {
+                    continue; // Si no se envió esta característica, continuar con la siguiente
+                }
+                // Dependiendo del tipo de dato, guarda la característica en la tabla correspondiente
+                switch ($tipoDato) {
+                    case 'longtext':
+                        CaracteristicaLongtextEvento::create([
+                            'valor_longtext_evento' => $valor,
+                            'id_caracteristica_evento' => $caracteristica->id_caracteristica_evento,
+                            'id_evento' => $evento->id_evento,
+                        ]);
+                        break;
+                    case 'decimal':
+                        CaracteristicaDecimalEvento::create([
+                            'valor_decimal_evento' => $valor,
+                            'id_caracteristica_evento' => $caracteristica->id_caracteristica_evento,
+                            'id_evento' => $evento->id_evento,
+                        ]);
+                        break;
+                    case 'varchar':
+                        CaracteristicaTextoEvento::create([
+                            'valor_texto_evento' => $valor,
+                            'id_caracteristica_evento' => $caracteristica->id_caracteristica_evento,
+                            'id_evento' => $evento->id_evento,
+                        ]);
+                        break;
+                    case 'date':
+                        CaracteristicaFechaEvento::create([
+                            'valor_fecha_evento' => $valor,
+                            'id_caracteristica_evento' => $caracteristica->id_caracteristica_evento,
+                            'id_evento' => $evento->id_evento,
+                        ]);
+                        break;
+                    case 'int':
+                        CaracteristicaIntEvento::create([
+                            'valor_int_evento' => $valor,
+                            'id_caracteristica_evento' => $caracteristica->id_caracteristica_evento,
+                            'id_evento' => $evento->id_evento,
+                        ]);
+                        break;
+                    // Añade más casos si hay más tipos de datos
+                }
+            }
+    
+            // Si todo ha ido bien, confirmamos los cambios
+            DB::commit();
+            return response()->json(['message' => 'Características guardadas con éxito']);
+        } catch (\Exception $e) {
+            // Si algo sale mal, revertimos los cambios
+            DB::rollBack();
+            return response()->json(['message' => 'Error al guardar las características', 'error' => $e->getMessage()], 500);
+        }
+    }
+                   
 }
 
