@@ -390,22 +390,46 @@ export default function DetalleEvento() {
           >
             <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
               <Form form={form} className="formEtapas">
-                <Form.Item label="Nombre de la etapa" name="TITULO_ETAPA">
+                <Form.Item label="Nombre de la etapa" name="TITULO_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
                   <Input placeholder="Ingrese el nombre de la etapa" />
                 </Form.Item>
 
-                <Form.Item label="Modalidad de la etapa" name="MODALIDAD_ETAPA">
+                <Form.Item label="Modalidad de la etapa" name="MODALIDAD_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
                   <Radio.Group onChange={onChangeEtapa} value={value7}>
                     <Radio value={1}>En linea</Radio>
                     <Radio value={2}>Presencial</Radio>
                   </Radio.Group>
                 </Form.Item>
 
-                <Form.Item label="Fecha de etapa" name="FECHA_ETAPA">
+                <Form.Item label="Fecha de etapa" name="FECHA_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
                   <DatePicker placeholder="Seleccione la fecha de la etapa" />
                 </Form.Item>
 
-                <Form.Item label="Ubicación" name="UBICACION_ETAPA">
+                <Form.Item label="Ubicación" name="UBICACION_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
                   <Select
                     allowClear
                     options={[
