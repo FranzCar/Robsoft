@@ -271,6 +271,9 @@ export default function DetalleEvento() {
       title: '¿Estás seguro de que quieres cancelar?',
     icon: <ExclamationCircleFilled />,
     content: 'Los cambios se perderán.',
+    okText: 'Si',
+    cancelText: 'No',
+    centered: true,
     onOk(){
     
     setMostrarPestanias(false);
@@ -284,7 +287,7 @@ export default function DetalleEvento() {
     form.resetFields();
   },
   onCancel(){
-    //no hace nada
+    
     },
   });
 };
