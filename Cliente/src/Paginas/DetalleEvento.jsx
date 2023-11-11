@@ -123,6 +123,7 @@ export default function DetalleEvento() {
     return Promise.resolve();
   }
 
+
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
     const tipoEvento = record.TIPO_EVENTO;
@@ -266,6 +267,12 @@ export default function DetalleEvento() {
   }
 
   const handleCanceDetalle = () => {
+    confirm({
+      title: '¿Estás seguro de que quieres cancelar?',
+    icon: <ExclamationCircleFilled />,
+    content: 'Los cambios se perderán.',
+    onOk(){
+    
     setMostrarPestanias(false);
     setMostrarFormEntrenamiento(false);
     setMostrarFormICPC(false);
@@ -274,7 +281,13 @@ export default function DetalleEvento() {
     setMostrarFormReclutamiento(false);
     setMostrarFormTaller(false);
     setMostrarFormTorneo(false);
-  };
+    form.resetFields();
+  },
+  onCancel(){
+    //no hace nada
+    },
+  });
+};
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
