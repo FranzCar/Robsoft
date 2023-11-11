@@ -100,6 +100,29 @@ export default function DetalleEvento() {
       });
   };
 
+  //validar minimo
+  const validarMinimo = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 5) {
+      callback("Ingrese al menos 5 caracteres");
+    } else {
+      callback();
+    }
+  };
+  //validacion de caracteres permitidos en nombre de etapa
+  const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9 ]+$/;
+  function validarCaracteresPermitidos(_, value) {
+    if (value && !caracteresPermitidos.test(value)) {
+      return Promise.reject(
+        'Este campo no acepta caracteres especiales'
+      );
+    }
+    return Promise.resolve();
+  }
+
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
     const tipoEvento = record.TIPO_EVENTO;
@@ -394,10 +417,16 @@ export default function DetalleEvento() {
                   rules={[
                     {
                       required: true,
-                    }
+                      message: "Por favor, ingrese un nombre",
+                    },
+                    {validator: validarMinimo},
+                    {validator: validarCaracteresPermitidos},
                   ]}
                 >
-                  <Input placeholder="Ingrese el nombre de la etapa" />
+                  <Input 
+                  minLength={5}
+                  maxLength={25}
+                  placeholder="Ingrese el nombre de la etapa" />
                 </Form.Item>
 
                 <Form.Item label="Modalidad de la etapa" name="MODALIDAD_ETAPA"
