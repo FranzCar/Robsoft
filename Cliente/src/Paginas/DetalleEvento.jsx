@@ -100,6 +100,30 @@ export default function DetalleEvento() {
       });
   };
 
+  //validar minimo
+  const validarMinimo = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 5) {
+      callback("Ingrese al menos 5 caracteres");
+    } else {
+      callback();
+    }
+  };
+  //validacion de caracteres permitidos en nombre de etapa
+  const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9 ]+$/;
+  function validarCaracteresPermitidos(_, value) {
+    if (value && !caracteresPermitidos.test(value)) {
+      return Promise.reject(
+        'Este campo no acepta caracteres especiales'
+      );
+    }
+    return Promise.resolve();
+  }
+
+
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
     const tipoEvento = record.TIPO_EVENTO;
@@ -243,6 +267,15 @@ export default function DetalleEvento() {
   }
 
   const handleCanceDetalle = () => {
+    confirm({
+      title: '¿Estás seguro de que quieres cancelar?',
+    icon: <ExclamationCircleFilled />,
+    content: 'Los cambios se perderán.',
+    okText: 'Si',
+    cancelText: 'No',
+    centered: true,
+    onOk(){
+    
     setMostrarPestanias(false);
     setMostrarFormEntrenamiento(false);
     setMostrarFormICPC(false);
@@ -251,7 +284,13 @@ export default function DetalleEvento() {
     setMostrarFormReclutamiento(false);
     setMostrarFormTaller(false);
     setMostrarFormTorneo(false);
-  };
+    form.resetFields();
+  },
+  onCancel(){
+    
+    },
+  });
+};
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -390,60 +429,75 @@ export default function DetalleEvento() {
           >
             <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
               <Form form={form} className="formEtapas">
-                <div className="etapas-hora">
-                  <div className="etapas-columna1">
-                    <Form.Item label="Nombre de la etapa" name="TITULO_ETAPA">
-                      <Input placeholder="Ingrese el nombre de la etapa" />
-                    </Form.Item>
+                <Form.Item label="Nombre de la etapa" name="TITULO_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor, ingrese un nombre",
+                    },
+                    {validator: validarMinimo},
+                    {validator: validarCaracteresPermitidos},
+                  ]}
+                >
+                  <Input 
+                  minLength={5}
+                  maxLength={25}
+                  placeholder="Ingrese el nombre de la etapa" />
+                </Form.Item>
 
-                    <Form.Item
-                      label="Modalidad de la etapa"
-                      name="MODALIDAD_ETAPA"
-                    >
-                      <Radio.Group onChange={onChangeEtapa} value={value7}>
-                        <Radio value={1}>En linea</Radio>
-                        <Radio value={2}>Presencial</Radio>
-                      </Radio.Group>
-                    </Form.Item>
+                <Form.Item label="Modalidad de la etapa" name="MODALIDAD_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
+                  <Radio.Group onChange={onChangeEtapa} value={value7}>
+                    <Radio value={1}>En linea</Radio>
+                    <Radio value={2}>Presencial</Radio>
+                  </Radio.Group>
+                </Form.Item>
 
-                    <Form.Item label="Fecha de etapa" name="FECHA_ETAPA">
-                      <DatePicker placeholder="Seleccione la fecha de la etapa" />
-                    </Form.Item>
+                <Form.Item label="Fecha de etapa" name="FECHA_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
+                  <DatePicker placeholder="Seleccione la fecha de la etapa" />
+                </Form.Item>
 
-                    <Form.Item label="Ubicación" name="UBICACION_ETAPA">
-                      <Select
-                        allowClear
-                        options={[
-                          {
-                            value: "1",
-                            label: "Auditorio",
-                          },
-                          {
-                            value: "2",
-                            label: "Laboratorio 1",
-                          },
-                          {
-                            value: "3",
-                            label: "Laboratorio 2",
-                          },
-                        ]}
-                      />
-                    </Form.Item>
-                  </div>
-                  <div className="etapas-columna2">
-                    <Form.Item name="HORA_ETAPA">
-                      <div className="reservar-hora-input">
-                        <div>
-                          <Button onClick={reservarHora}>Reservar hora</Button>
-                        </div>
-                        <div>
-                          <Input ></Input>
-                        </div>
-                      </div>
-                    </Form.Item>
-                    <Table></Table>
-                  </div>
-                </div>
+                <Form.Item label="Ubicación" name="UBICACION_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
+                  <Select
+                    allowClear
+                    options={[
+                      {
+                        value: "1",
+                        label: "Auditorio",
+                      },
+                      {
+                        value: "2",
+                        label: "Laboratorio 1",
+                      },
+                      {
+                        value: "3",
+                        label: "Laboratorio 2",
+                      },
+                    ]}
+                  />
+                </Form.Item>
+
+                <Form.Item name="HORA_ETAPA">
+                  <Button onClick={reservarHora}>Reservar hora</Button>
+                  <Input></Input>
+                </Form.Item>
               </Form>
             </div>
           </TabPane>
