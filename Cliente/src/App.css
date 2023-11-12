@@ -185,7 +185,6 @@
 }
 
 .pestanias{
-    background-color: #9ccaf0;
     border-radius: 8px;
     padding-top: 1%;
     padding-left: 15px;
@@ -193,23 +192,18 @@
     margin-top: -2.1%;
     margin-left: -2.5%;
     margin-right: -2.5%;
+    
 }
-
-
   
 .contenido {
     background-color: #ffff; 
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
     margin-top: -16px;
     border-bottom-right-radius: 8px; 
     border-bottom-left-radius: 8px;
     margin-left: -15px;
 }  
  
-
 /* Estilo para el mensaje de error */
 .ant-form-item-explain-error {
     float: left;
@@ -386,4 +380,11 @@ h3 {
   }
   .columna1-icpc{
     padding-right: 20px;
+  }
+
+  /*Pestaña de etapas*/
+  .formEtapas{
+    padding: 20px ;
+    padding-bottom: 0;
+
   }

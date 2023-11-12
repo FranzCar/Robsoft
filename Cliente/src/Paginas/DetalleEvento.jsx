@@ -39,13 +39,6 @@ const getBase64 = (file) => {
 
 export default function DetalleEvento() {
   const [data, setData] = useState([]);
-  const [verICPC, setVerICPC] = useState(false);
-  const [verLibre, setVerLibre] = useState(false);
-  const [verProgramacion, setVerProgramacion] = useState(false);
-  const [verReclutamiento, setVerReclutamiento] = useState(false);
-  const [verTorneo, setVerTorneo] = useState(false);
-  const [verEntenamiento, setVerEntenamiento] = useState(false);
-  const [verOtros, setVerOtros] = useState(false);
   const [value, setValue] = useState(1);
   const [value2, setValue2] = useState(1);
   const [value3, setValue3] = useState(1);
@@ -53,7 +46,6 @@ export default function DetalleEvento() {
   const [value5, setValue5] = useState(1);
   const [value6, setValue6] = useState(1);
   const [value7, setValue7] = useState(1);
-  const [disabled, setDisabled] = useState(false);
   const handleCancelIMG = () => setPreviewOpen(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -65,17 +57,16 @@ export default function DetalleEvento() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [mostrarPestanias, setMostrarPestanias] = useState(false);
   const [activeTab, setActiveTab] = useState("1");
-  const [formularioSegundaPestana, setFormularioSegundaPestana] =
-    useState(null);
-  const [formularioPrimeraPestana, setFormularioPrimeraPestana] =
-    useState(null);
-
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      // Actualiza el estado con las filas seleccionadas
-      setSelectedRows(selectedRows);
-    },
-  };
+  const [mostrarFormICPC, setMostrarFormICPC] = useState(false);
+  const [mostrarFormLibre, setMostrarFormLibre] = useState(false);
+  const [mostrarFormTaller, setMostrarFormTaller] = useState(false);
+  const [mostrarFormEntrenamiento, setMostrarFormEntrenamiento] =
+    useState(false);
+  const [mostrarFormReclutamiento, setMostrarFormReclutamiento] =
+    useState(false);
+  const [mostrarFormTorneo, setMostrarFormTorneo] = useState(false);
+  const [mostrarFormOtro, setMostrarFormOtro] = useState(false);
+  const [form] = Form.useForm();
 
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
   const customRequest = ({ fileList, onSuccess }) => {
@@ -109,587 +100,50 @@ export default function DetalleEvento() {
       });
   };
 
+  //validar minimo
+  const validarMinimo = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 5) {
+      callback("Ingrese al menos 5 caracteres");
+    } else {
+      callback();
+    }
+  };
+  //validacion de caracteres permitidos en nombre de etapa
+  const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚ0-9 ]+$/;
+  function validarCaracteresPermitidos(_, value) {
+    if (value && !caracteresPermitidos.test(value)) {
+      return Promise.reject(
+        'Este campo no acepta caracteres especiales'
+      );
+    }
+    return Promise.resolve();
+  }
+
+
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
     const tipoEvento = record.TIPO_EVENTO;
     console.log("El tipo de evento es ", tipoEvento);
-    setMostrarPestanias(true); 
-    //Se asigna el form de Etapas a la primera pestaña
-    setFormularioPrimeraPestana(
-      <Form>
-        <Form.Item label="Nombre de la etapa">
-          <Input placeholder="Ingrese el nombre de la etapa" />
-        </Form.Item>
-        <Form.Item label="Modalidad de la etapa">
-          <Radio.Group onChange={onChangeEtapa} value={value7}>
-            <Radio value={1}>En linea</Radio>
-            <Radio value={2}>Presencial</Radio>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item label="Fecha de etapa">
-          <DatePicker placeholder="Seleccione la fecha de la etapa" />
-        </Form.Item>
-        <Form.Item label="Ubicación">
-          <Select
-            allowClear
-            options={[
-              {
-                value: "1",
-                label: "Auditorio",
-              },
-              {
-                value: "2",
-                label: "Laboratorio 1",
-              },
-              {
-                value: "3",
-                label: "Laboratorio 2",
-              },
-            ]}
-          />
-        </Form.Item>
-        <Form.Item>
-          <Button onClick={reservarHora}>Reservar hora</Button>
-          <Input></Input>
-        </Form.Item>
-      </Form>
-    );
+    setMostrarPestanias(true);
     if (tipoEvento === "Competencia estilo ICPC") {
-      setFormularioSegundaPestana(
-        <Form>
-          <div className="modal-icpc">
-            <div className="columna1-icpc">
-              <Form.Item label="Modalidad">
-                <Radio.Group onChange={onChangeICPC} value={value}>
-                  <Radio value={1}>Interno</Radio>
-                  <Radio value={2}>Abierto</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item label="Fecha límite de inscripción">
-                <DatePicker
-                  style={{ width: "180px" }}
-                  placeholder="Selecione una fecha"
-                />
-              </Form.Item>
-              <Form.Item label="Dirigido a">
-                <Select
-                  allowClear
-                  options={[
-                    {
-                      value: "1",
-                      label: "Universitarios",
-                    },
-                    {
-                      value: "2",
-                      label: "Colegio",
-                    },
-                    {
-                      value: "3",
-                      label: "Profesionales",
-                    },
-                    {
-                      value: "4",
-                      label: "Técnico",
-                    },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item label="Cupos">
-                <Slider min={5} max={100} />
-              </Form.Item>
-              <Form.Item label="Bases del evento reglas y premios">
-                <Upload
-                  {...uploadProps}
-                  customRequest={customRequest}
-                  listType="picture-card"
-                  onPreview={handlePreview}
-                  onChange={handleChange}
-                  fileList={fileList}
-                  maxCount={1}
-                >
-                  {fileList.length >= 1 ? null : uploadButton}
-                </Upload>
-                <Modal
-                  open={previewOpen}
-                  title={previewTitle}
-                  footer={null}
-                  onCancel={handleCancelIMG}
-                >
-                  <img
-                    alt="example"
-                    style={{
-                      width: "auto",
-                      height: "300px",
-                    }}
-                    src={previewImage}
-                  />
-                </Modal>
-              </Form.Item>
-            </div>
-            <div>
-              <Form.Item label="Costo">
-                <Input placeholder="Ingrese el costo" />
-              </Form.Item>
-              <label>Añadir etapa</label>
-              <Button type="link" onClick={showEtapa}>
-                <PlusOutlined />
-              </Button>
-              <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                <Table
-                  //dataSource={horarios}
-                  pagination={false}
-                  locale={{
-                    emptyText: (
-                      <div style={{ padding: "30px", textAlign: "center" }}>
-                        No hay etapas
-                      </div>
-                    ),
-                  }}
-                >
-                  <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                  <Column
-                    title="Ubicación"
-                    dataIndex="ubicacion"
-                    key="ubicacion"
-                  />
-                  <Column title="Horario" dataIndex="horario" key="horario" />
-                </Table>
-              </Form.Item>
-              <Form.Item label="Requisitos"></Form.Item>
-            </div>
-          </div>
-        </Form>
-      );
+      setMostrarFormICPC(true);
     } else if (tipoEvento === "Competencia estilo libre") {
-      setFormularioSegundaPestana(
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeLibre} value={value2}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Reglas"></Form.Item>
-          <Form.Item label="Premios"></Form.Item>
-          <Form.Item label="Requisitos"></Form.Item>
-        </Form>
-      );
-    } else if (tipoEvento === "Taller de programacion") {
-      setFormularioSegundaPestana(
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeTaller} value={value3}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Facilitador">
-            <Input placeholder="Ingrese el nombre del facilitador" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Contenido"></Form.Item>
-        </Form>
-      );
+      setMostrarFormLibre(true);
+    } else if (tipoEvento === "Taller de programación") {
+      setMostrarFormTaller(true);
     } else if (tipoEvento === "Entrenamiento") {
-      setFormularioSegundaPestana(
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeEntrenamiento} value={value5}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Entrenador">
-            <Input placeholder="Ingrese el nombre del entrenador" />
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Contenido"></Form.Item>
-        </Form>
-      );
+      setMostrarFormEntrenamiento(true);
     } else if (tipoEvento === "Reclutamiento") {
-      setFormularioSegundaPestana(
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeTorneo} value={value4}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Reglas"></Form.Item>
-          <Form.Item label="Premios"></Form.Item>
-          <Form.Item label="Requisitos"></Form.Item>
-        </Form>
-      );
+      setMostrarFormReclutamiento(true);
     } else if (tipoEvento === "Torneo") {
-      setFormularioSegundaPestana(
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeTorneo} value={value4}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Reglas"></Form.Item>
-          <Form.Item label="Premios"></Form.Item>
-          <Form.Item label="Requisitos"></Form.Item>
-        </Form>
-      );
+      setMostrarFormTorneo(true);
     } else if (tipoEvento === "Otro") {
-      setFormularioSegundaPestana(
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeOtros} value={value6}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Facilitador">
-            <Input placeholder="Ingrese el nombre del facilitador" />
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Contenido"></Form.Item>
-          <Form.Item label="Reglas"></Form.Item>
-          <Form.Item label="Premios"></Form.Item>
-          <Form.Item label="Requisitos"></Form.Item>
-        </Form>
-      );
+      setMostrarFormOtro(true);
     }
-  };
-
-  //Cerrar modal de cada tipo de evento
-  const cerrarICPC = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerICPC(false);
-      },
-      onCancel() {},
-    });
-  };
-
-  const cerrarLibre = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerLibre(false);
-      },
-      onCancel() {},
-    });
-  };
-
-  const cerrarProgramacion = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerProgramacion(false);
-      },
-      onCancel() {},
-    });
-  };
-
-  const cerrarReclutamiento = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerReclutamiento(false);
-      },
-      onCancel() {},
-    });
-  };
-
-  const cerrarTorneo = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerTorneo(false);
-      },
-      onCancel() {},
-    });
-  };
-
-  const cerrarEntrenamiento = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerEntenamiento(false);
-      },
-      onCancel() {},
-    });
-  };
-
-  const cerrarOtros = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerOtros(false);
-      },
-      onCancel() {},
-    });
-  };
-
-  const cerrarEtapa = () => {
-    confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerEtapa(false);
-      },
-      onCancel() {},
-    });
   };
 
   const onChangeICPC = (e) => {
@@ -784,34 +238,87 @@ export default function DetalleEvento() {
   };
 
   const horarios = [
-    { key: 1, hora: "8:00 AM", estado: "Libre" },
-    { key: 2, hora: "8:30 AM", estado: "Ocupado" },
-    { key: 3, hora: "9:00 AM", estado: "Libre" },
-    { key: 4, hora: "9:30 AM", estado: "Libre" },
-    { key: 5, hora: "10:00 AM", estado: "Ocupado" },
-    { key: 6, hora: "10:30 AM", estado: "Ocupado" },
-    { key: 7, hora: "11:00 AM", estado: "Libre" },
-    { key: 8, hora: "11:30 AM", estado: "Ocupado" },
-    { key: 9, hora: "12:00 PM", estado: "Libre" },
-    { key: 10, hora: "12:30 PM", estado: "Libre" },
-    { key: 11, hora: "1:00 PM", estado: "Ocupado" },
-    { key: 12, hora: "1:30 PM", estado: "Ocupado" },
-    { key: 13, hora: "2:00 PM", estado: "Libre" },
-    { key: 14, hora: "2:30 PM", estado: "Ocupado" },
-    { key: 15, hora: "3:00 PM", estado: "Libre" },
-    { key: 16, hora: "3:30 PM", estado: "Ocupado" },
-    { key: 17, hora: "4:00 PM", estado: "Ocupado" },
-    { key: 18, hora: "4:30 PM", estado: "Libre" },
-    { key: 19, hora: "5:00 PM", estado: "Ocupado" },
-    { key: 20, hora: "5:30 PM", estado: "Ocupado" },
+    { key: 1, hora: "8:00 - 8:30 AM", estado: "Libre" },
+    { key: 2, hora: "8:30 - 9:00 AM", estado: "Libre" },
+    { key: 3, hora: "9:00 - 9:30 AM", estado: "Libre" },
+    { key: 4, hora: "9:30 - 10:00 AM", estado: "Libre" },
+    { key: 5, hora: "10:00 - 10:30 AM", estado: "Libre" },
+    { key: 6, hora: "10:30 - 11:00 AM", estado: "Libre" },
+    { key: 7, hora: "11:00 - 11:30 AM", estado: "Libre" },
+    { key: 8, hora: "11:30 - 12:00 PM", estado: "Libre" },
+    { key: 9, hora: "12:00 - 12:30 PM", estado: "Libre" },
+    { key: 10, hora: "12:30 - 1:00 PM", estado: "Libre" },
+    { key: 11, hora: "1:00 - 1:30 PM", estado: "Libre" },
+    { key: 12, hora: "1:30 - 2:00 PM", estado: "Libre" },
+    { key: 13, hora: "2:00 - 2:30 PM", estado: "Libre" },
+    { key: 14, hora: "2:30 - 3:00 PM", estado: "Libre" },
+    { key: 15, hora: "3:00 - 3:30 PM", estado: "Libre" },
+    { key: 16, hora: "3:30 - 4:00 PM", estado: "Libre" },
+    { key: 17, hora: "4:00 - 4:30 PM", estado: "Libre" },
+    { key: 18, hora: "4:30 - 5:00 PM", estado: "Libre" },
+    { key: 19, hora: "5:00 - 5:30 PM", estado: "Libre" },
+    { key: 20, hora: "5:30 - 6:00 PM", estado: "Libre" },
   ];
+
+  // Puedes seguir agregando más objetos a la lista según tus necesidades
 
   function onChangeTabs(key) {
     setActiveTab(key);
   }
 
   const handleCanceDetalle = () => {
+    confirm({
+      title: '¿Estás seguro de que quieres cancelar?',
+    icon: <ExclamationCircleFilled />,
+    content: 'Los cambios se perderán.',
+    okText: 'Si',
+    cancelText: 'No',
+    centered: true,
+    onOk(){
+    
     setMostrarPestanias(false);
+    setMostrarFormEntrenamiento(false);
+    setMostrarFormICPC(false);
+    setMostrarFormLibre(false);
+    setMostrarFormOtro(false);
+    setMostrarFormReclutamiento(false);
+    setMostrarFormTaller(false);
+    setMostrarFormTorneo(false);
+    form.resetFields();
+  },
+  onCancel(){
+    
+    },
+  });
+};
+
+  const rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      setSelectedRows(selectedRows);
+    },
+  };
+
+  const handleGuardarClick = () => {
+    // Aquí puedes utilizar la variable selectedRows que contiene los elementos seleccionados.
+    console.log("Datos seleccionados:", selectedRows);
+
+    // Agrega aquí tu lógica para guardar o procesar los datos según tus necesidades.
+  };
+
+  const showGuardarHoras = (values) => {
+    confirm({
+      title: "¿Desea agregar las horas seleccionadas?",
+      icon: <ExclamationCircleFilled />,
+      content: "",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+
+      onOk() {
+        handleGuardarClick();
+      },
+      onCancel() {},
+    });
   };
 
   return (
@@ -859,527 +366,19 @@ export default function DetalleEvento() {
         />
       </Table>
 
-      {/*MODAL ESTILO ICPC*/}
-      <Modal
-        title="Carateristicas estilo ICPC"
-        open={verICPC}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        width={800}
-        footer={[
-          <Form>
-            <Button onClick={cerrarICPC}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <div className="modal-icpc">
-            <div className="columna1-icpc">
-              <Form.Item label="Modalidad">
-                <Radio.Group onChange={onChangeICPC} value={value}>
-                  <Radio value={1}>Interno</Radio>
-                  <Radio value={2}>Abierto</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item label="Fecha límite de inscripción">
-                <DatePicker
-                  style={{ width: "180px" }}
-                  placeholder="Selecione una fecha"
-                />
-              </Form.Item>
-              <Form.Item label="Dirigido a">
-                <Select
-                  allowClear
-                  options={[
-                    {
-                      value: "1",
-                      label: "Universitarios",
-                    },
-                    {
-                      value: "2",
-                      label: "Colegio",
-                    },
-                    {
-                      value: "3",
-                      label: "Profesionales",
-                    },
-                    {
-                      value: "4",
-                      label: "Técnico",
-                    },
-                  ]}
-                />
-              </Form.Item>
-              <Form.Item label="Cupos">
-                <Slider min={5} max={100} />
-              </Form.Item>
-              <Form.Item label="Bases del evento reglas y premios">
-                <Upload
-                  {...uploadProps}
-                  customRequest={customRequest}
-                  listType="picture-card"
-                  onPreview={handlePreview}
-                  onChange={handleChange}
-                  fileList={fileList}
-                  maxCount={1}
-                >
-                  {fileList.length >= 1 ? null : uploadButton}
-                </Upload>
-                <Modal
-                  open={previewOpen}
-                  title={previewTitle}
-                  footer={null}
-                  onCancel={handleCancelIMG}
-                >
-                  <img
-                    alt="example"
-                    style={{
-                      width: "auto",
-                      height: "300px",
-                    }}
-                    src={previewImage}
-                  />
-                </Modal>
-              </Form.Item>
-            </div>
-            <div>
-              <Form.Item label="Costo">
-                <Input placeholder="Ingrese el costo" />
-              </Form.Item>
-              <label>Añadir etapa</label>
-              <Button type="link" onClick={showEtapa}>
-                <PlusOutlined />
-              </Button>
-              <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                <Table
-                  //dataSource={horarios}
-                  pagination={false}
-                  locale={{
-                    emptyText: (
-                      <div style={{ padding: "30px", textAlign: "center" }}>
-                        No hay etapas
-                      </div>
-                    ),
-                  }}
-                >
-                  <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                  <Column
-                    title="Ubicación"
-                    dataIndex="ubicacion"
-                    key="ubicacion"
-                  />
-                  <Column title="Horario" dataIndex="horario" key="horario" />
-                </Table>
-              </Form.Item>
-              <Form.Item label="Requisitos"></Form.Item>
-            </div>
-          </div>
-        </Form>
-      </Modal>
-
-      {/*MODAL ESTILO LIBRE*/}
-      <Modal
-        title="Estilo Libre"
-        open={verLibre}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form>
-            <Button onClick={cerrarLibre}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeLibre} value={value2}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Reglas"></Form.Item>
-          <Form.Item label="Premios"></Form.Item>
-          <Form.Item label="Requisitos"></Form.Item>
-        </Form>
-      </Modal>
-
-      {/*MODAL TALLER DE PROGRAMACION*/}
-      <Modal
-        title="Taller de programación"
-        open={verProgramacion}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form>
-            <Button onClick={cerrarProgramacion}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeTaller} value={value3}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Facilitador">
-            <Input placeholder="Ingrese el nombre del facilitador" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Contenido"></Form.Item>
-        </Form>
-      </Modal>
-
-      {/*MODAL SESION DE RECLUTAMIENTO*/}
-      <Modal
-        title="Sesión de reclutamiento"
-        open={verReclutamiento}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form>
-            <Button onClick={cerrarReclutamiento}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <Form.Item label="Facilitador">
-            <Input placeholder="Ingrese el nombre del facilitador" />
-          </Form.Item>
-          <Form.Item label="Contenido">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/*MODAL TORNEOS DE PROGRAMACION*/}
-      <Modal
-        title="Torneo de programación"
-        open={verTorneo}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form>
-            <Button onClick={cerrarTorneo}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeTorneo} value={value4}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Reglas"></Form.Item>
-          <Form.Item label="Premios"></Form.Item>
-          <Form.Item label="Requisitos"></Form.Item>
-        </Form>
-      </Modal>
-
-      {/*MODAL ENTRENAMIENTOS*/}
-      <Modal
-        title="Entrenamiento"
-        open={verEntenamiento}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form>
-            <Button onClick={cerrarEntrenamiento}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeEntrenamiento} value={value5}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Entrenador">
-            <Input placeholder="Ingrese el nombre del entrenador" />
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Contenido"></Form.Item>
-        </Form>
-      </Modal>
-
-      {/*MODAL OTROS*/}
-      <Modal
-        title="Otro tipo de evento"
-        open={verOtros}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form>
-            <Button onClick={cerrarOtros}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <Form.Item label="Tipo">
-            <Radio.Group onChange={onChangeOtros} value={value6}>
-              <Radio value={1}>Interno</Radio>
-              <Radio value={2}>Abierto</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Facilitador">
-            <Input placeholder="Ingrese el nombre del facilitador" />
-          </Form.Item>
-          <Form.Item label="Fecha fin de inscripciones">
-            <DatePicker placeholder="Seleccione una fecha" />
-          </Form.Item>
-          <Form.Item label="Categoria">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Universitarios",
-                },
-                {
-                  value: "2",
-                  label: "Colegio",
-                },
-                {
-                  value: "3",
-                  label: "Profesionales",
-                },
-                {
-                  value: "4",
-                  label: "Técnico",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Cupos">
-            <Input placeholder="Ingrese el limite de cupos" />
-          </Form.Item>
-          <Form.Item label="Costo">
-            <Input placeholder="Ingrese el costo" />
-          </Form.Item>
-          <Form.Item label="Contactos">
-            <QRCode value="Contactos del evento" />
-          </Form.Item>
-          <Form.Item label="Contenido"></Form.Item>
-          <Form.Item label="Reglas"></Form.Item>
-          <Form.Item label="Premios"></Form.Item>
-          <Form.Item label="Requisitos"></Form.Item>
-        </Form>
-      </Modal>
-
-      {/*Modal añadir etapa*/}
-      <Modal
-        title="Añadir etapa"
-        open={verEtapa}
-        footer={[
-          <Form>
-            <Button onClick={cerrarEtapa}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
-          </Form>,
-        ]}
-      >
-        <Form>
-          <Form.Item label="Nombre de la etapa">
-            <Input placeholder="Ingrese el nombre de la etapa" />
-          </Form.Item>
-          <Form.Item label="Modalidad de la etapa">
-            <Radio.Group onChange={onChangeEtapa} value={value7}>
-              <Radio value={1}>En linea</Radio>
-              <Radio value={2}>Presencial</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Fecha de etapa">
-            <DatePicker placeholder="Seleccione la fecha de la etapa" />
-          </Form.Item>
-          <Form.Item label="Ubicación">
-            <Select
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Auditorio",
-                },
-                {
-                  value: "2",
-                  label: "Laboratorio 1",
-                },
-                {
-                  value: "3",
-                  label: "Laboratorio 2",
-                },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button onClick={reservarHora}>Reservar hora</Button>
-            <Input></Input>
-          </Form.Item>
-        </Form>
-      </Modal>
-
       {/*Modal para elegir las horas q se quiere reservar */}
       <Modal
         title="??"
         open={verHoraReserva}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
         footer={[
           <Form>
             <Button onClick={cerrarReservaHora}>Cancelar</Button>
-            <Button type="primary">Guardar</Button>
+            <Button type="primary" onClick={showGuardarHoras}>
+              Agregar
+            </Button>
           </Form>,
         ]}
       >
@@ -1420,22 +419,501 @@ export default function DetalleEvento() {
         <Tabs
           onChange={onChangeTabs}
           className="pestanias"
-          type="card"
           width={1000}
           activeKey={activeTab}
         >
           <TabPane
-            tab={<span style={{ color: "black" }}>Tab 1</span>}
+            tab={<span style={{ color: "black" }}>Etapas</span>}
             key="1"
             className="tab1"
           >
             <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
-              {formularioPrimeraPestana}
+              <Form form={form} className="formEtapas">
+                <Form.Item label="Nombre de la etapa" name="TITULO_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor, ingrese un nombre",
+                    },
+                    {validator: validarMinimo},
+                    {validator: validarCaracteresPermitidos},
+                  ]}
+                >
+                  <Input 
+                  minLength={5}
+                  maxLength={25}
+                  placeholder="Ingrese el nombre de la etapa" />
+                </Form.Item>
+
+                <Form.Item label="Modalidad de la etapa" name="MODALIDAD_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
+                  <Radio.Group onChange={onChangeEtapa} value={value7}>
+                    <Radio value={1}>En linea</Radio>
+                    <Radio value={2}>Presencial</Radio>
+                  </Radio.Group>
+                </Form.Item>
+
+                <Form.Item label="Fecha de etapa" name="FECHA_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
+                  <DatePicker placeholder="Seleccione la fecha de la etapa" />
+                </Form.Item>
+
+                <Form.Item label="Ubicación" name="UBICACION_ETAPA"
+                  rules={[
+                    {
+                      required: true,
+                    }
+                  ]}
+                >
+                  <Select
+                    allowClear
+                    options={[
+                      {
+                        value: "1",
+                        label: "Auditorio",
+                      },
+                      {
+                        value: "2",
+                        label: "Laboratorio 1",
+                      },
+                      {
+                        value: "3",
+                        label: "Laboratorio 2",
+                      },
+                    ]}
+                  />
+                </Form.Item>
+
+                <Form.Item name="HORA_ETAPA">
+                  <Button onClick={reservarHora}>Reservar hora</Button>
+                  <Input></Input>
+                </Form.Item>
+              </Form>
             </div>
           </TabPane>
-          <TabPane tab={<span style={{ color: "black" }}>Tab 2</span>} key="2">
+          <TabPane
+            tab={<span style={{ color: "black" }}>Detalles</span>}
+            key="2"
+          >
             <div className={`contenido ${activeTab === "2" ? "color2" : ""}`}>
-              {formularioSegundaPestana}
+              {mostrarFormICPC && (
+                <Form>
+                  <div className="modal-icpc">
+                    <div className="columna1-icpc">
+                      <Form.Item label="Modalidad">
+                        <Radio.Group onChange={onChangeICPC} value={value}>
+                          <Radio value={1}>Interno</Radio>
+                          <Radio value={2}>Abierto</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item label="Fecha límite de inscripción">
+                        <DatePicker
+                          style={{ width: "180px" }}
+                          placeholder="Selecione una fecha"
+                        />
+                      </Form.Item>
+                      <Form.Item label="Dirigido a">
+                        <Select
+                          allowClear
+                          options={[
+                            {
+                              value: "1",
+                              label: "Universitarios",
+                            },
+                            {
+                              value: "2",
+                              label: "Colegio",
+                            },
+                            {
+                              value: "3",
+                              label: "Profesionales",
+                            },
+                            {
+                              value: "4",
+                              label: "Técnico",
+                            },
+                          ]}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Cupos">
+                        <Slider min={5} max={100} />
+                      </Form.Item>
+                      <Form.Item label="Bases del evento reglas y premios">
+                        <Upload
+                          {...uploadProps}
+                          customRequest={customRequest}
+                          listType="picture-card"
+                          onPreview={handlePreview}
+                          onChange={handleChange}
+                          fileList={fileList}
+                          maxCount={1}
+                        >
+                          {fileList.length >= 1 ? null : uploadButton}
+                        </Upload>
+                        <Modal
+                          open={previewOpen}
+                          title={previewTitle}
+                          footer={null}
+                          onCancel={handleCancelIMG}
+                        >
+                          <img
+                            alt="example"
+                            style={{
+                              width: "auto",
+                              height: "300px",
+                            }}
+                            src={previewImage}
+                          />
+                        </Modal>
+                      </Form.Item>
+                    </div>
+                    <div>
+                      <Form.Item label="Costo">
+                        <Input placeholder="Ingrese el costo" />
+                      </Form.Item>
+                      <label>Añadir etapa</label>
+                      <Button type="link" onClick={showEtapa}>
+                        <PlusOutlined />
+                      </Button>
+                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
+                        <Table
+                          //dataSource={horarios}
+                          pagination={false}
+                          locale={{
+                            emptyText: (
+                              <div
+                                style={{ padding: "30px", textAlign: "center" }}
+                              >
+                                No hay etapas
+                              </div>
+                            ),
+                          }}
+                        >
+                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
+                          <Column
+                            title="Ubicación"
+                            dataIndex="ubicacion"
+                            key="ubicacion"
+                          />
+                          <Column
+                            title="Horario"
+                            dataIndex="horario"
+                            key="horario"
+                          />
+                        </Table>
+                      </Form.Item>
+                      <Form.Item label="Requisitos"></Form.Item>
+                    </div>
+                  </div>
+                </Form>
+              )}
+              {mostrarFormLibre && (
+                <Form>
+                  <Form.Item label="Tipo">
+                    <Radio.Group onChange={onChangeLibre} value={value2}>
+                      <Radio value={1}>Interno</Radio>
+                      <Radio value={2}>Abierto</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Form.Item label="Fecha fin de inscripciones">
+                    <DatePicker placeholder="Seleccione una fecha" />
+                  </Form.Item>
+                  <Form.Item label="Categoria">
+                    <Select
+                      allowClear
+                      options={[
+                        {
+                          value: "1",
+                          label: "Universitarios",
+                        },
+                        {
+                          value: "2",
+                          label: "Colegio",
+                        },
+                        {
+                          value: "3",
+                          label: "Profesionales",
+                        },
+                        {
+                          value: "4",
+                          label: "Técnico",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Cupos">
+                    <Input placeholder="Ingrese el limite de cupos" />
+                  </Form.Item>
+                  <Form.Item label="Costo">
+                    <Input placeholder="Ingrese el costo" />
+                  </Form.Item>
+                  <Form.Item label="Contactos">
+                    <QRCode value="Contactos del evento" />
+                  </Form.Item>
+                  <Form.Item label="Reglas"></Form.Item>
+                  <Form.Item label="Premios"></Form.Item>
+                  <Form.Item label="Requisitos"></Form.Item>
+                </Form>
+              )}
+              {mostrarFormTaller && (
+                <Form>
+                  <Form.Item label="Tipo">
+                    <Radio.Group onChange={onChangeTaller} value={value3}>
+                      <Radio value={1}>Interno</Radio>
+                      <Radio value={2}>Abierto</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Form.Item label="Fecha fin de inscripciones">
+                    <DatePicker placeholder="Seleccione una fecha" />
+                  </Form.Item>
+                  <Form.Item label="Categoria">
+                    <Select
+                      allowClear
+                      options={[
+                        {
+                          value: "1",
+                          label: "Universitarios",
+                        },
+                        {
+                          value: "2",
+                          label: "Colegio",
+                        },
+                        {
+                          value: "3",
+                          label: "Profesionales",
+                        },
+                        {
+                          value: "4",
+                          label: "Técnico",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Cupos">
+                    <Input placeholder="Ingrese el limite de cupos" />
+                  </Form.Item>
+                  <Form.Item label="Costo">
+                    <Input placeholder="Ingrese el costo" />
+                  </Form.Item>
+                  <Form.Item label="Facilitador">
+                    <Input placeholder="Ingrese el nombre del facilitador" />
+                  </Form.Item>
+                  <Form.Item label="Contactos">
+                    <QRCode value="Contactos del evento" />
+                  </Form.Item>
+                  <Form.Item label="Contenido"></Form.Item>
+                </Form>
+              )}
+              {mostrarFormEntrenamiento && (
+                <Form>
+                  <Form.Item label="Tipo">
+                    <Radio.Group
+                      onChange={onChangeEntrenamiento}
+                      value={value5}
+                    >
+                      <Radio value={1}>Interno</Radio>
+                      <Radio value={2}>Abierto</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Form.Item label="Entrenador">
+                    <Input placeholder="Ingrese el nombre del entrenador" />
+                  </Form.Item>
+                  <Form.Item label="Fecha fin de inscripciones">
+                    <DatePicker placeholder="Seleccione una fecha" />
+                  </Form.Item>
+                  <Form.Item label="Categoria">
+                    <Select
+                      allowClear
+                      options={[
+                        {
+                          value: "1",
+                          label: "Universitarios",
+                        },
+                        {
+                          value: "2",
+                          label: "Colegio",
+                        },
+                        {
+                          value: "3",
+                          label: "Profesionales",
+                        },
+                        {
+                          value: "4",
+                          label: "Técnico",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Cupos">
+                    <Input placeholder="Ingrese el limite de cupos" />
+                  </Form.Item>
+                  <Form.Item label="Costo">
+                    <Input placeholder="Ingrese el costo" />
+                  </Form.Item>
+                  <Form.Item label="Contactos">
+                    <QRCode value="Contactos del evento" />
+                  </Form.Item>
+                  <Form.Item label="Contenido"></Form.Item>
+                </Form>
+              )}
+              {mostrarFormReclutamiento && (
+                <Form>
+                  <Form.Item label="Tipo">
+                    <Radio.Group onChange={onChangeTorneo} value={value4}>
+                      <Radio value={1}>Interno</Radio>
+                      <Radio value={2}>Abierto</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Form.Item label="Fecha fin de inscripciones">
+                    <DatePicker placeholder="Seleccione una fecha" />
+                  </Form.Item>
+                  <Form.Item label="Categoria">
+                    <Select
+                      allowClear
+                      options={[
+                        {
+                          value: "1",
+                          label: "Universitarios",
+                        },
+                        {
+                          value: "2",
+                          label: "Colegio",
+                        },
+                        {
+                          value: "3",
+                          label: "Profesionales",
+                        },
+                        {
+                          value: "4",
+                          label: "Técnico",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Cupos">
+                    <Input placeholder="Ingrese el limite de cupos" />
+                  </Form.Item>
+                  <Form.Item label="Costo">
+                    <Input placeholder="Ingrese el costo" />
+                  </Form.Item>
+                  <Form.Item label="Contactos">
+                    <QRCode value="Contactos del evento" />
+                  </Form.Item>
+                  <Form.Item label="Reglas"></Form.Item>
+                  <Form.Item label="Premios"></Form.Item>
+                  <Form.Item label="Requisitos"></Form.Item>
+                </Form>
+              )}
+              {mostrarFormTorneo && (
+                <Form>
+                  <Form.Item label="Tipo">
+                    <Radio.Group onChange={onChangeTorneo} value={value5}>
+                      <Radio value={1}>Interno</Radio>
+                      <Radio value={2}>Abierto</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Form.Item label="Fecha fin de inscripciones">
+                    <DatePicker placeholder="Seleccione una fecha" />
+                  </Form.Item>
+                  <Form.Item label="Categoria">
+                    <Select
+                      allowClear
+                      options={[
+                        {
+                          value: "1",
+                          label: "Universitarios",
+                        },
+                        {
+                          value: "2",
+                          label: "Colegio",
+                        },
+                        {
+                          value: "3",
+                          label: "Profesionales",
+                        },
+                        {
+                          value: "4",
+                          label: "Técnico",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Cupos">
+                    <Input placeholder="Ingrese el limite de cupos" />
+                  </Form.Item>
+                  <Form.Item label="Costo">
+                    <Input placeholder="Ingrese el costo" />
+                  </Form.Item>
+                  <Form.Item label="Contactos">
+                    <QRCode value="Contactos del evento" />
+                  </Form.Item>
+                  <Form.Item label="Reglas"></Form.Item>
+                  <Form.Item label="Premios"></Form.Item>
+                  <Form.Item label="Requisitos"></Form.Item>
+                </Form>
+              )}
+              {mostrarFormOtro && (
+                <Form>
+                  <Form.Item label="Tipo">
+                    <Radio.Group onChange={onChangeOtros} value={value6}>
+                      <Radio value={1}>Interno</Radio>
+                      <Radio value={2}>Abierto</Radio>
+                    </Radio.Group>
+                  </Form.Item>
+                  <Form.Item label="Facilitador">
+                    <Input placeholder="Ingrese el nombre del facilitador" />
+                  </Form.Item>
+                  <Form.Item label="Fecha fin de inscripciones">
+                    <DatePicker placeholder="Seleccione una fecha" />
+                  </Form.Item>
+                  <Form.Item label="Categoria">
+                    <Select
+                      allowClear
+                      options={[
+                        {
+                          value: "1",
+                          label: "Universitarios",
+                        },
+                        {
+                          value: "2",
+                          label: "Colegio",
+                        },
+                        {
+                          value: "3",
+                          label: "Profesionales",
+                        },
+                        {
+                          value: "4",
+                          label: "Técnico",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Cupos">
+                    <Input placeholder="Ingrese el limite de cupos" />
+                  </Form.Item>
+                  <Form.Item label="Costo">
+                    <Input placeholder="Ingrese el costo" />
+                  </Form.Item>
+                  <Form.Item label="Contactos">
+                    <QRCode value="Contactos del evento" />
+                  </Form.Item>
+                  <Form.Item label="Contenido"></Form.Item>
+                  <Form.Item label="Reglas"></Form.Item>
+                  <Form.Item label="Premios"></Form.Item>
+                  <Form.Item label="Requisitos"></Form.Item>
+                </Form>
+              )}
             </div>
           </TabPane>
         </Tabs>

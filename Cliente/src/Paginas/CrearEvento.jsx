@@ -122,6 +122,14 @@ export default function CrearEvento() {
     return current < minDate || current > maxDate;
   };
 
+  const disabledDateFin = (current) => {
+    // Obtenemos la fecha seleccionada en "Fecha inicio"
+    const fechaInicioValue = form.getFieldValue('FECHA_INICIO');
+  
+    // Si no hay fecha seleccionada en "Fecha inicio" o la fecha actual es anterior, deshabilitar
+    return !fechaInicioValue || current < fechaInicioValue;
+  };
+
   //Restringir las horas
   const disabledHours = () => {
     const hours = [];
@@ -422,6 +430,9 @@ export default function CrearEvento() {
 
   return (
     <div>
+      <div className="tabla-descripcion-editarEv">
+        <p>CREACIÓN DE EVENTO</p>
+      </div>
       <Form
         layout="vertical"
         className="form-evento"
@@ -480,7 +491,7 @@ export default function CrearEvento() {
               <DatePicker
                 className="fecha-hora"
                 placeholder="Selecciona una fecha"
-                disabledDate={disabledDate}
+                disabledDate={disabledDateFin}
               />
             </Form.Item>
 
@@ -603,7 +614,7 @@ export default function CrearEvento() {
               { validator: validarMinimo },
             ]}
           >
-            <TextArea maxLength={300} minLength={5} />
+            <TextArea showCount maxLength={300} minLength={5} />
           </Form.Item>
 
           <Form.Item
