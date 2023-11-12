@@ -392,7 +392,12 @@ h3 {
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
-
+.etapa-fecha{
+    width: 202px;
+}
+.etapa-ubicacion{
+    width: 320px;
+}
   /*Modal de las pestañas*/
   .pestanias{
     padding-left: 15px;
@@ -403,3 +408,23 @@ h3 {
     margin-top: -16px;
     margin-left: -18px;
 } 
+ /*Modal de detalles*/
+ .form-ICPC{
+    padding: 20px ;
+    padding-bottom: 0;
+ }
+ .icpc-dirigido{
+    width: 356px;
+ }
+ .form-reclutamiento{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 20px;
+    padding-bottom: 0;
+ }
+ .fecha-reclutamiento{
+    width: 190px;
+ }
+ .columna1-reclutamiento{
+    padding-right: 40px;
+ }
