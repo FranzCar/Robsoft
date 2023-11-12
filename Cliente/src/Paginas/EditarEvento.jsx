@@ -18,6 +18,7 @@ import {
   EditOutlined,
   ExclamationCircleFilled,
   PlusOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import moment from "moment";
@@ -68,8 +69,9 @@ export default function EditarEvento() {
   const [obtenerPatrocinadores, setObtenerPatrocinadores] = useState([]);
   const [organizadoresRecuperados, setOrganizadoresRecuperados] = useState([]);
   const [patrocinadorRecuperados, setPatrocinadorRecuperados] = useState([]);
-  const [fechaInicioBD, setFechaInicioBD] = useState("");
-  const [fechaFinBD, setFechaFinBD] = useState("");
+  const [fechaInicioBD, setFechaInicioBD] = useState(null);
+  const [fechaFinBD, setFechaFinBD] = useState(null);
+  const [estadoFormulario, setEstadoFormulario] = useState(true);
 
   //Obtener datos de la base de datos
   useEffect(() => {
@@ -188,7 +190,8 @@ export default function EditarEvento() {
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   const showEdit = (record) => {
-
+    setIsModalOpenEdit(true);
+    console.log("LOS datos de la base de datos ", record.FECHA_FIN);
     setVerImagen(record.AFICHE);
     const organizadores = record.ORGANIZADORES.map(
       (organizador) => organizador.nombre
@@ -199,15 +202,16 @@ export default function EditarEvento() {
     const datos = {
       TITULO: record.TITULO,
       TIPO_EVENTO: record.TIPO_EVENTO,
-      UBICACION: record.UBICACION,
       DESCRIPCION: record.DESCRIPCION,
       ORGANIZADOR: organizadores,
       PATROCINADOR: patrocinadores,
+      fecha: record.FECHA_INICIO,
+      fechafin: record.FECHA_FIN,
       AFICHE: record.AFICHE,
     };
 
     setFechaInicioBD(record.FECHA_INICIO);
-    setFechaFinBD(record.FECHA_FIN)
+    setFechaFinBD(record.FECHA_FIN);
     form.setFieldsValue({ TIPO_EVENTO: record.TIPO_EVENTO });
     form.setFieldsValue(datos);
     setActual(record.TITULO);
@@ -222,10 +226,10 @@ export default function EditarEvento() {
 
     setOrganizadoresRecuperados(organizadoresBD);
     setPatrocinadorRecuperados(patrocinadoresBD);
-    setIsModalOpenEdit(true);
   };
 
   const onFinish = (values) => {
+    console.log("EL valor obtenido de los formularios es ", fechaInicioBD);
     actualizarEvento(values);
   };
 
@@ -256,10 +260,12 @@ export default function EditarEvento() {
       centered: "true",
 
       onOk() {
-        setIsModalOpenEdit(false);
         setListaPatrocinador([]);
         setListaOrganizador([]);
         setFileList([]);
+        setFechaInicioBD("");
+        setFechaFinBD("");
+        setIsModalOpenEdit(false);
       },
       onCancel() {},
     });
@@ -292,10 +298,6 @@ export default function EditarEvento() {
   const datosEvento = (values) => {
     let organizadores = [];
     let patrocinadores = [];
-    const fecha = values.FECHAsINI;
-    const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
-    const fecha_fin = values.FECHAsFIN;
-    const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const TIPO = validarTipo(values.TIPO_EVENTO);
     if (listaOrganizador.length === 0) {
       organizadores = organizadoresRecuperados;
@@ -311,8 +313,8 @@ export default function EditarEvento() {
     const datos = {
       TITULO: values.TITULO,
       id_tipo_evento: TIPO,
-      FECHA_INICIO: NUEVAFECHA_INICIO,
-      FECHA_FIN: NUEVAFECHA_FIN,
+      FECHA_INICIO: values.fecha,
+      FECHA_FIN: values.fechafin,
       DESCRIPCION: values.DESCRIPCION,
       organizadores: organizadores,
       auspiciadores: patrocinadores,
@@ -346,8 +348,6 @@ export default function EditarEvento() {
     const duplicado = validarDuplicado(values);
     const datos = datosEvento(values);
     console.log("Valores del formulario:", datos);
-    console.log("El valor de duplicado es ", duplicado);
-    console.log("el id es ", id);
     if (duplicado === true) {
       console.log(
         "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
@@ -393,21 +393,39 @@ export default function EditarEvento() {
     const today = new Date();
     // Establecemos la fecha mínima como 3 días después de la fecha actual
     const minDate = new Date();
-    minDate.setDate(today.getDate() + 3);
+    minDate.setDate(today.getDate() + -1);
     // Establecemos la fecha máxima como 180 días después de la fecha actual
     const maxDate = new Date();
     maxDate.setDate(today.getDate() + 180);
+
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
   };
 
   const disabledDateFin = (current) => {
-    // Obtenemos la fecha seleccionada en "Fecha inicio"
-    const fechaInicioValue = form.getFieldValue("FECHAsINI");
-
-    // Si no hay fecha seleccionada en "Fecha inicio" o la fecha actual es anterior, deshabilitar
-    return !fechaInicioValue || current < fechaInicioValue;
+    const fechaInicioFieldValue = form.getFieldValue("FECHAsINI");
+    let fechaInicio;
+    // Si no hay fecha seleccionada en "Fecha inicio", asignar la fecha de fechaInicioBD
+    if (!fechaInicioFieldValue) {
+      const fechaIni = moment(fechaInicioBD); // Utiliza la fecha proporcionada
+      fechaInicio = fechaIni.isValid() ? fechaIni.toDate() : new Date();
+    } else {
+      fechaInicio = fechaInicioFieldValue.toDate();
+    }
+  
+    // Calculamos la fecha máxima permitida (180 días desde la fecha de inicio)
+    const fechaMaxima = new Date(fechaInicio);
+    fechaMaxima.setDate(fechaMaxima.getDate() + 180);
+  
+    // Devolvemos true si la fecha actual es anterior a la fecha de inicio o posterior a la fecha máxima permitida
+    return (
+      current < moment().startOf("day") ||
+      current < moment(fechaInicio).startOf("day") ||
+      current > moment(fechaMaxima).startOf("day")
+    );
   };
+  
+  
 
   //Restringir las horas
   const disabledHours = () => {
@@ -505,6 +523,27 @@ export default function EditarEvento() {
       nuevaListaPatrocinador[nuevaListaPatrocinador.length - 1]
     );
   };
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const handleDateChange = (date) => {
+    const nuevaFecha = date.format("YYYY-MM-DD");
+    const fechaForm = form.getFieldValue("fechafin")
+    console.log("la fechas comparadas son ", nuevaFecha, " ", fechaFinBD);
+    setSelectedDate(date);
+    if (fechaFinBD  <= nuevaFecha || fechaForm  <= nuevaFecha ) {
+      form.setFieldValue("fechafin", nuevaFecha);
+      form.setFieldValue("fecha", nuevaFecha);
+    } else {
+      form.setFieldValue("fecha", nuevaFecha);
+    }
+  };
+
+  const handleDateChange2 = (date) => {
+    const nuevaFecha = date.format("YYYY-MM-DD");
+    console.log("fehca ", nuevaFecha);
+    setSelectedDate(date);
+    form.setFieldValue("fechafin", nuevaFecha);
+  };
 
   return (
     <div>
@@ -574,7 +613,6 @@ export default function EditarEvento() {
       >
         <Form
           form={form}
-          initialValues={info}
           onFinish={onFinish}
           layout="vertical"
           className="form-editar"
@@ -639,40 +677,81 @@ export default function EditarEvento() {
                 ]}
               />
             </Form.Item>
-            <Form.Item
-              label="Fecha inicio"
-              name="FECHAsINI"
-              rules={[
-                {
-                  required: true,
-                  message: "Por favor ingrese una fecha",
-                },
-              ]}
-            >
-              <DatePicker
-                defaultValue={dayjs(fechaInicioBD, dateFormat)}
-                style={{ width: "175px" }}
-                placeholder="Selecciona una fecha"
-                disabledDate={disabledDate}
-              />
-            </Form.Item>
-            <Form.Item
-              label="Fecha fin"
-              name="FECHAsFIN"
-              rules={[
-                {
-                  required: true,
-                  message: "Por favor ingrese una fecha",
-                },
-              ]}
-            >
-              <DatePicker
-                defaultValue={dayjs(fechaFinBD, dateFormat)}
-                style={{ width: "175px" }}
-                placeholder="Selecciona una fecha"
-                disabledDate={disabledDateFin}
-              />
-            </Form.Item>
+            <div className="formato-fechas">
+              <div className="formato-fechas-columna1">
+                <Form.Item
+                  label="Fecha inicio"
+                  name="fecha"
+                  rules={[
+                    {
+                      required: true,
+                    },
+                  ]}
+                >
+                  <Input
+                    readOnly={estadoFormulario}
+                    value={
+                      selectedDate
+                        ? moment(selectedDate).format("YYYY-MM-DD")
+                        : ""
+                    }
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Fecha fin"
+                  name="fechafin"
+                  rules={[
+                    {
+                      required: true,
+                    },
+                  ]}
+                >
+                  <Input
+                    readOnly={estadoFormulario}
+                    value={
+                      selectedDate
+                        ? moment(selectedDate).format("YYYY-MM-DD")
+                        : ""
+                    }
+                  />
+                </Form.Item>
+              </div>
+              <div className="formato-fechas-columna2">
+                <Form.Item label=" " name="FECHAsINI">
+                 
+                    <DatePicker
+                      className="fecha-inicio"
+                      suffixIcon={
+                        <CalendarOutlined
+                          style={{ fontSize: "25px", color: "#0757F7" }}
+                        />
+                      }
+                      bordered={false}
+                      placeholder="Selecciona una fecha"
+                      disabledDate={disabledDate}
+                      onChange={handleDateChange}
+                      allowClear={false}
+                    />
+                </Form.Item>
+
+                <Form.Item label=" " name="FECHAsFIN">
+                 
+                    <DatePicker
+                      className="fecha-inicio"
+                      suffixIcon={
+                        <CalendarOutlined
+                          style={{ fontSize: "25px", color: "#0757F7" }}
+                        />
+                      }
+                      bordered={false}
+                      placeholder="Selecciona una fecha"
+                      onChange={handleDateChange2}
+                      disabledDate={disabledDateFin}
+                      allowClear={false}
+                    />
+                </Form.Item>
+              </div>
+            </div>
 
             {/*<Form.Item
               label="Hora"

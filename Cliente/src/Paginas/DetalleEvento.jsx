@@ -390,45 +390,60 @@ export default function DetalleEvento() {
           >
             <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
               <Form form={form} className="formEtapas">
-                <Form.Item label="Nombre de la etapa" name="TITULO_ETAPA">
-                  <Input placeholder="Ingrese el nombre de la etapa" />
-                </Form.Item>
+                <div className="etapas-hora">
+                  <div className="etapas-columna1">
+                    <Form.Item label="Nombre de la etapa" name="TITULO_ETAPA">
+                      <Input placeholder="Ingrese el nombre de la etapa" />
+                    </Form.Item>
 
-                <Form.Item label="Modalidad de la etapa" name="MODALIDAD_ETAPA">
-                  <Radio.Group onChange={onChangeEtapa} value={value7}>
-                    <Radio value={1}>En linea</Radio>
-                    <Radio value={2}>Presencial</Radio>
-                  </Radio.Group>
-                </Form.Item>
+                    <Form.Item
+                      label="Modalidad de la etapa"
+                      name="MODALIDAD_ETAPA"
+                    >
+                      <Radio.Group onChange={onChangeEtapa} value={value7}>
+                        <Radio value={1}>En linea</Radio>
+                        <Radio value={2}>Presencial</Radio>
+                      </Radio.Group>
+                    </Form.Item>
 
-                <Form.Item label="Fecha de etapa" name="FECHA_ETAPA">
-                  <DatePicker placeholder="Seleccione la fecha de la etapa" />
-                </Form.Item>
+                    <Form.Item label="Fecha de etapa" name="FECHA_ETAPA">
+                      <DatePicker placeholder="Seleccione la fecha de la etapa" />
+                    </Form.Item>
 
-                <Form.Item label="Ubicación" name="UBICACION_ETAPA">
-                  <Select
-                    allowClear
-                    options={[
-                      {
-                        value: "1",
-                        label: "Auditorio",
-                      },
-                      {
-                        value: "2",
-                        label: "Laboratorio 1",
-                      },
-                      {
-                        value: "3",
-                        label: "Laboratorio 2",
-                      },
-                    ]}
-                  />
-                </Form.Item>
-
-                <Form.Item name="HORA_ETAPA">
-                  <Button onClick={reservarHora}>Reservar hora</Button>
-                  <Input></Input>
-                </Form.Item>
+                    <Form.Item label="Ubicación" name="UBICACION_ETAPA">
+                      <Select
+                        allowClear
+                        options={[
+                          {
+                            value: "1",
+                            label: "Auditorio",
+                          },
+                          {
+                            value: "2",
+                            label: "Laboratorio 1",
+                          },
+                          {
+                            value: "3",
+                            label: "Laboratorio 2",
+                          },
+                        ]}
+                      />
+                    </Form.Item>
+                  </div>
+                  <div className="etapas-columna2">
+                    <Form.Item name="HORA_ETAPA">
+                      <div className="reservar-hora-input">
+                        <div>
+                          <Button onClick={reservarHora}>Reservar hora</Button>
+                        </div>
+                        <div>
+                          <Input ></Input>
+                        </div>
+                      </div>
+                    </Form.Item>
+                    <Table></Table>
+                  </div>
+                </div>
               </Form>
             </div>
           </TabPane>

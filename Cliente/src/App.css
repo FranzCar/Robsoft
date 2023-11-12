@@ -183,26 +183,7 @@
     font-size: 15px;
     height: 35px;
 }
-
-.pestanias{
-    border-radius: 8px;
-    padding-top: 1%;
-    padding-left: 15px;
-    height: 100%;
-    margin-top: -2.1%;
-    margin-left: -2.5%;
-    margin-right: -2.5%;
-    
-}
-  
-.contenido {
-    background-color: #ffff; 
-    display: grid;
-    margin-top: -16px;
-    border-bottom-right-radius: 8px; 
-    border-bottom-left-radius: 8px;
-    margin-left: -15px;
-}  
+ 
  
 /* Estilo para el mensaje de error */
 .ant-form-item-explain-error {
@@ -263,7 +244,19 @@ h3 {
 .upload-editar-evento{
     padding-top: 30px;
 }
+.formato-fechas{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.formato-fechas-columna1{
+    width: 170px;
+}
 
+.fecha-inicio{
+    margin-left: 20px;
+    width: 40px;
+    margin-top: -5px;
+}
 
 /*Pagina de inicio*/
 .imagen-inicio{
@@ -388,3 +381,25 @@ h3 {
     padding-bottom: 0;
 
   }
+.etapas-hora{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.etapas-columna2{
+    padding-left: 20px;
+}
+.reservar-hora-input{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+  /*Modal de las pestañas*/
+  .pestanias{
+    padding-left: 15px;
+}
+  
+.contenido {
+    display: grid;
+    margin-top: -16px;
+    margin-left: -18px;
+} 
