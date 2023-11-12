@@ -228,6 +228,7 @@ const validarDuplicadoCI = (values) => {
 
       onOk() {
         confirmSave(values);
+        obtenerParticipantesCI();
       },
       onCancel() {},
     });
@@ -244,12 +245,15 @@ const validarDuplicadoCI = (values) => {
 
       onOk() {
         setVisible(false);
-
+        setIsInstitucionDisabled(true);
         setFileList([]);
         setFileList1([]);
+       obtenerParticipantesCI();
         form.resetFields();
       },
-      onCancel() {},
+      onCancel() {
+    setIsInstitucionDisabled(true);
+    },
     });
   };
 
@@ -275,6 +279,9 @@ const validarDuplicadoCI = (values) => {
       foto: fileList1.length > 0 ? fileList1[0].thumbUrl : null,
       certificado_estudiante: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
+     if (values.INSTITUCION !== 1) {
+    datos.codigoSIS = null;
+  }
     return datos;
   };
 
@@ -295,7 +302,8 @@ const validarDuplicadoCI = (values) => {
       .then((response) => {
         console.log("Datos guardados con éxito", response.data);
         message.success("El participante se registró correctamente");
-      
+      obtenerParticipantesCI();
+      obtenerParticipantes();
       })
       .catch((error) => {
         if (error.response) {
@@ -682,7 +690,7 @@ function onlyLetters(event) {
   };
   //validar CodigoSis
   const validarCodigoSis = (_, value, callback) => {
-   if(isInstitucionDisabled==false){
+   if(isInstitucionDisabled===false){
     const anoActual = new Date().getFullYear();
 
   // Obtener el año del código de estudiante
@@ -740,6 +748,9 @@ function onlyLetters(event) {
         cancelText="Cancelar"
         onCancel={handleCancel}
         width={1000}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
         footer={[
           <Form form={form} onFinish={onFinish}>
             <Button onClick={showCancel} className="boton-cancelar-registro">
@@ -755,6 +766,7 @@ function onlyLetters(event) {
           </Form>,
         ]}
        >
+       <br/>
         <Form
           className="form-persona"
           name="formulario_persona"
@@ -945,6 +957,8 @@ function onlyLetters(event) {
                   minLength={9}
                   onKeyPress={onlyNumbers}
                   disabled={isInstitucionDisabled}
+                  value={estadoCODSIS}
+                  onChange={(e) => setCODSIS(e.target.value)}
                 ></Input>
               </Form.Item>
               <Form.Item
@@ -960,10 +974,11 @@ function onlyLetters(event) {
                 </Select>
               </Form.Item>
 
+            {/*
               <Form.Item
                 label="Certificacion del estudiante"
                 name="CERTIFICADO"
-              >
+               >
                 <Upload
                   name="CERTIFICADO"
                   customRequest={customRequest}
@@ -991,7 +1006,7 @@ function onlyLetters(event) {
                   />
                 </Modal>
               </Form.Item>
-              
+            */}
             </Col>
           </Row>
         </Form>
