@@ -957,8 +957,6 @@ function onlyLetters(event) {
                   minLength={9}
                   onKeyPress={onlyNumbers}
                   disabled={isInstitucionDisabled}
-                  value={estadoCODSIS}
-                  onChange={(e) => setCODSIS(e.target.value)}
                 ></Input>
               </Form.Item>
               <Form.Item
