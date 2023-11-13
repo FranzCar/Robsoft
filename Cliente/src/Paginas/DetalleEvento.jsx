@@ -69,7 +69,62 @@ export default function DetalleEvento() {
   const [mostrarFormOtro, setMostrarFormOtro] = useState(false);
   const [valueParticipacion, setValueParticipacion] = useState(false);
   const [form] = Form.useForm();
+//Kevin
+ //Solo permitir numeros en los input
+  function onlyNumbers(event) {
+  const key = event.key;
 
+  if (!key.match(/[0-9]/)) {
+    event.preventDefault();
+  }
+}
+const showCancelDetalle = () => {
+    confirm({
+      title: "¿Estás seguro de que quieres cancelar?",
+      icon: <ExclamationCircleFilled />,
+      content: "Los cambios se perderán.",
+      okText: "Si",
+      cancelText: "No",
+      centered: true,
+      onOk() {
+        setMostrarPestanias(false);
+        setMostrarFormEntrenamiento(false);
+        setMostrarFormICPC(false);
+        setMostrarFormLibre(false);
+        setMostrarFormOtro(false);
+        setMostrarFormReclutamiento(false);
+        setMostrarFormTaller(false);
+        setMostrarFormTorneo(false);
+        form.resetFields();
+      },
+      onCancel() {},
+    });
+  };
+  //Guardar datos del formulario Detalle
+  const registrarDetalle= (values) => {
+    showConfirmDetalle(values);
+    console.log("Los valores de los datos del detalle son ", values);
+  };
+   //Mensaje de confirmacion al dar guardar en la parte de registro de los detalles
+  const showConfirmDetalle = (values) => {
+    confirm({
+      title: "¿Esta seguro de guardar este registro?",
+      icon: <ExclamationCircleFilled />,
+      content: "",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        guardarDetalle(values);
+      },
+      onCancel() { },
+    });
+  };
+  //Guardar DetalleEvento
+   const guardarDetalle = (values) => {
+   };
+   
+//
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
   const customRequest = ({ fileList, onSuccess }) => {
     onSuccess();
@@ -132,7 +187,7 @@ export default function DetalleEvento() {
       setMostrarFormICPC(true);
     } else if (tipoEvento === "Competencia estilo libre") {
       setMostrarFormLibre(true);
-    } else if (tipoEvento === "Taller de programación") {
+    } else if (tipoEvento === "Taller de Programacion") {
       setMostrarFormTaller(true);
     } else if (tipoEvento === "Entrenamiento") {
       setMostrarFormEntrenamiento(true);
@@ -407,18 +462,30 @@ export default function DetalleEvento() {
         maskClosable={false}
         keyboard={false}
         closable={false}
+        footer={[
+          <Form form={form} onFinish={registrarDetalle}>
+            <Button onClick={showCancelDetalle} className="boton-cancelar-detalle">
+            Cancelar</Button>
+            <Button  
+            type="primary" 
+            htmlType="submit"
+            className="boton-guardar-detalle">
+              Guardar
+            </Button>
+          </Form>,
+        ]}
       >
         <Tabs
           onChange={onChangeTabs}
           className="pestanias"
           width={1000}
           activeKey={activeTab}
-        >
+         >
           <TabPane
             tab={<span style={{ color: "black" }}>Etapas</span>}
             key="1"
             className="tab1"
-          >
+           >
             <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
               <Form form={form} className="formEtapas">
                 <div className="etapas-hora">
@@ -448,6 +515,7 @@ export default function DetalleEvento() {
                       rules={[
                         {
                           required: true,
+                          message: "Por favor, seleccione una etapa",
                         },
                       ]}
                     >
@@ -463,6 +531,7 @@ export default function DetalleEvento() {
                       rules={[
                         {
                           required: true,
+                          message: "Por favor, seleccione una fecha",
                         },
                       ]}
                     >
@@ -479,6 +548,7 @@ export default function DetalleEvento() {
                       rules={[
                         {
                           required: true,
+                          message: "Por favor, seleccione una ubicacion",
                         },
                       ]}
                     >
@@ -521,7 +591,7 @@ export default function DetalleEvento() {
           <TabPane
             tab={<span style={{ color: "black" }}>Detalles</span>}
             key="2"
-          >
+           >
             <div className={`contenido ${activeTab === "2" ? "color2" : ""}`}>
               {mostrarFormICPC && (
                 <Form className="form-ICPC">
@@ -533,6 +603,7 @@ export default function DetalleEvento() {
                       rules={[
                         {
                           required: true,
+                          message: "Por favor, seleccione un tipo de participacion",
                         },
                       ]}
                       >
@@ -572,6 +643,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Por favor, seleccione una opcion",
                           }
                         ]}
                       >
@@ -604,6 +676,7 @@ export default function DetalleEvento() {
                       rules={[
                           {
                             required: true,
+                            message: "Suba los archivos necesarios",
                           }
                         ]}
                       >
@@ -637,7 +710,9 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" />
+                        <Input 
+                        placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}/>
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
@@ -701,6 +776,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message: "Seleccione una modalidad",
                           },
                         ]}
                       >
@@ -721,6 +797,7 @@ export default function DetalleEvento() {
                       rules={[
                         {
                           required: true,
+                          message:"Por favor, seleccione una opcion",
                         },
                       ]}
                       >
@@ -785,7 +862,9 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" />
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        />
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
@@ -849,10 +928,11 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                             message: "Seleccione una modalidad",
                           }
                         ]}
                       >
-                        <Radio.Group onChange={onChangeICPC} value={value3}>
+                        <Radio.Group onChange={onChangeTaller} value={value3}>
                           <Radio value={1}>Interno</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
@@ -890,6 +970,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Por favor, seleccione una opcion",
                           }
                         ]}
                       >
@@ -947,7 +1028,9 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" />
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        />
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
@@ -1011,6 +1094,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                             message: "Seleccione una modalidad",
                           },
                         ]}
                       >
@@ -1055,6 +1139,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Por favor, seleccione una opcion",
                           },
                         ]}
                       >
@@ -1112,7 +1197,9 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" />
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        />
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
@@ -1160,6 +1247,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                             message: "Seleccione una modalidad",
                           }
                         ]}
                       >
@@ -1176,6 +1264,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Por favor, seleccione una opcion",
                           }
                         ]}
                       >
@@ -1292,6 +1381,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                             message: "Seleccione una modalidad",
                           },
                         ]}
                       >
@@ -1312,6 +1402,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Por favor, seleccione una opcion",
                           },
                         ]}
                       >
@@ -1376,7 +1467,9 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" />
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        />
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
@@ -1417,165 +1510,169 @@ export default function DetalleEvento() {
               )}
               {mostrarFormOtro && (
                 <Form className="form-ICPC">
-                <div className="modal-icpc">
-                  <div className="columna1-icpc">
-                    <Form.Item label="Participación"
-                      name="participacion"
-                      rules={[
-                        {
-                          required: true,
-                        }
-                      ]}
-                    >
-                      <Radio.Group
-                        onChange={onChangeParticipacion}
-                        value={valueParticipacion}
+                  <div className="modal-icpc">
+                    <div className="columna1-icpc">
+                      <Form.Item label="Participación"
+                        name="participacion"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Por favor, seleccione un tipo de participacion",
+                          }
+                        ]}
                       >
-                        <Radio value={1}>Grupal</Radio>
-                        <Radio value={2}>Individual</Radio>
-                      </Radio.Group>
-                    </Form.Item>
-                    <Form.Item label="Modalidad"
-                      name="modalidad"
-                      rules={[
-                        {
-                          required: true,
-                        }
-                      ]}
-                    >
-                      <Radio.Group onChange={onChangeOtros} value={value6}>
-                        <Radio value={1}>Interno</Radio>
-                        <Radio value={2}>Abierto</Radio>
-                      </Radio.Group>
-                    </Form.Item>
-                    <Form.Item label="Fecha límite de inscripción">
-                      <DatePicker
-                        style={{ width: "180px" }}
-                        placeholder="Selecione una fecha"
-                      />
-                    </Form.Item>
-                    <Form.Item label="Responsable" className="icpc-dirigido"
-                      name="responsable"
-                      rules={[
-                        {
-                          required: true,
-                        }
-                      ]}
-                    >
+                        <Radio.Group
+                          onChange={onChangeParticipacion}
+                          value={valueParticipacion}
+                        >
+                          <Radio value={1}>Grupal</Radio>
+                          <Radio value={2}>Individual</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item label="Modalidad"
+                        name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
+                        <Radio.Group onChange={onChangeOtros} value={value6}>
+                          <Radio value={1}>Interno</Radio>
+                          <Radio value={2}>Abierto</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item label="Fecha límite de inscripción">
+                        <DatePicker
+                          style={{ width: "180px" }}
+                          placeholder="Selecione una fecha"
+                        />
+                      </Form.Item>
+                      <Form.Item label="Responsable" className="icpc-dirigido"
+                        name="responsable"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
+                          <Select
+                            allowClear
+                            options={[
+                              {
+                                value: "1",
+                                label: "Santos",
+                              },
+                              {
+                                value: "2",
+                                label: "Simon",
+                              },
+                            ]}
+                          />
+                        </Form.Item>
+                      <Form.Item label="Dirigido a" className="icpc-dirigido"
+                        name="dirigido a"
+                        rules={[
+                          {
+                            required: true,
+                            message:"Por favor, seleccione una opcion",
+                          }
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
                             {
                               value: "1",
-                              label: "Santos",
+                              label: "Universitarios",
                             },
                             {
                               value: "2",
-                              label: "Simon",
+                              label: "Colegio",
+                            },
+                            {
+                              value: "3",
+                              label: "Profesionales",
+                            },
+                            {
+                              value: "4",
+                              label: "Técnico",
                             },
                           ]}
                         />
                       </Form.Item>
-                    <Form.Item label="Dirigido a" className="icpc-dirigido"
-                      name="dirigido a"
-                      rules={[
-                        {
-                          required: true,
-                        }
-                      ]}
-                    >
-                      <Select
-                        allowClear
-                        options={[
-                          {
-                            value: "1",
-                            label: "Universitarios",
-                          },
-                          {
-                            value: "2",
-                            label: "Colegio",
-                          },
-                          {
-                            value: "3",
-                            label: "Profesionales",
-                          },
-                          {
-                            value: "4",
-                            label: "Técnico",
-                          },
-                        ]}
-                      />
-                    </Form.Item>
 
-                    <Form.Item label="Contenido del evento">
-                      <Upload
-                        {...uploadProps}
-                        customRequest={customRequest}
-                        listType="picture-card"
-                        onPreview={handlePreview}
-                        onChange={handleChange}
-                        fileList={fileList}
-                        maxCount={1}
-                      >
-                        {fileList.length >= 1 ? null : uploadButton}
-                      </Upload>
-                      <Modal
-                        open={previewOpen}
-                        title={previewTitle}
-                        footer={null}
-                        onCancel={handleCancelIMG}
-                      >
-                        <img
-                          alt="example"
-                          style={{
-                            width: "auto",
-                            height: "300px",
+                      <Form.Item label="Contenido del evento">
+                        <Upload
+                          {...uploadProps}
+                          customRequest={customRequest}
+                          listType="picture-card"
+                          onPreview={handlePreview}
+                          onChange={handleChange}
+                          fileList={fileList}
+                          maxCount={1}
+                        >
+                          {fileList.length >= 1 ? null : uploadButton}
+                        </Upload>
+                        <Modal
+                          open={previewOpen}
+                          title={previewTitle}
+                          footer={null}
+                          onCancel={handleCancelIMG}
+                        >
+                          <img
+                            alt="example"
+                            style={{
+                              width: "auto",
+                              height: "300px",
+                            }}
+                            src={previewImage}
+                          />
+                        </Modal>
+                      </Form.Item>
+                    </div>
+                    <div>
+                      <Form.Item label="Costo">
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Cupos">
+                        <Slider min={5} max={100} />
+                      </Form.Item>
+                      <Form.Item label="Requisitos">
+                        <TextArea showCount></TextArea>
+                      </Form.Item>
+                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
+                        <Table
+                          //dataSource={horarios}
+                          pagination={false}
+                          locale={{
+                            emptyText: (
+                              <div
+                                style={{ padding: "30px", textAlign: "center" }}
+                              >
+                                No hay etapas
+                              </div>
+                            ),
                           }}
-                          src={previewImage}
-                        />
-                      </Modal>
-                    </Form.Item>
+                        >
+                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
+                          <Column
+                            title="Ubicación"
+                            dataIndex="ubicacion"
+                            key="ubicacion"
+                          />
+                          <Column
+                            title="Horario"
+                            dataIndex="horario"
+                            key="horario"
+                          />
+                        </Table>
+                      </Form.Item>
+                    </div>
                   </div>
-                  <div>
-                    <Form.Item label="Costo">
-                      <Input placeholder="Ingrese el costo" />
-                    </Form.Item>
-                    <Form.Item label="Cupos">
-                      <Slider min={5} max={100} />
-                    </Form.Item>
-                    <Form.Item label="Requisitos">
-                      <TextArea showCount></TextArea>
-                    </Form.Item>
-                    <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                      <Table
-                        //dataSource={horarios}
-                        pagination={false}
-                        locale={{
-                          emptyText: (
-                            <div
-                              style={{ padding: "30px", textAlign: "center" }}
-                            >
-                              No hay etapas
-                            </div>
-                          ),
-                        }}
-                      >
-                        <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                        <Column
-                          title="Ubicación"
-                          dataIndex="ubicacion"
-                          key="ubicacion"
-                        />
-                        <Column
-                          title="Horario"
-                          dataIndex="horario"
-                          key="horario"
-                        />
-                      </Table>
-                    </Form.Item>
-                  </div>
-                </div>
-              </Form>
+                </Form>
               )}
             </div>
           </TabPane>
