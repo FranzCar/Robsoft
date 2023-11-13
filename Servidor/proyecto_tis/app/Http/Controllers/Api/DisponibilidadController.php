@@ -16,7 +16,7 @@ class DisponibilidadController extends Controller
 
         $horariosDisponibles = Disponibilidad::where('id_ubicacion', $idUbicacion)
                                     ->where('fecha_ocupacion', $fechaEtapa)
-                                    ->get();
+                                    ->pluck('id_horario');
 
         return response()->json($horariosDisponibles);
     }
