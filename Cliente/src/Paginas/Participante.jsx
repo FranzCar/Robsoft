@@ -219,7 +219,7 @@ const validarDuplicadoCI = (values) => {
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
     confirm({
-      title: "¿Esta seguro de registrarse?",
+      title: "¿Está seguro de registrarse?",
       icon: <ExclamationCircleFilled />,
       content: "",
       okText: "Si",
@@ -236,9 +236,9 @@ const validarDuplicadoCI = (values) => {
   //Mensaje al dar al boton cancelar del formulario de crear registro
   const showCancel = () => {
     confirm({
-      title: "¿Esta seguro de que desea cancelar su registro? Se perdera el progreso realizado.",
+      title: "¿Está seguro de que desea cancelar su registro? ",
       icon: <ExclamationCircleFilled />,
-
+      content:"Se perdera el progreso realizado.",
       okText: "Si",
       cancelText: "No",
       centered: "true",
@@ -294,7 +294,7 @@ const validarDuplicadoCI = (values) => {
         "No se cierra el formulario y no se guarda, se mustra un mensaje de q existe evento duplicado"
       );
       setVisible(true);
-      message.error("Existe un participante con el mismo carnet de identidad.");
+      message.error("El carnet de identidad ya esta registrado.");
     } else {
     console.log("Se guarda los datos en la BD");
     axios
@@ -711,483 +711,493 @@ function onlyLetters(event) {
   };
   
   return (
-    <div className="pagina-evento">
-      <Row gutter={[16, 8]}>
-        <Col className="main-content" span={12}>
-          <Space direction="vertical" style={{ width: "80%" }}>
-            <Button
-              type="primary"
-              onClick={showModal}
-              block
-              style={{ background: "var(--primary-color)" }}
-            >
-              <span style={{ fontWeight: "bold" }}>Registro Individual</span>
-            </Button>
-          </Space>
-        </Col>
-        <Col className="main-content" span={12}>
-          <Space direction="vertical" style={{ width: "80%" }}>
-            <Button
-              type="primary"
-              onClick={showModalGrupal}
-              block
-              style={{ background: "var(--primary-color)" }}
-            >
-              <span style={{ fontWeight: "bold" }}>Registro Grupal</span>
-            </Button>
-          </Space>
-        </Col>
-      </Row>
-
-      {/*Ventana emergente para el formulario de crear participante Individual */}
-      <Modal
-        title="Formulario de registro individual"
-        className="modal-registro"
-        open={visible}
-        okText="Guardar"
-        cancelText="Cancelar"
-        onCancel={handleCancel}
-        width={1000}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form form={form} onFinish={onFinish}>
-            <Button onClick={showCancel} className="boton-cancelar-registro">
-              Cancelar
-            </Button>
-            <Button
-              htmlType="submit"
-              type="primary"
-              className="boton-guardar-registro"
-            >
-              Guardar
-            </Button>
-          </Form>,
-        ]}
-       >
-       <br/>
+    <div>
+      <div className="tabla-descripcion-editarEv">
+          <p>REGISTRO INDIVIDUAL</p>
+      </div>
+      {/*
+        <Row gutter={[16, 8]}>
+          <Col className="main-content" span={12}>
+            <Space direction="vertical" style={{ width: "80%" }}>
+              <Button
+                type="primary"
+                onClick={showModal}
+                block
+                style={{ background: "var(--primary-color)" }}
+              >
+                <span style={{ fontWeight: "bold" }}>Registro Individual</span>
+              </Button>
+            </Space>
+          </Col>
+          <Col className="main-content" span={12}>
+            <Space direction="vertical" style={{ width: "80%" }}>
+              <Button
+                type="primary"
+                onClick={showModalGrupal}
+                block
+                style={{ background: "var(--primary-color)" }}
+              >
+                <span style={{ fontWeight: "bold" }}>Registro Grupal</span>
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      */}
+        {/*Ventana emergente para el formulario de crear participante Individual */}
         <Form
-          className="form-persona"
-          name="formulario_persona"
-          autoComplete="off"
-          onFinishFailed={onFinishFailed}
-          form={form}
-        >
-          
-          <Row gutter={[16, 8]}>
-            <Col span={12}>
-            <Form.Item
-            label="Nombre completo"
-            name="NOMBRE"
-            rules={[
-              { required: true, message: "Ingrese un nombre, por favor." },
-              { validator: validarMinimo },
-            ]}
-           >
-            <Input
-              maxLength={50}
-              minLength={5}
-              placeholder="Ingrese su nombre completo."
-              style={{maxWidth: "100%"}}
-              onKeyPress={onlyLetters}
-            ></Input>
-          </Form.Item>
-              <Form.Item
-            label="Fecha de nacimiento"
-            name="FECHA"
-            rules={[
-              { required: true, message: "Ingrese una fecha, por favor." },
-            ]}
-           >
-            <DatePicker
-              style={{ width: "200px", maxWidth: "100%" }}
-              placeholder="Selecciona una fecha"
-              disabledDate={disabledDate}
-            />
-          </Form.Item>
-          <Form.Item
-                label="Carnet de identidad"
-                name="CI"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingrese su numero de carnet",
-                  },
-                  { validator: validarMinimoCI },
-                ]}
-              >
-                <Input
-                  maxLength={8}
-                  minLength={7}
-                  placeholder="Ingrese su numero de carnet"
-                  onKeyPress={onlyNumbers}
-                ></Input>
-              </Form.Item>
-
-              <Form.Item
-                label="Celular"
-                name="TELEFONO"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingrese un telefono",
-                  },
-                  {
-                    validator:validarTelefono,
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Ingrese el telefono"
-                  maxLength={8}
-                  minLength={8}
-                  style={{ maxWidth: "100%"}}
-                  onKeyPress={onlyNumbers}
-                ></Input>
-              </Form.Item>
-
-              <Form.Item
-                label="Genero"
-                name="GENERO"
-                style={{ maxWidth: "100%" }}
-                rules={[
-                  {
-                    required: true,message: "Por favor seleccione un genero ",
-                  },
-                ]}
-               >
-                <Select  placeholder="Seleccione un genero.">
-                  <Select.Option value="Femenino">Femenino</Select.Option>
-                  <Select.Option value="Masculino">Masculino</Select.Option>
-                </Select>
-              </Form.Item>
-              <Form.Item label="Foto" name="FOTO">
-                <Upload
-                  name="FOTO"
-                  customRequest={customRequest1}
-                  listType="picture-card"
-                  onPreview={handlePreview1}
-                  onChange={handleChange1}
-                  fileList={fileList1}
-                  maxCount={1}
-                >
-                  {fileList1.length >= 1 ? null : uploadButton1}
-                </Upload>
-                <Modal
-                  open={previewOpen}
-                  title={previewTitle}
-                  footer={null}
-                  onCancel={handleCancelIMG}
-                >
-                  <img
-                    alt="example"
-                    style={{
-                      width: "auto",
-                      height: "300px",
-                    }}
-                    src={previewImage}
-                  />
-                </Modal>
-              </Form.Item>
+             layout="vertical"
+            
+            autoComplete="off"
+            maskClosable={false}
+            keyboard={false}
+            closable={false}
+            onFinishFailed={onFinishFailed}
+            form={form} 
+            onFinish={onFinish}
+            style={{
+              width: "95%",
+              paddingLeft: "3%",
+              backgroundColor: "#ffff",
+              width: "90%",
+              margin: "0% 5% 5% 5%",
+              paddingTop: "4%",
+              paddingRight: "3%",
+              borderRadius: "15px",
+              display: "grid",
+            }}>
+            
               
-            </Col>
-            <Col span={10}>
-              <Form.Item 
-                label="Correo electronico" 
-                name="CORREO"
-                rules={[
-                  {
-                          type: "email",
-                          message: "El correo electrónico no es válido.",
-                        },
-                ]}
-                  >
-                  <Input
-                  placeholder="Ingrese su correo"
-                  maxLength={30}
+            <Row gutter={[16, 8]}>
+              <Col span={12}>
+              <Form.Item
+                  label="Nombre completo"
+                  name="NOMBRE"
+                  rules={[
+                    { required: true, message: "Ingrese un nombre, por favor." },
+                    { validator: validarMinimo },
+                  ]}
+                >
+                <Input
+                  maxLength={50}
                   minLength={5}
+                  placeholder="Ingrese su nombre completo."
+                  style={{maxWidth: "100%"}}
+                  onKeyPress={onlyLetters}
                 ></Input>
+             </Form.Item>
+                <Form.Item
+                    label="Fecha de nacimiento"
+                    name="FECHA"
+                    rules={[
+                      { required: true, message: "Ingrese una fecha, por favor." },
+                    ]}
+                  >
+                    <DatePicker
+                      style={{ width: "200px", maxWidth: "100%" }}
+                      placeholder="Selecciona una fecha"
+                      disabledDate={disabledDate}
+                    />
               </Form.Item>
               <Form.Item
-                label="Institucion"
-                name="INSTITUCION"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingrese la institucion",
-                  },
-                ]}
-               >
-                <Select
-                placeholder="Seleccione una institucion."
-                options={instituciones}
-                onChange={onInstitutionChange}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Semestre"
-                name="SEMESTRE"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingrese el semestre",
-                  },
-                ]}
-               >
-                <Select placeholder="Ingrese el semestre" options={options} />
-  
-              </Form.Item>
-              
-
-              <Form.Item
-                label="Codigo SIS"
-                name="CODIGOSIS"
-                style={{maxWidth: "100%"}}
-                 rules={[
-                  {
-                    requires:false,
-                    validator:validarCodigoSis,
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Ingrese su codigo sis"
-                  maxLength={9}
-                  minLength={9}
-                  onKeyPress={onlyNumbers}
-                  disabled={isInstitucionDisabled}
-                ></Input>
-              </Form.Item>
-              <Form.Item
-                label="Talla de polera"
-                name="TALLA_POLERA"
-              >
-                <Select placeholder="Seleccione una talla de polera">
-                  <Select.Option value="S">S</Select.Option>
-                  <Select.Option value="M">M</Select.Option>
-                  <Select.Option value="L">L</Select.Option>
-                  <Select.Option value="XL">XL</Select.Option>
-                  <Select.Option value="XXL">XXL</Select.Option>
-                </Select>
-              </Form.Item>
-
-            {/*
-              <Form.Item
-                label="Certificacion del estudiante"
-                name="CERTIFICADO"
-               >
-                <Upload
-                  name="CERTIFICADO"
-                  customRequest={customRequest}
-                  listType="picture-card"
-                  onPreview={handlePreview}
-                  onChange={handleChange}
-                  fileList={fileList}
-                  maxCount={1}
+                  label="Carnet de identidad"
+                  name="CI"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingrese su numero de carnet",
+                    },
+                    { validator: validarMinimoCI },
+                  ]}
                 >
-                  {fileList.length >= 1 ? null : uploadButton}
-                </Upload>
-                <Modal
-                  open={previewOpen}
-                  title={previewTitle}
-                  footer={null}
-                  onCancel={handleCancelIMG}
+                  <Input
+                    maxLength={8}
+                    minLength={7}
+                    placeholder="Ingrese su numero de carnet"
+                    onKeyPress={onlyNumbers}
+                  ></Input>
+                </Form.Item>
+
+                <Form.Item
+                  label="Celular"
+                  name="TELEFONO"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingrese un celular",
+                    },
+                    {
+                      validator:validarTelefono,
+                    },
+                  ]}
                 >
-                  <img
-                    alt="example"
-                    style={{
-                      width: "auto",
-                      height: "300px",
-                    }}
-                    src={previewImage}
+                  <Input
+                    placeholder="Ingrese el celular"
+                    maxLength={8}
+                    minLength={8}
+                    style={{ maxWidth: "100%"}}
+                    onKeyPress={onlyNumbers}
+                  ></Input>
+                </Form.Item>
+
+                <Form.Item
+                  label="Genéro"
+                  name="GENERO"
+                  style={{ maxWidth: "100%" }}
+                  rules={[
+                    {
+                      required: true,message: "Por favor seleccione un género ",
+                    },
+                  ]}
+                >
+                  <Select  placeholder="Seleccione un género.">
+                    <Select.Option value="Femenino">Femenino</Select.Option>
+                    <Select.Option value="Masculino">Masculino</Select.Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Foto" name="FOTO">
+                  <Upload
+                    name="FOTO"
+                    customRequest={customRequest1}
+                    listType="picture-card"
+                    onPreview={handlePreview1}
+                    onChange={handleChange1}
+                    fileList={fileList1}
+                    maxCount={1}
+                  >
+                    {fileList1.length >= 1 ? null : uploadButton1}
+                  </Upload>
+                  <Modal
+                    open={previewOpen}
+                    title={previewTitle}
+                    footer={null}
+                    onCancel={handleCancelIMG}
+                  >
+                    <img
+                      alt="example"
+                      style={{
+                        width: "auto",
+                        height: "300px",
+                      }}
+                      src={previewImage}
+                    />
+                  </Modal>
+                </Form.Item>
+                
+              </Col>
+              <Col span={12}>
+                <Form.Item 
+                  label="Correo electrónico" 
+                  name="CORREO"
+                  rules={[
+                    {
+                            type: "email",
+                            message: "El correo electrónico no es válido.",
+                          },
+                  ]}
+                    >
+                    <Input
+                    placeholder="Ingrese su correo electrónico"
+                    maxLength={30}
+                    minLength={5}
+                  ></Input>
+                </Form.Item>
+                <Form.Item
+                  label="Institución"
+                  name="INSTITUCION"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingrese la institución",
+                    },
+                  ]}
+                 >
+                  <Select
+                  placeholder="Seleccione una institución."
+                  options={instituciones}
+                  onChange={onInstitutionChange}
                   />
-                </Modal>
-              </Form.Item>
-            */}
-            </Col>
-          </Row>
-        </Form>
-      </Modal>
+                </Form.Item>
+                <Form.Item
+                  label="Semestre"
+                  name="SEMESTRE"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingrese el semestre",
+                    },
+                  ]}
+                 >
+                  <Select placeholder="Ingrese el semestre" options={options} />
+                </Form.Item>
+                <Form.Item
+                  label="Código SIS"
+                  name="CODIGOSIS"
+                  style={{maxWidth: "100%"}}
+                  rules={[
+                    {
+                      requires:false,
+                      validator:validarCodigoSis,
+                    },
+                  ]}
+                 >
+                  <Input
+                    placeholder="Ingrese su código sis"
+                    maxLength={9}
+                    minLength={9}
+                    onKeyPress={onlyNumbers}
+                    disabled={isInstitucionDisabled}
+                  ></Input>
+                </Form.Item>
+                <Form.Item
+                  label="Talla de polera"
+                  name="TALLA_POLERA"
+                 >
+                  <Select placeholder="Seleccione una talla de polera">
+                    <Select.Option value="S">S</Select.Option>
+                    <Select.Option value="M">M</Select.Option>
+                    <Select.Option value="L">L</Select.Option>
+                    <Select.Option value="XL">XL</Select.Option>
+                    <Select.Option value="XXL">XXL</Select.Option>
+                  </Select>
+                </Form.Item>
 
-      {/*Modal para la parte de registrar equipo grupal */}
-      <Modal
-        title="Formulario de registro grupal"
-        open={verModalGrupal}
-        onCancel={handleCancelGrupal}
-        style={{
-          top: 20,
-        }}
-        width={600}
-        footer={[
-          <Form form={form} onFinish={registrarGrupo}>
-            <Button onClick={showCancelGrupal} className="boton-cancelar-registro">
-            Cancelar</Button>
-            <Button  
-            type="primary" 
-            htmlType="submit"
-            className="boton-guardar-registro">
-              Guardar
-            </Button>
-          </Form>,
-        ]}
-      >
-        <Form
-          onFinishFailed={onFinishFailed}
-          form={form}
-          initialValues={nombreEntrenador}
-          onFinish={registrarGrupo}
-          layout="vertical"
-        >
-          <Form.Item
-            label="Nombre del equipo"
-            name="EQUIPO"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese el nombre del equipo",
-              },
-            ]}
-          >
-            <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
-          </Form.Item>
-          {/*<Form.Item label="Institución" name="INSTITUCION">
-            <Input placeholder="Ingrese el nombre de la institución" />
-          </Form.Item>*/}
-          <Form.Item label="Entrenador" name="ENTRENADOR">
-            <div className="botones-entrenador">
-              <label>Añadir</label>
-              <Button
-                type="link"
-                onClick={showModalEntrenador}
-                className="icono-aniadir"
-              >
-                <PlusOutlined />
-              </Button>
-            </div>
-
-            <Input
-              value={nombreEntrenador}
-              readOnly={estadoFormulario}
-              placeholder="Ingrese el nombre del entrenador"
-            />
-          </Form.Item>
-
-          <div className="aniadir-participante">
-            <div>
-              <label>Participantes</label>
-            </div>
-            <div className="boton-aniadir-participante">
-              <label>Eliminar</label>
-              <Button
-                type="link"
-                onClick={eliminarParticipante}
-                className="icono-eliminar"
-              >
-                <DeleteOutlined />
-              </Button>
-
-              <label>Añadir</label>
-              <Button
-                type="link"
-                onClick={aniadirPArticipante}
-                className="icono-aniadir"
-              >
-                <PlusOutlined />
-              </Button>
-            </div>
+              {/*
+                <Form.Item
+                  label="Certificacion del estudiante"
+                  name="CERTIFICADO"
+                >
+                  <Upload
+                    name="CERTIFICADO"
+                    customRequest={customRequest}
+                    listType="picture-card"
+                    onPreview={handlePreview}
+                    onChange={handleChange}
+                    fileList={fileList}
+                    maxCount={1}
+                  >
+                    {fileList.length >= 1 ? null : uploadButton}
+                  </Upload>
+                  <Modal
+                    open={previewOpen}
+                    title={previewTitle}
+                    footer={null}
+                    onCancel={handleCancelIMG}
+                  >
+                    <img
+                      alt="example"
+                      style={{
+                        width: "auto",
+                        height: "300px",
+                      }}
+                      src={previewImage}
+                    />
+                  </Modal>
+                </Form.Item>
+              */}
+              </Col>
+            </Row>
+         <div style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+              margin: "10px",
+            }}>
+          <Button onClick={showCancel}
+                style={{
+                margin: "10px",
+                }}>
+                  Cancelar
+                </Button>
+                <Button
+                  htmlType="submit"
+                  type="primary"
+                  style={{
+                    margin: "10px",
+                  }}
+                >
+                  Guardar
+                </Button>
           </div>
-          <Table
-            className="tabla-participantes"
-            dataSource={listaParticipante}
-            rowSelection={{
-              type: selectionType,
-              ...rowSelection,
-            }}
-            pagination={false}
-            locale={{
-              emptyText: (
-                <div style={{ padding: "30px", textAlign: "center" }}>
-                  No hay participantes añadidos.
-                </div>
-              ),
-            }}
+        </Form>
+      
+        {/*Modal para la parte de registrar equipo grupal */}
+        <Modal
+          title="Formulario de registro grupal"
+          open={verModalGrupal}
+          onCancel={handleCancelGrupal}
+          style={{
+            top: 20,
+          }}
+          width={600}
+          footer={[
+            <Form form={form} onFinish={registrarGrupo}>
+              <Button onClick={showCancelGrupal} className="boton-cancelar-registro">
+              Cancelar</Button>
+              <Button  
+              type="primary" 
+              htmlType="submit"
+              className="boton-guardar-registro">
+                Guardar
+              </Button>
+            </Form>,
+          ]}
+         >
+          <Form
+            onFinishFailed={onFinishFailed}
+            form={form}
+            initialValues={nombreEntrenador}
+            onFinish={registrarGrupo}
+            layout="vertical"
           >
-            <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
-          </Table>
-        </Form>
-      </Modal>
-
-      {/*Modal para buscar un participante*/}
-      <Modal
-        title="Buscar participante"
-        open={buscarParticipante}
-        onCancel={handleCancelBuscador}
-        footer={[
-          <Form onFinish={aniadirEntrenador}>
-            <Button type="primary" onClick={aniadirParticipante}>
-              Añadir
-            </Button>
-          </Form>,
-        ]}
-      >
-        <label>CI del participante</label>
-        <div>
-          <Search
-            className="buscador-participante"
-            value={searchText}
-            placeholder="Buscar participante"
-            onSearch={onSearch}
-            onChange={(e) => onSearch(e.target.value)}
-            maxLength={30}
-            allowClear
-          />
-        </div>
-        <Form layout="vertical">
-          <Form.Item label="Nombre del participante">
-            {datoFiltrado.map((item) => (
-              <div key={item}>
-                <p> {item.nombre}</p>
+            <Form.Item
+              label="Nombre del equipo"
+              name="EQUIPO"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese el nombre del equipo",
+                },
+              ]}
+            >
+              <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
+            </Form.Item>
+            {/*<Form.Item label="Institución" name="INSTITUCION">
+              <Input placeholder="Ingrese el nombre de la institución" />
+            </Form.Item>*/}
+            <Form.Item label="Entrenador" name="ENTRENADOR">
+              <div className="botones-entrenador">
+                <label>Añadir</label>
+                <Button
+                  type="link"
+                  onClick={showModalEntrenador}
+                  className="icono-aniadir"
+                >
+                  <PlusOutlined />
+                </Button>
               </div>
-            ))}
-          </Form.Item>
-        </Form>
-      </Modal>
 
-      {/*Modal para buscar un entrenador*/}
-      <Modal
-        title="Selecionar un entrenador"
-        open={buscarEntrenador}
-        onCancel={handleCancelEntrenador}
-        footer={[
-          <Form>
-            <Button type="primary" onClick={aniadirEntrenador}>
-              Añadir
-            </Button>
-          </Form>,
-        ]}
-      >
-        <label>CI del entrenador</label>
-        <div>
-          <Search
-            placeholder="Buscar entrenador"
-            value={searchEntrenador}
-            onSearch={onSearchEntrenador}
-            onChange={(e) => onSearchEntrenador(e.target.value)}
-            maxLength={30}
-            allowClear
-          />
-        </div>
-        <Form layout="vertical">
-          <Form.Item label="Nombre del Entrenador">
-            {datoFiltradoEntrenador.map((item) => (
-              <div key={item}>
-                <p> {item.nombre}</p>
+              <Input
+                value={nombreEntrenador}
+                readOnly={estadoFormulario}
+                placeholder="Ingrese el nombre del entrenador"
+              />
+            </Form.Item>
+
+            <div className="aniadir-participante">
+              <div>
+                <label>Participantes</label>
               </div>
-            ))}
-          </Form.Item>
-        </Form>
-      </Modal>
+              <div className="boton-aniadir-participante">
+                <label>Eliminar</label>
+                <Button
+                  type="link"
+                  onClick={eliminarParticipante}
+                  className="icono-eliminar"
+                >
+                  <DeleteOutlined />
+                </Button>
+
+                <label>Añadir</label>
+                <Button
+                  type="link"
+                  onClick={aniadirPArticipante}
+                  className="icono-aniadir"
+                >
+                  <PlusOutlined />
+                </Button>
+              </div>
+            </div>
+            <Table
+              className="tabla-participantes"
+              dataSource={listaParticipante}
+              rowSelection={{
+                type: selectionType,
+                ...rowSelection,
+              }}
+              pagination={false}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: "30px", textAlign: "center" }}>
+                    No hay participantes añadidos.
+                  </div>
+                ),
+              }}
+            >
+              <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
+            </Table>
+          </Form>
+        </Modal>
+
+        {/*Modal para buscar un participante*/}
+        <Modal
+          title="Buscar participante"
+          open={buscarParticipante}
+          onCancel={handleCancelBuscador}
+          footer={[
+            <Form onFinish={aniadirEntrenador}>
+              <Button type="primary" onClick={aniadirParticipante}>
+                Añadir
+              </Button>
+            </Form>,
+          ]}
+        >
+          <label>CI del participante</label>
+          <div>
+            <Search
+              className="buscador-participante"
+              value={searchText}
+              placeholder="Buscar participante"
+              onSearch={onSearch}
+              onChange={(e) => onSearch(e.target.value)}
+              maxLength={30}
+              allowClear
+            />
+          </div>
+          <Form layout="vertical">
+            <Form.Item label="Nombre del participante">
+              {datoFiltrado.map((item) => (
+                <div key={item}>
+                  <p> {item.nombre}</p>
+                </div>
+              ))}
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/*Modal para buscar un entrenador*/}
+        <Modal
+          title="Selecionar un entrenador"
+          open={buscarEntrenador}
+          onCancel={handleCancelEntrenador}
+          footer={[
+            <Form>
+              <Button type="primary" onClick={aniadirEntrenador}>
+                Añadir
+              </Button>
+            </Form>,
+          ]}
+        >
+          <label>CI del entrenador</label>
+          <div>
+            <Search
+              placeholder="Buscar entrenador"
+              value={searchEntrenador}
+              onSearch={onSearchEntrenador}
+              onChange={(e) => onSearchEntrenador(e.target.value)}
+              maxLength={30}
+              allowClear
+            />
+          </div>
+          <Form layout="vertical">
+            <Form.Item label="Nombre del Entrenador">
+              {datoFiltradoEntrenador.map((item) => (
+                <div key={item}>
+                  <p> {item.nombre}</p>
+                </div>
+              ))}
+            </Form.Item>
+          </Form>
+        </Modal>
     </div>
   );
 }
