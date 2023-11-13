@@ -527,7 +527,15 @@ export default function DetalleEvento() {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación">
+                      <Form.Item 
+                      label="Participación"
+                      name="participacion"
+                      rules={[
+                        {
+                          required: true,
+                        },
+                      ]}
+                      >
                         <Radio.Group
                           onChange={onChangeParticipacion}
                           value={valueParticipacion}
@@ -536,7 +544,17 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad">
+                      <Form.Item 
+                      label="Modalidad"
+                      name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Seleccione una modalidad",
+                          },
+                          
+                        ]}
+                      >
                         <Radio.Group onChange={onChangeICPC} value={value}>
                           <Radio value={1}>Interno</Radio>
                           <Radio value={2}>Abierto</Radio>
@@ -548,7 +566,15 @@ export default function DetalleEvento() {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido">
+                      <Form.Item label="Dirigido a" 
+                      name="dirigido a"
+                      className="icpc-dirigido"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -572,7 +598,15 @@ export default function DetalleEvento() {
                         />
                       </Form.Item>
 
-                      <Form.Item label="Bases del evento reglas y premios">
+                      <Form.Item 
+                      label="Bases del evento reglas y premios"
+                      name="bases"
+                      rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Upload
                           {...uploadProps}
                           customRequest={customRequest}
@@ -646,7 +680,14 @@ export default function DetalleEvento() {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación">
+                      <Form.Item label="Participación"
+                        name="participacion"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeParticipacion}
                           value={valueParticipacion}
@@ -655,7 +696,14 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad">
+                      <Form.Item label="Modalidad"
+                        name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Radio.Group onChange={onChangeLibre} value={value2}>
                           <Radio value={1}>Interno</Radio>
                           <Radio value={2}>Abierto</Radio>
@@ -667,7 +715,15 @@ export default function DetalleEvento() {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido">
+                      <Form.Item label="Dirigido a" 
+                      className="icpc-dirigido"
+                      name="dirigido a"
+                      rules={[
+                        {
+                          required: true,
+                        },
+                      ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -691,7 +747,14 @@ export default function DetalleEvento() {
                         />
                       </Form.Item>
 
-                      <Form.Item label="Bases del evento reglas y premios">
+                      <Form.Item label="Bases del evento reglas y premios"
+                        name="bases"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Upload
                           {...uploadProps}
                           customRequest={customRequest}
@@ -765,7 +828,14 @@ export default function DetalleEvento() {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación">
+                      <Form.Item label="Participación"
+                        name="participacion"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeParticipacion}
                           value={valueParticipacion}
@@ -774,7 +844,14 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad">
+                      <Form.Item label="Modalidad"
+                        name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Radio.Group onChange={onChangeICPC} value={value3}>
                           <Radio value={1}>Interno</Radio>
                           <Radio value={2}>Abierto</Radio>
@@ -786,7 +863,14 @@ export default function DetalleEvento() {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Facilitador" className="icpc-dirigido">
+                      <Form.Item label="Facilitador" className="icpc-dirigido"
+                        name="facilitador"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -801,7 +885,14 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido">
+                      <Form.Item label="Dirigido a" className="icpc-dirigido"
+                        name="dirigido a"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -899,7 +990,14 @@ export default function DetalleEvento() {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación">
+                      <Form.Item label="Participación"
+                        name="participacion"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeParticipacion}
                           value={valueParticipacion}
@@ -908,7 +1006,14 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad">
+                      <Form.Item label="Modalidad"
+                        name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeEntrenamiento}
                           value={value5}
@@ -923,7 +1028,14 @@ export default function DetalleEvento() {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Entrenador" className="icpc-dirigido">
+                      <Form.Item label="Entrenador" className="icpc-dirigido"
+                        name="entrenador"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -938,7 +1050,14 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido">
+                      <Form.Item label="Dirigido a" className="icpc-dirigido"
+                        name="dirigido a"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -1036,7 +1155,14 @@ export default function DetalleEvento() {
                 <Form>
                   <div className="form-reclutamiento">
                     <div className="columna1-reclutamiento" >
-                      <Form.Item label="Tipo">
+                      <Form.Item label="Modalidad"
+                        name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Radio.Group onChange={onChangeTorneo} value={value4}>
                           <Radio value={1}>Interno</Radio>
                           <Radio value={2}>Abierto</Radio>
@@ -1045,7 +1171,14 @@ export default function DetalleEvento() {
                       <Form.Item label="Fecha fin de inscripciones">
                         <DatePicker placeholder="Seleccione una fecha" className="fecha-reclutamiento"/>
                       </Form.Item>
-                      <Form.Item label="Dirigido a">
+                      <Form.Item label="Dirigido a"
+                        name="dirigido a"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -1073,7 +1206,14 @@ export default function DetalleEvento() {
                       </Form.Item>
                     </div>
                     <div>
-                      <Form.Item label="Facilitador">
+                      <Form.Item label="Facilitador"
+                        name="facilitador"
+                        rules={[
+                          {
+                            required: true,
+                          }
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -1131,7 +1271,14 @@ export default function DetalleEvento() {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación">
+                      <Form.Item label="Participación"
+                        name="participacion"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeParticipacion}
                           value={valueParticipacion}
@@ -1140,7 +1287,14 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad">
+                      <Form.Item label="Modalidad"
+                        name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Radio.Group onChange={onChangeTorneo} value={value5}>
                           <Radio value={1}>Interno</Radio>
                           <Radio value={2}>Abierto</Radio>
@@ -1152,7 +1306,15 @@ export default function DetalleEvento() {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido">
+                      <Form.Item label="Dirigido a" 
+                      className="icpc-dirigido"
+                      name="dirigido a"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Select
                           allowClear
                           options={[
@@ -1176,7 +1338,14 @@ export default function DetalleEvento() {
                         />
                       </Form.Item>
 
-                      <Form.Item label="Bases del evento reglas y premios">
+                      <Form.Item label="Bases del evento reglas y premios"
+                        name="bases"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
                         <Upload
                           {...uploadProps}
                           customRequest={customRequest}
@@ -1250,7 +1419,14 @@ export default function DetalleEvento() {
                 <Form className="form-ICPC">
                 <div className="modal-icpc">
                   <div className="columna1-icpc">
-                    <Form.Item label="Participación">
+                    <Form.Item label="Participación"
+                      name="participacion"
+                      rules={[
+                        {
+                          required: true,
+                        }
+                      ]}
+                    >
                       <Radio.Group
                         onChange={onChangeParticipacion}
                         value={valueParticipacion}
@@ -1259,7 +1435,14 @@ export default function DetalleEvento() {
                         <Radio value={2}>Individual</Radio>
                       </Radio.Group>
                     </Form.Item>
-                    <Form.Item label="Modalidad">
+                    <Form.Item label="Modalidad"
+                      name="modalidad"
+                      rules={[
+                        {
+                          required: true,
+                        }
+                      ]}
+                    >
                       <Radio.Group onChange={onChangeOtros} value={value6}>
                         <Radio value={1}>Interno</Radio>
                         <Radio value={2}>Abierto</Radio>
@@ -1271,7 +1454,14 @@ export default function DetalleEvento() {
                         placeholder="Selecione una fecha"
                       />
                     </Form.Item>
-                    <Form.Item label="Responsable" className="icpc-dirigido">
+                    <Form.Item label="Responsable" className="icpc-dirigido"
+                      name="responsable"
+                      rules={[
+                        {
+                          required: true,
+                        }
+                      ]}
+                    >
                         <Select
                           allowClear
                           options={[
@@ -1286,7 +1476,14 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-                    <Form.Item label="Dirigido a" className="icpc-dirigido">
+                    <Form.Item label="Dirigido a" className="icpc-dirigido"
+                      name="dirigido a"
+                      rules={[
+                        {
+                          required: true,
+                        }
+                      ]}
+                    >
                       <Select
                         allowClear
                         options={[
