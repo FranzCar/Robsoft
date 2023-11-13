@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\EquipoController;
 use App\Http\Controllers\Api\AuspiciadorController;
 use App\Http\Controllers\Api\RolPersonaController;
 use App\Http\Controllers\Api\InstitucionController;
+use App\Http\Controllers\Api\DisponibilidadController;
+use App\Http\Controllers\Api\EtapaController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -34,3 +36,5 @@ Route::get('lista-auspiciadores',[AuspiciadorController::class, 'listaAuspiciado
 Route::get('lista-instituciones',[InstitucionController::class, 'listaInstitucion']);
 Route::post('detallar-evento/{id}',[EventoController::class, 'guardarCaracteristicasEvento']);
 Route::get('lista-facilitadores',[RolPersonaController::class, 'listaFacilitadores']);
+Route::get('horarios-disponibles', [DisponibilidadController::class, 'obtenerHorarios']);
+Route::post('guardar-etapa/{id}', [EtapaController::class, 'guardarEtapa']);
