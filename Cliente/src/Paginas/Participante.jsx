@@ -22,6 +22,9 @@ import {
 import axios from "axios";
 import Column from "antd/es/table/Column";
 
+import { useNavigate } from "react-router-dom";
+
+
 const { confirm } = Modal;
 const { Search } = Input;
 
@@ -81,6 +84,26 @@ export default function Participante() {
   }, []);
 
 //*Kevin
+const navigate = useNavigate();
+
+//Validacion de los tipos de imagenes
+
+  const isImage = (file) => {
+    const imageExtensions = ["jpeg", "jpg", "png"];
+    const extension = file.name.split(".").pop().toLowerCase();
+    return imageExtensions.includes(extension);
+  };
+// Configuración de las opciones del componente Upload
+  const uploadProps = {
+    name: "file",
+    beforeUpload: (file) => {
+      if (!isImage(file)) {
+        message.error("Solo se permiten archivos de imagen (JPEG, JPG, PNG)");
+        return Upload.LIST_IGNORE; // Impedir la carga del archivo y no lo añade a la lista
+      }
+      return isImage(file); // Permitir la carga del archivo solo si es una imagen
+    },
+  };
 
 const [isInstitucionDisabled, setIsInstitucionDisabled] = useState(true);
 
@@ -250,6 +273,7 @@ const validarDuplicadoCI = (values) => {
         setFileList1([]);
        obtenerParticipantesCI();
         form.resetFields();
+        
       },
       onCancel() {
     setIsInstitucionDisabled(true);
@@ -304,6 +328,7 @@ const validarDuplicadoCI = (values) => {
         message.success("El participante se registró correctamente");
       obtenerParticipantesCI();
       obtenerParticipantes();
+      navigate("/");
       })
       .catch((error) => {
         if (error.response) {
@@ -856,6 +881,7 @@ function onlyLetters(event) {
                 </Form.Item>
                 <Form.Item label="Foto" name="FOTO">
                   <Upload
+                  {...uploadProps}
                     name="FOTO"
                     customRequest={customRequest1}
                     listType="picture-card"
