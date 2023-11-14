@@ -74,9 +74,10 @@ export default function DetalleEvento() {
   const [listaUbicacion, setListaUbicacion] = useState(null);
   const [listaEtapas, setListaEtapas] = useState([]);
   const [estadoFormulario, setEstadoFormulario] = useState(true);
-  const [horaReservada, setHoraReservada] = useState(null)
-  const [listaHorarios,setListaHorarios] = useState([])
+  const [horaReservada, setHoraReservada] = useState(null);
+  const [listaHorarios, setListaHorarios] = useState([]);
   const [fechaInicioBD, setFechaInicioBD] = useState(null);
+  const [requisitos, setRequisitos] = useState([]);
   //Kevin
   //Solo permitir numeros en los input
   function onlyNumbers(event) {
@@ -104,8 +105,8 @@ export default function DetalleEvento() {
         setMostrarFormTaller(false);
         setMostrarFormTorneo(false);
         setListaEtapas([]);
-        setHoraReservada(null)
-        setFechaInicioBD(null)
+        setHoraReservada(null);
+        setFechaInicioBD(null);
         form.resetFields();
       },
       onCancel() {},
@@ -191,9 +192,8 @@ export default function DetalleEvento() {
 
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
-
-    console.log("El record es ", record.FECHA_INICIO)
-    setFechaInicioBD(record.FECHA_INICIO)
+    console.log("El record es ", record.FECHA_INICIO);
+    setFechaInicioBD(record.FECHA_INICIO);
     const tipoEvento = record.TIPO_EVENTO;
     console.log("El tipo de evento es ", tipoEvento);
     setMostrarPestanias(true);
@@ -215,6 +215,21 @@ export default function DetalleEvento() {
   };
 
   const onChangeICPC = (e) => {
+    const requisito = e.target.value;
+    // Divide los requisitos actuales en un array
+    if (requisito === 1) {
+      // Agrega "Código SIS" solo si no está presente
+      setRequisitos((prevRequisitos) =>
+        prevRequisitos.includes("- Código SIS")
+          ? prevRequisitos
+          : prevRequisitos + "- Código SIS"
+      );
+    } else {
+      // Elimina "Código SIS" si está presente
+      setRequisitos((prevRequisitos) =>
+        prevRequisitos.replace("- Código SIS", "")
+      );
+    }
     setValue(e.target.value);
   };
 
@@ -294,7 +309,6 @@ export default function DetalleEvento() {
     return imageExtensions.includes(extension);
   };
 
-
   //Ver el modal de etapa
   const showEtapa = () => {
     setVerEtapa(true);
@@ -317,11 +331,10 @@ export default function DetalleEvento() {
       id_ubicacion: ubicacion,
       fecha_etapa: nuevaFecha,
     };
-    mostrarHorarios(listaHorarios)
+    mostrarHorarios(listaHorarios);
     axios
-      .get("http://localhost:8000/api/horarios-disponibles",datos )
+      .get("http://localhost:8000/api/horarios-disponibles", datos)
       .then((response) => {
-       
         setVerHoraReserva(true);
       })
       .catch((error) => {
@@ -358,31 +371,27 @@ export default function DetalleEvento() {
       { key: 23, hora: "7:00 - 7:30 PM", estado: "Libre" },
       { key: 24, hora: "7:30 - 8:00 PM", estado: "Libre" },
     ];
-  
+
     console.log("Los horarios ocupados de la base de datos son ", data.length);
-  
+
     // Verificar si la lista de data está vacía
     if (data.length === 0) {
       // Si está vacía, devolver la lista completa de horarios
       setListaHorarios(horarios);
     } else {
       // Obtener la lista de horarios ocupados
-      const horariosOcupados = data.map(item => item.id_horario);
-  
+      const horariosOcupados = data.map((item) => item.id_horario);
+
       // Filtrar la lista de horarios para excluir los ocupados
       const horariosDisponibles = horarios.filter(
-        horario => !horariosOcupados.includes(horario.key)
+        (horario) => !horariosOcupados.includes(horario.key)
       );
-  
+
       // Devolver la lista filtrada
       console.log("Los horarios disponibles son ", horariosDisponibles);
       setListaHorarios(horariosDisponibles);
     }
   };
-  
-  
-
-  
 
   // Puedes seguir agregando más objetos a la lista según tus necesidades
 
@@ -428,7 +437,14 @@ export default function DetalleEvento() {
     // Obtén el primer y último elemento de la lista
     const primerDato = selectedRows[0];
     const ultimoDato = selectedRows[selectedRows.length - 1];
-    console.log("los datos selecionados son ", primerDato.key, " ", ultimoDato.key, " ", listaHorarios[0].key)
+    console.log(
+      "los datos selecionados son ",
+      primerDato.key,
+      " ",
+      ultimoDato.key,
+      " ",
+      listaHorarios[0].key
+    );
 
     // Obtén la parte antes y después del guion en el campo 'hora'
     const primeraParte = primerDato.hora.split(" - ")[0];
@@ -437,16 +453,16 @@ export default function DetalleEvento() {
     // Combina las partes obtenidas
     const nuevoTexto = `${primeraParte} - ${segundaParte}`;
 
-    let listaNueva = []
+    let listaNueva = [];
     // Cambia el campo 'estado' de los elementos entre el primero y el último a 'Ocupado'
-    for(let i = primerDato.key; i<= ultimoDato.key; i++){
-      for(let j = 0; j< listaHorarios.length; j++){
-        if(i === listaHorarios[j].key){
+    for (let i = primerDato.key; i <= ultimoDato.key; i++) {
+      for (let j = 0; j < listaHorarios.length; j++) {
+        if (i === listaHorarios[j].key) {
           listaNueva.push(i);
         }
       }
     }
-    setListaHorarios(listaNueva)    
+    setListaHorarios(listaNueva);
     //Se asgina el valor al campo input de horario de la etapa
     setHoraReservada(nuevoTexto);
     // Muestra los resultados
@@ -509,17 +525,17 @@ export default function DetalleEvento() {
   };
 
   const aniadirEtapa = () => {
-    const titulo = form.getFieldValue("TITULO_ETAPA")
-    const modalidad = form.getFieldValue("MODALIDAD_ETAPA")
+    const titulo = form.getFieldValue("TITULO_ETAPA");
+    const modalidad = form.getFieldValue("MODALIDAD_ETAPA");
     const fecha = form.getFieldValue("FECHA_ETAPA");
     const nuevaFecha = fecha.format("YYYY-MM-DD");
     const ubicacion = form.getFieldValue("UBICACION_ETAPA");
-    const hora = horaReservada
-    let modalidadNueva = ""
-    if(modalidad === 1){
-      modalidadNueva = "En linea"
-    }else{
-      modalidadNueva = "Presencial"
+    const hora = horaReservada;
+    let modalidadNueva = "";
+    if (modalidad === 1) {
+      modalidadNueva = "En linea";
+    } else {
+      modalidadNueva = "Presencial";
     }
 
     // Crear un nuevo objeto con la información de la etapa
@@ -549,29 +565,79 @@ export default function DetalleEvento() {
       const nuevaListaEtapas = [...listaEtapas, nuevaEtapa];
 
       // Actualizar el estado con la nueva lista de etapas
-      console.log("las list de añadir etapa es ", listaHorarios)
-      mostrarHorarios(listaHorarios)
+      console.log("las list de añadir etapa es ", listaHorarios);
+      mostrarHorarios(listaHorarios);
       setListaEtapas(nuevaListaEtapas);
-      form.resetFields()
-      setHoraReservada(null)
+      form.resetFields();
+      setHoraReservada(null);
     }
   };
 
   const validacionFechaLimite = (current) => {
-     // Obtenemos la fecha actual
-     const today = new Date();
+    // Obtenemos la fecha actual
+    const today = new Date();
 
-     // Establecemos la fecha mínima como 1 día antes de la fecha actual
-     const minDate = new Date();
-     minDate.setDate(today.getDate() -1);
- 
-     // Establecemos la fecha máxima como fechaInicioBD - 1 día
-     const maxDate = new Date(fechaInicioBD);
-     maxDate.setDate(maxDate.getDate() - 0);
- 
-     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
-     return current < minDate || current > maxDate;
-  }
+    // Establecemos la fecha mínima como 1 día antes de la fecha actual
+    const minDate = new Date();
+    minDate.setDate(today.getDate() - 1);
+
+    // Establecemos la fecha máxima como fechaInicioBD - 1 día
+    const maxDate = new Date(fechaInicioBD);
+    maxDate.setDate(maxDate.getDate() - 0);
+
+    // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
+    return current < minDate || current > maxDate;
+  };
+
+  const insertarRequisitos = (value) => {
+    if (value === "1") {
+      // Si el valor es "1", quitar el texto "RUDE" si existe en requisitos
+      setRequisitos((prevRequisitos) =>
+        typeof prevRequisitos === "string"
+          ? prevRequisitos.replace(/-?RUDE/g, "").trim()
+          : prevRequisitos
+      );
+
+      // Agregar "Certificado de estudiante" al estado de requisitos
+      setRequisitos((prevRequisitos) =>
+        typeof prevRequisitos === "string"
+          ? (prevRequisitos.endsWith("-")
+              ? prevRequisitos
+              : prevRequisitos + " - ") + "Certificado de estudiante"
+          : "Certificado de estudiante"
+      );
+    } else if (value === "2") {
+      // Si el valor es "2", quitar el texto "Certificado de estudiante" si existe en requisitos
+      setRequisitos((prevRequisitos) =>
+        typeof prevRequisitos === "string"
+          ? prevRequisitos.replace(/-?Certificado de estudiante/g, "").trim()
+          : prevRequisitos
+      );
+
+      // Agregar "RUDE" al estado de requisitos
+      setRequisitos((prevRequisitos) =>
+        typeof prevRequisitos === "string"
+          ? (prevRequisitos.endsWith("-")
+              ? prevRequisitos
+              : prevRequisitos + " - ") + "RUDE"
+          : "RUDE"
+      );
+    } else {
+      // Verificar si hay datos en requisitos antes de realizar alguna acción
+      if (requisitos) {
+        // Eliminar ambos campos si existen en requisitos
+        const nuevoRequisitos =
+          typeof requisitos === "string"
+            ? requisitos
+                .replace(/-?Certificado de estudiante/g, "")
+                .replace(/-?RUDE/g, "")
+                .trim()
+            : requisitos;
+        setRequisitos(nuevoRequisitos);
+      }
+      // Puedes agregar más lógica aquí según sea necesario
+    }
+  };
 
   return (
     <div>
@@ -785,7 +851,10 @@ export default function DetalleEvento() {
                           <Button onClick={reservarHora}>Reservar hora</Button>
                         </div>
                         <div>
-                          <Input  readOnly={estadoFormulario} value={horaReservada}></Input>
+                          <Input
+                            readOnly={estadoFormulario}
+                            value={horaReservada}
+                          ></Input>
                         </div>
                       </div>
                     </Form.Item>
@@ -805,7 +874,7 @@ export default function DetalleEvento() {
                         ),
                       }}
                     >
-                      <Column title="Título" dataIndex="nombre_etapa"/>
+                      <Column title="Título" dataIndex="nombre_etapa" />
                       <Column title="Fecha" dataIndex="fecha_etapa" />
                       <Column title="Ubicación" dataIndex="id_ubicacion" />
                       <Column title="Hora" dataIndex="hora" />
@@ -878,6 +947,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
+                          onChange={insertarRequisitos}
                           options={[
                             {
                               value: "1",
@@ -885,7 +955,7 @@ export default function DetalleEvento() {
                             },
                             {
                               value: "2",
-                              label: "Colegio",
+                              label: "Colegios",
                             },
                             {
                               value: "3",
@@ -943,17 +1013,17 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input 
-                        placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
-                        maxLength={3}/>
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
+                        />
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={20} max={100} />
                       </Form.Item>
-                      <Form.Item label="Requisitos"
-                      >
-                        <TextArea showCount ></TextArea>
+                      <Form.Item label="Requisitos">
+                        <TextArea disabled={true} value={requisitos}></TextArea>
                       </Form.Item>
                       <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
                         <Table
@@ -1101,9 +1171,10 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
-                        maxLength={3}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1274,9 +1345,10 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
-                        maxLength={3}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1450,9 +1522,10 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
-                        maxLength={3}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1731,9 +1804,10 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
-                        maxLength={3}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1905,9 +1979,10 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
-                        maxLength={3}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
