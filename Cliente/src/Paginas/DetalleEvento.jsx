@@ -289,6 +289,7 @@ export default function DetalleEvento() {
     return imageExtensions.includes(extension);
   };
 
+
   //Ver el modal de etapa
   const showEtapa = () => {
     setVerEtapa(true);
@@ -832,7 +833,7 @@ export default function DetalleEvento() {
                         ]}
                       >
                         <Radio.Group onChange={onChangeICPC} value={value}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -920,16 +921,17 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
-                        />
+                        <Input 
+                        placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        maxLength={3}/>
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
-                      <Form.Item label="Requisitos">
-                        <TextArea  showCount></TextArea>
+                      <Form.Item label="Requisitos"
+                      >
+                        <TextArea showCount ></TextArea>
                       </Form.Item>
                       <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
                         <Table
@@ -994,7 +996,7 @@ export default function DetalleEvento() {
                         ]}
                       >
                         <Radio.Group onChange={onChangeLibre} value={value2}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1077,13 +1079,13 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount></TextArea>
@@ -1151,7 +1153,7 @@ export default function DetalleEvento() {
                         ]}
                       >
                         <Radio.Group onChange={onChangeTaller} value={value3}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1250,13 +1252,13 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount></TextArea>
@@ -1327,7 +1329,7 @@ export default function DetalleEvento() {
                           onChange={onChangeEntrenamiento}
                           value={value5}
                         >
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1426,13 +1428,13 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount></TextArea>
@@ -1483,7 +1485,7 @@ export default function DetalleEvento() {
                         ]}
                       >
                         <Radio.Group onChange={onChangeTorneo} value={value4}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1624,7 +1626,7 @@ export default function DetalleEvento() {
                         ]}
                       >
                         <Radio.Group onChange={onChangeTorneo} value={value5}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1707,13 +1709,13 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea></TextArea>
@@ -1782,7 +1784,7 @@ export default function DetalleEvento() {
                         ]}
                       >
                         <Radio.Group onChange={onChangeOtros} value={value6}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1881,13 +1883,13 @@ export default function DetalleEvento() {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
+                        <Input placeholder="Ingrese el costo" 
+                        onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount></TextArea>
