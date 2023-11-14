@@ -24,7 +24,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import TextArea from "antd/es/input/TextArea";
-
+import { useNavigate } from "react-router-dom";
 const { TabPane } = Tabs;
 const { Column } = Table;
 const { confirm } = Modal;
@@ -77,6 +77,7 @@ export default function DetalleEvento() {
   const [horaReservada, setHoraReservada] = useState(null)
   const [listaHorarios,setListaHorarios] = useState([])
   //Kevin
+  const [form2] = Form.useForm();
   //Solo permitir numeros en los input
   function onlyNumbers(event) {
     const key = event.key;
@@ -114,6 +115,9 @@ export default function DetalleEvento() {
     showConfirmDetalle(values);
     console.log("Los valores de los datos del detalle son ", values);
   };
+  const onFinish = (values) => {
+    showConfirmDetalle(values);
+  };
   //Mensaje de confirmacion al dar guardar en la parte de registro de los detalles
   const showConfirmDetalle = (values) => {
     confirm({
@@ -129,9 +133,19 @@ export default function DetalleEvento() {
       onCancel() {},
     });
   };
+ 
   //Guardar DetalleEvento
-  const guardarDetalle = (values) => {};
-
+  const guardarDetalle = (values) => {
+    message.success("Los detalles del evento se registraron correctamente");
+      
+      navigate("/evento");
+  };
+const navigate = useNavigate();
+const Footer = ({ children }) => (
+  <footer>
+    {children}
+  </footer>
+);
   //
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
   const customRequest = ({ fileList, onSuccess }) => {
@@ -800,7 +814,40 @@ export default function DetalleEvento() {
           >
             <div className={`contenido ${activeTab === "2" ? "color2" : ""}`}>
               {mostrarFormICPC && (
-                <Form className="form-ICPC">
+                <Form className="form-ICPC"
+                  form={form} 
+                  onFinish={registrarDetalle}
+                  footer={[
+                      <div style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                      margin: "10px",
+                    }}>
+                      <Button onClick={showCancelDetalle}
+                            style={{
+                            margin: "10px",
+                            }}
+                            className="boton-cancelar-detalle"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button onClick={showConfirmDetalle}
+                          htmlType="submit"
+                          type="primary"
+                          style={{
+                            margin: "10px",
+                          }}
+                          className="boton-guardar-detalle"
+                        >
+                          Guardar
+                        </Button>
+                
+                    </div>
+                      ,
+                    ]}
+                  >
+                  
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -828,7 +875,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
-                            message: "Seleccione una modalidad",
+                            message: "Seleccione un tipo de modalidad",
                           },
                         ]}
                       >
@@ -884,12 +931,7 @@ export default function DetalleEvento() {
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Suba los archivos necesarios",
-                          },
-                        ]}
+                        
                       >
                         <Upload
                           {...uploadProps}
@@ -962,10 +1004,43 @@ export default function DetalleEvento() {
                       </Form.Item>
                     </div>
                   </div>
+                  
                 </Form>
+                
               )}
               {mostrarFormLibre && (
-                <Form className="form-ICPC">
+                <Form className="form-ICPC"
+                form={form} 
+                  onFinish={registrarDetalle}
+                  footer={[
+                      <div style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                      margin: "10px",
+                    }}>
+                      <Button onClick={showCancelDetalle}
+                            style={{
+                            margin: "10px",
+                            }}
+                            className="boton-cancelar-detalle"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button onClick={showConfirmDetalle}
+                          htmlType="submit"
+                          type="primary"
+                          style={{
+                            margin: "10px",
+                          }}
+                          className="boton-guardar-detalle"
+                        >
+                          Guardar
+                        </Button>
+                
+                    </div>
+                      ,
+                    ]}>
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -974,6 +1049,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -991,7 +1067,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
-                            message: "Seleccione una modalidad",
+                            message: "Seleccione un tipo de modalidad",
                           },
                         ]}
                       >
@@ -1043,11 +1119,7 @@ export default function DetalleEvento() {
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
-                        rules={[
-                          {
-                            required: true,
-                          },
-                        ]}
+                        
                       >
                         <Upload
                           {...uploadProps}
@@ -1122,7 +1194,38 @@ export default function DetalleEvento() {
                 </Form>
               )}
               {mostrarFormTaller && (
-                <Form className="form-ICPC">
+                <Form className="form-ICPC"
+                form={form} 
+                  onFinish={registrarDetalle}
+                  footer={[
+                      <div style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                      margin: "10px",
+                    }}>
+                      <Button onClick={showCancelDetalle}
+                            style={{
+                            margin: "10px",
+                            }}
+                            className="boton-cancelar-detalle"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button onClick={showConfirmDetalle}
+                          htmlType="submit"
+                          type="primary"
+                          style={{
+                            margin: "10px",
+                          }}
+                          className="boton-guardar-detalle"
+                        >
+                          Guardar
+                        </Button>
+                
+                    </div>
+                      ,
+                    ]}>
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1131,6 +1234,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -1148,7 +1252,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
-                            message: "Seleccione una modalidad",
+                            message: "Seleccione un tipo de modalidad",
                           },
                         ]}
                       >
@@ -1170,6 +1274,8 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:
+                              "Por favor, seleccione un facilitador",
                           },
                         ]}
                       >
@@ -1295,7 +1401,38 @@ export default function DetalleEvento() {
                 </Form>
               )}
               {mostrarFormEntrenamiento && (
-                <Form className="form-ICPC">
+                <Form className="form-ICPC"
+                form={form} 
+                  onFinish={registrarDetalle}
+                  footer={[
+                      <div style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                      margin: "10px",
+                    }}>
+                      <Button onClick={showCancelDetalle}
+                            style={{
+                            margin: "10px",
+                            }}
+                            className="boton-cancelar-detalle"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button onClick={showConfirmDetalle}
+                          htmlType="submit"
+                          type="primary"
+                          style={{
+                            margin: "10px",
+                          }}
+                          className="boton-guardar-detalle"
+                        >
+                          Guardar
+                        </Button>
+                
+                    </div>
+                      ,
+                    ]}>
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1304,6 +1441,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -1321,7 +1459,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
-                            message: "Seleccione una modalidad",
+                            message: "Seleccione un tipo de modalidad",
                           },
                         ]}
                       >
@@ -1346,6 +1484,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Por favor, seleccione un entrenador"
                           },
                         ]}
                       >
@@ -1471,7 +1610,39 @@ export default function DetalleEvento() {
                 </Form>
               )}
               {mostrarFormReclutamiento && (
-                <Form>
+                <Form
+                className="form-ICPC"
+                form={form} 
+                  onFinish={registrarDetalle}
+                  footer={[
+                      <div style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                      margin: "10px",
+                    }}>
+                      <Button onClick={showCancelDetalle}
+                            style={{
+                            margin: "10px",
+                            }}
+                            className="boton-cancelar-detalle"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button onClick={showConfirmDetalle}
+                          htmlType="submit"
+                          type="primary"
+                          style={{
+                            margin: "10px",
+                          }}
+                          className="boton-guardar-detalle"
+                        >
+                          Guardar
+                        </Button>
+                
+                    </div>
+                      ,
+                    ]}>
                   <div className="form-reclutamiento">
                     <div className="columna1-reclutamiento">
                       <Form.Item
@@ -1538,6 +1709,8 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:
+                              "Por favor, seleccione un facilitador",
                           },
                         ]}
                       >
@@ -1595,7 +1768,38 @@ export default function DetalleEvento() {
                 </Form>
               )}
               {mostrarFormTorneo && (
-                <Form className="form-ICPC">
+                <Form className="form-ICPC"
+                form={form} 
+                  onFinish={registrarDetalle}
+                  footer={[
+                      <div style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                      margin: "10px",
+                    }}>
+                      <Button onClick={showCancelDetalle}
+                            style={{
+                            margin: "10px",
+                            }}
+                            className="boton-cancelar-detalle"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button onClick={showConfirmDetalle}
+                          htmlType="submit"
+                          type="primary"
+                          style={{
+                            margin: "10px",
+                          }}
+                          className="boton-guardar-detalle"
+                        >
+                          Guardar
+                        </Button>
+                
+                    </div>
+                      ,
+                    ]}>
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1604,6 +1808,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -1673,11 +1878,7 @@ export default function DetalleEvento() {
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
-                        rules={[
-                          {
-                            required: true,
-                          },
-                        ]}
+                        
                       >
                         <Upload
                           {...uploadProps}
@@ -1752,7 +1953,38 @@ export default function DetalleEvento() {
                 </Form>
               )}
               {mostrarFormOtro && (
-                <Form className="form-ICPC">
+                <Form className="form-ICPC"
+                form={form} 
+                  onFinish={registrarDetalle}
+                  footer={[
+                      <div style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                      margin: "10px",
+                    }}>
+                      <Button onClick={showCancelDetalle}
+                            style={{
+                            margin: "10px",
+                            }}
+                            className="boton-cancelar-detalle"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button onClick={showConfirmDetalle}
+                          htmlType="submit"
+                          type="primary"
+                          style={{
+                            margin: "10px",
+                          }}
+                          className="boton-guardar-detalle"
+                        >
+                          Guardar
+                        </Button>
+                
+                    </div>
+                      ,
+                    ]}>
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1780,6 +2012,8 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:
+                              "Por favor, seleccione un tipo de modalidad",
                           },
                         ]}
                       >
@@ -1801,6 +2035,7 @@ export default function DetalleEvento() {
                         rules={[
                           {
                             required: true,
+                            message:"Porfavor, seleccione un responsable",
                           },
                         ]}
                       >
