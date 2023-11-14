@@ -70,6 +70,7 @@ export default function DetalleEvento() {
   const [valueParticipacion, setValueParticipacion] = useState(1);
   const [valueModalidad, setValueModalidad] = useState(1);
   const [form] = Form.useForm();
+  const [formICPC] = Form.useForm();
   const [obtenerUbicaciones, setObtenerUbicaciones] = useState([]);
   const [listaUbicacion, setListaUbicacion] = useState(null);
   const [listaEtapas, setListaEtapas] = useState([]);
@@ -89,9 +90,8 @@ export default function DetalleEvento() {
   }
   const showCancelDetalle = () => {
     confirm({
-      title: "¿Estás seguro de que quieres cancelar?",
+      title: "¿Estás seguro de que deseas cancelar los detalles del evento?",
       icon: <ExclamationCircleFilled />,
-      content: "Los cambios se perderán.",
       okText: "Si",
       cancelText: "No",
       centered: true,
@@ -108,6 +108,7 @@ export default function DetalleEvento() {
         setHoraReservada(null);
         setFechaInicioBD(null);
         form.resetFields();
+        formICPC.resetFields()
       },
       onCancel() {},
     });
@@ -120,7 +121,7 @@ export default function DetalleEvento() {
   //Mensaje de confirmacion al dar guardar en la parte de registro de los detalles
   const showConfirmDetalle = (values) => {
     confirm({
-      title: "¿Esta seguro de guardar este registro?",
+      title: "¿Está seguro de guardar los detalles de este evento?",
       icon: <ExclamationCircleFilled />,
       content: "",
       okText: "Si",
@@ -416,7 +417,9 @@ export default function DetalleEvento() {
         setMostrarFormReclutamiento(false);
         setMostrarFormTaller(false);
         setMostrarFormTorneo(false);
+        setFechaInicioBD(null)
         form.resetFields();
+        formICPC.resetFields()
       },
       onCancel() {},
     });
@@ -639,6 +642,19 @@ export default function DetalleEvento() {
     }
   };
 
+  const disabledDate = (current) => {
+    // Convertimos fechaInicioBD a un objeto Date si no lo es
+    const minDate = fechaInicioBD instanceof Date ? fechaInicioBD : new Date(fechaInicioBD);
+
+    // Establecemos la fecha máxima como 180 días después de la fecha inicial
+    const maxDate = new Date(minDate);
+    maxDate.setDate(minDate.getDate() + 180);
+
+    // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
+    return current < minDate || current > maxDate;
+};
+
+
   return (
     <div>
       {/*Apartado de la tabla de los eventos creados */}
@@ -819,6 +835,7 @@ export default function DetalleEvento() {
                       <DatePicker
                         placeholder="Seleccione una fecha"
                         className="etapa-fecha"
+                        disabledDate={disabledDate}
                       />
                     </Form.Item>
 
@@ -890,7 +907,7 @@ export default function DetalleEvento() {
           >
             <div className={`contenido ${activeTab === "2" ? "color2" : ""}`}>
               {mostrarFormICPC && (
-                <Form className="form-ICPC">
+                <Form className="form-ICPC" form={formICPC}>
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
