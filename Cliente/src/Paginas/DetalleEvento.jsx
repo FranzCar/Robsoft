@@ -109,7 +109,7 @@ export default function DetalleEvento() {
         setHoraReservada(null);
         setFechaInicioBD(null);
         form.resetFields();
-        formICPC.resetFields()
+        formICPC.resetFields();
       },
       onCancel() {},
     });
@@ -137,19 +137,15 @@ export default function DetalleEvento() {
       onCancel() {},
     });
   };
- 
+
   //Guardar DetalleEvento
   const guardarDetalle = (values) => {
     message.success("Los detalles del evento se registraron correctamente");
-      
-      navigate("/evento");
+
+    navigate("/evento");
   };
-const navigate = useNavigate();
-const Footer = ({ children }) => (
-  <footer>
-    {children}
-  </footer>
-);
+  const navigate = useNavigate();
+  const Footer = ({ children }) => <footer>{children}</footer>;
   //
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
   const customRequest = ({ fileList, onSuccess }) => {
@@ -231,6 +227,7 @@ const Footer = ({ children }) => (
 
   const onChangeICPC = (e) => {
     const requisito = e.target.value;
+
     // Divide los requisitos actuales en un array
     if (requisito === 1) {
       // Agrega "Código SIS" solo si no está presente
@@ -239,12 +236,19 @@ const Footer = ({ children }) => (
           ? prevRequisitos
           : prevRequisitos + "- Código SIS"
       );
-    } else {
-      // Elimina "Código SIS" si está presente
-      setRequisitos((prevRequisitos) =>
-        prevRequisitos.replace("- Código SIS", "")
-      );
+    } else if (requisito === 2) {
+      // Verifica si prevRequisitos es una cadena antes de llamar a replace
+      setRequisitos((prevRequisitos) => {
+        if (typeof prevRequisitos === "string") {
+          return prevRequisitos.replace("- Código SIS", "");
+        }
+        // Si prevRequisitos no es una cadena, puedes manejarlo según tus necesidades
+        console.error("prevRequisitos no es una cadena:", prevRequisitos);
+        return prevRequisitos;
+      });
     }
+
+    // Actualiza el valor
     setValue(e.target.value);
   };
 
@@ -431,9 +435,9 @@ const Footer = ({ children }) => (
         setMostrarFormReclutamiento(false);
         setMostrarFormTaller(false);
         setMostrarFormTorneo(false);
-        setFechaInicioBD(null)
+        setFechaInicioBD(null);
         form.resetFields();
-        formICPC.resetFields()
+        formICPC.resetFields();
       },
       onCancel() {},
     });
@@ -658,7 +662,8 @@ const Footer = ({ children }) => (
 
   const disabledDate = (current) => {
     // Convertimos fechaInicioBD a un objeto Date si no lo es
-    const minDate = fechaInicioBD instanceof Date ? fechaInicioBD : new Date(fechaInicioBD);
+    const minDate =
+      fechaInicioBD instanceof Date ? fechaInicioBD : new Date(fechaInicioBD);
 
     // Establecemos la fecha máxima como 180 días después de la fecha inicial
     const maxDate = new Date(minDate);
@@ -666,8 +671,7 @@ const Footer = ({ children }) => (
 
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
-};
-
+  };
 
   return (
     <div>
@@ -921,40 +925,42 @@ const Footer = ({ children }) => (
           >
             <div className={`contenido ${activeTab === "2" ? "color2" : ""}`}>
               {mostrarFormICPC && (
-                <Form className="form-ICPC"
-                  form={form} 
+                <Form
+                  className="form-ICPC"
+                  form={form}
                   onFinish={registrarDetalle}
                   footer={[
-                      <div style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "flex-end",
-                      margin: "10px",
-                    }}>
-                      <Button onClick={showCancelDetalle}
-                            style={{
-                            margin: "10px",
-                            }}
-                            className="boton-cancelar-detalle"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button onClick={showConfirmDetalle}
-                          htmlType="submit"
-                          type="primary"
-                          style={{
-                            margin: "10px",
-                          }}
-                          className="boton-guardar-detalle"
-                        >
-                          Guardar
-                        </Button>
-                
-                    </div>
-                      ,
-                    ]}
-                  >
-                  
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                        margin: "10px",
+                      }}
+                    >
+                      <Button
+                        onClick={showCancelDetalle}
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-cancelar-detalle"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={showConfirmDetalle}
+                        htmlType="submit"
+                        type="primary"
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-guardar-detalle"
+                      >
+                        Guardar
+                      </Button>
+                    </div>,
+                  ]}
+                >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1040,7 +1046,6 @@ const Footer = ({ children }) => (
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
-                        
                       >
                         <Upload
                           {...uploadProps}
@@ -1113,43 +1118,45 @@ const Footer = ({ children }) => (
                       </Form.Item>
                     </div>
                   </div>
-                  
                 </Form>
-                
               )}
               {mostrarFormLibre && (
-                <Form className="form-ICPC"
-                form={form} 
+                <Form
+                  className="form-ICPC"
+                  form={form}
                   onFinish={registrarDetalle}
                   footer={[
-                      <div style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "flex-end",
-                      margin: "10px",
-                    }}>
-                      <Button onClick={showCancelDetalle}
-                            style={{
-                            margin: "10px",
-                            }}
-                            className="boton-cancelar-detalle"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button onClick={showConfirmDetalle}
-                          htmlType="submit"
-                          type="primary"
-                          style={{
-                            margin: "10px",
-                          }}
-                          className="boton-guardar-detalle"
-                        >
-                          Guardar
-                        </Button>
-                
-                    </div>
-                      ,
-                    ]}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                        margin: "10px",
+                      }}
+                    >
+                      <Button
+                        onClick={showCancelDetalle}
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-cancelar-detalle"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={showConfirmDetalle}
+                        htmlType="submit"
+                        type="primary"
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-guardar-detalle"
+                      >
+                        Guardar
+                      </Button>
+                    </div>,
+                  ]}
+                >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1158,7 +1165,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:"Seleccione un tipo de participacion",
+                            message: "Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -1228,7 +1235,6 @@ const Footer = ({ children }) => (
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
-                        
                       >
                         <Upload
                           {...uploadProps}
@@ -1304,38 +1310,42 @@ const Footer = ({ children }) => (
                 </Form>
               )}
               {mostrarFormTaller && (
-                <Form className="form-ICPC"
-                form={form} 
+                <Form
+                  className="form-ICPC"
+                  form={form}
                   onFinish={registrarDetalle}
                   footer={[
-                      <div style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "flex-end",
-                      margin: "10px",
-                    }}>
-                      <Button onClick={showCancelDetalle}
-                            style={{
-                            margin: "10px",
-                            }}
-                            className="boton-cancelar-detalle"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button onClick={showConfirmDetalle}
-                          htmlType="submit"
-                          type="primary"
-                          style={{
-                            margin: "10px",
-                          }}
-                          className="boton-guardar-detalle"
-                        >
-                          Guardar
-                        </Button>
-                
-                    </div>
-                      ,
-                    ]}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                        margin: "10px",
+                      }}
+                    >
+                      <Button
+                        onClick={showCancelDetalle}
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-cancelar-detalle"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={showConfirmDetalle}
+                        htmlType="submit"
+                        type="primary"
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-guardar-detalle"
+                      >
+                        Guardar
+                      </Button>
+                    </div>,
+                  ]}
+                >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1344,7 +1354,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:"Seleccione un tipo de participacion",
+                            message: "Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -1384,8 +1394,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:
-                              "Por favor, seleccione un facilitador",
+                            message: "Por favor, seleccione un facilitador",
                           },
                         ]}
                       >
@@ -1512,38 +1521,42 @@ const Footer = ({ children }) => (
                 </Form>
               )}
               {mostrarFormEntrenamiento && (
-                <Form className="form-ICPC"
-                form={form} 
+                <Form
+                  className="form-ICPC"
+                  form={form}
                   onFinish={registrarDetalle}
                   footer={[
-                      <div style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "flex-end",
-                      margin: "10px",
-                    }}>
-                      <Button onClick={showCancelDetalle}
-                            style={{
-                            margin: "10px",
-                            }}
-                            className="boton-cancelar-detalle"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button onClick={showConfirmDetalle}
-                          htmlType="submit"
-                          type="primary"
-                          style={{
-                            margin: "10px",
-                          }}
-                          className="boton-guardar-detalle"
-                        >
-                          Guardar
-                        </Button>
-                
-                    </div>
-                      ,
-                    ]}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                        margin: "10px",
+                      }}
+                    >
+                      <Button
+                        onClick={showCancelDetalle}
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-cancelar-detalle"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={showConfirmDetalle}
+                        htmlType="submit"
+                        type="primary"
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-guardar-detalle"
+                      >
+                        Guardar
+                      </Button>
+                    </div>,
+                  ]}
+                >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1552,7 +1565,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:"Seleccione un tipo de participacion",
+                            message: "Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -1595,7 +1608,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:"Por favor, seleccione un entrenador"
+                            message: "Por favor, seleccione un entrenador",
                           },
                         ]}
                       >
@@ -1723,38 +1736,41 @@ const Footer = ({ children }) => (
               )}
               {mostrarFormReclutamiento && (
                 <Form
-                className="form-ICPC"
-                form={form} 
+                  className="form-ICPC"
+                  form={form}
                   onFinish={registrarDetalle}
                   footer={[
-                      <div style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "flex-end",
-                      margin: "10px",
-                    }}>
-                      <Button onClick={showCancelDetalle}
-                            style={{
-                            margin: "10px",
-                            }}
-                            className="boton-cancelar-detalle"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button onClick={showConfirmDetalle}
-                          htmlType="submit"
-                          type="primary"
-                          style={{
-                            margin: "10px",
-                          }}
-                          className="boton-guardar-detalle"
-                        >
-                          Guardar
-                        </Button>
-                
-                    </div>
-                      ,
-                    ]}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                        margin: "10px",
+                      }}
+                    >
+                      <Button
+                        onClick={showCancelDetalle}
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-cancelar-detalle"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={showConfirmDetalle}
+                        htmlType="submit"
+                        type="primary"
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-guardar-detalle"
+                      >
+                        Guardar
+                      </Button>
+                    </div>,
+                  ]}
+                >
                   <div className="form-reclutamiento">
                     <div className="columna1-reclutamiento">
                       <Form.Item
@@ -1821,8 +1837,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:
-                              "Por favor, seleccione un facilitador",
+                            message: "Por favor, seleccione un facilitador",
                           },
                         ]}
                       >
@@ -1880,38 +1895,42 @@ const Footer = ({ children }) => (
                 </Form>
               )}
               {mostrarFormTorneo && (
-                <Form className="form-ICPC"
-                form={form} 
+                <Form
+                  className="form-ICPC"
+                  form={form}
                   onFinish={registrarDetalle}
                   footer={[
-                      <div style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "flex-end",
-                      margin: "10px",
-                    }}>
-                      <Button onClick={showCancelDetalle}
-                            style={{
-                            margin: "10px",
-                            }}
-                            className="boton-cancelar-detalle"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button onClick={showConfirmDetalle}
-                          htmlType="submit"
-                          type="primary"
-                          style={{
-                            margin: "10px",
-                          }}
-                          className="boton-guardar-detalle"
-                        >
-                          Guardar
-                        </Button>
-                
-                    </div>
-                      ,
-                    ]}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                        margin: "10px",
+                      }}
+                    >
+                      <Button
+                        onClick={showCancelDetalle}
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-cancelar-detalle"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={showConfirmDetalle}
+                        htmlType="submit"
+                        type="primary"
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-guardar-detalle"
+                      >
+                        Guardar
+                      </Button>
+                    </div>,
+                  ]}
+                >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -1920,7 +1939,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:"Seleccione un tipo de participacion",
+                            message: "Seleccione un tipo de participacion",
                           },
                         ]}
                       >
@@ -1990,7 +2009,6 @@ const Footer = ({ children }) => (
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
-                        
                       >
                         <Upload
                           {...uploadProps}
@@ -2066,38 +2084,42 @@ const Footer = ({ children }) => (
                 </Form>
               )}
               {mostrarFormOtro && (
-                <Form className="form-ICPC"
-                form={form} 
+                <Form
+                  className="form-ICPC"
+                  form={form}
                   onFinish={registrarDetalle}
                   footer={[
-                      <div style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "flex-end",
-                      margin: "10px",
-                    }}>
-                      <Button onClick={showCancelDetalle}
-                            style={{
-                            margin: "10px",
-                            }}
-                            className="boton-cancelar-detalle"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button onClick={showConfirmDetalle}
-                          htmlType="submit"
-                          type="primary"
-                          style={{
-                            margin: "10px",
-                          }}
-                          className="boton-guardar-detalle"
-                        >
-                          Guardar
-                        </Button>
-                
-                    </div>
-                      ,
-                    ]}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-end",
+                        margin: "10px",
+                      }}
+                    >
+                      <Button
+                        onClick={showCancelDetalle}
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-cancelar-detalle"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={showConfirmDetalle}
+                        htmlType="submit"
+                        type="primary"
+                        style={{
+                          margin: "10px",
+                        }}
+                        className="boton-guardar-detalle"
+                      >
+                        Guardar
+                      </Button>
+                    </div>,
+                  ]}
+                >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
                       <Form.Item
@@ -2148,7 +2170,7 @@ const Footer = ({ children }) => (
                         rules={[
                           {
                             required: true,
-                            message:"Porfavor, seleccione un responsable",
+                            message: "Porfavor, seleccione un responsable",
                           },
                         ]}
                       >
