@@ -76,6 +76,7 @@ export default function DetalleEvento() {
   const [estadoFormulario, setEstadoFormulario] = useState(true);
   const [horaReservada, setHoraReservada] = useState(null)
   const [listaHorarios,setListaHorarios] = useState([])
+  const [fechaInicioBD, setFechaInicioBD] = useState(null);
   //Kevin
   //Solo permitir numeros en los input
   function onlyNumbers(event) {
@@ -104,6 +105,7 @@ export default function DetalleEvento() {
         setMostrarFormTorneo(false);
         setListaEtapas([]);
         setHoraReservada(null)
+        setFechaInicioBD(null)
         form.resetFields();
       },
       onCancel() {},
@@ -189,6 +191,9 @@ export default function DetalleEvento() {
 
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
+
+    console.log("El record es ", record.FECHA_INICIO)
+    setFechaInicioBD(record.FECHA_INICIO)
     const tipoEvento = record.TIPO_EVENTO;
     console.log("El tipo de evento es ", tipoEvento);
     setMostrarPestanias(true);
@@ -552,6 +557,22 @@ export default function DetalleEvento() {
     }
   };
 
+  const validacionFechaLimite = (current) => {
+     // Obtenemos la fecha actual
+     const today = new Date();
+
+     // Establecemos la fecha mínima como 1 día antes de la fecha actual
+     const minDate = new Date();
+     minDate.setDate(today.getDate() -1);
+ 
+     // Establecemos la fecha máxima como fechaInicioBD - 1 día
+     const maxDate = new Date(fechaInicioBD);
+     maxDate.setDate(maxDate.getDate() - 0);
+ 
+     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
+     return current < minDate || current > maxDate;
+  }
+
   return (
     <div>
       {/*Apartado de la tabla de los eventos creados */}
@@ -841,6 +862,7 @@ export default function DetalleEvento() {
                         <DatePicker
                           style={{ width: "180px" }}
                           placeholder="Selecione una fecha"
+                          disabledDate={validacionFechaLimite}
                         />
                       </Form.Item>
                       <Form.Item
