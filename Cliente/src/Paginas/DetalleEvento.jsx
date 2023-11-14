@@ -628,7 +628,7 @@ const showCancelDetalle = () => {
                         ]}
                       >
                         <Radio.Group onChange={onChangeICPC} value={value}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -784,7 +784,7 @@ const showCancelDetalle = () => {
                         ]}
                       >
                         <Radio.Group onChange={onChangeLibre} value={value2}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -937,7 +937,7 @@ const showCancelDetalle = () => {
                         ]}
                       >
                         <Radio.Group onChange={onChangeTaller} value={value3}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1107,7 +1107,7 @@ const showCancelDetalle = () => {
                           onChange={onChangeEntrenamiento}
                           value={value5}
                         >
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1258,7 +1258,7 @@ const showCancelDetalle = () => {
                         ]}
                       >
                         <Radio.Group onChange={onChangeTorneo} value={value4}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1392,7 +1392,7 @@ const showCancelDetalle = () => {
                         ]}
                       >
                         <Radio.Group onChange={onChangeTorneo} value={value5}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
@@ -1545,7 +1545,7 @@ const showCancelDetalle = () => {
                         ]}
                       >
                         <Radio.Group onChange={onChangeOtros} value={value6}>
-                          <Radio value={1}>Interno</Radio>
+                          <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
