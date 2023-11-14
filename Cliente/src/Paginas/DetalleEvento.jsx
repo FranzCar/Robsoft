@@ -67,18 +67,25 @@ export default function DetalleEvento() {
     useState(false);
   const [mostrarFormTorneo, setMostrarFormTorneo] = useState(false);
   const [mostrarFormOtro, setMostrarFormOtro] = useState(false);
-  const [valueParticipacion, setValueParticipacion] = useState(false);
+  const [valueParticipacion, setValueParticipacion] = useState(1);
+  const [valueModalidad, setValueModalidad] = useState(1);
   const [form] = Form.useForm();
-//Kevin
- //Solo permitir numeros en los input
+  const [obtenerUbicaciones, setObtenerUbicaciones] = useState([]);
+  const [listaUbicacion, setListaUbicacion] = useState(null);
+  const [listaEtapas, setListaEtapas] = useState([]);
+  const [estadoFormulario, setEstadoFormulario] = useState(true);
+  const [horaReservada, setHoraReservada] = useState(null)
+  const [listaHorarios,setListaHorarios] = useState([])
+  //Kevin
+  //Solo permitir numeros en los input
   function onlyNumbers(event) {
-  const key = event.key;
+    const key = event.key;
 
-  if (!key.match(/[0-9]/)) {
-    event.preventDefault();
+    if (!key.match(/[0-9]/)) {
+      event.preventDefault();
+    }
   }
-}
-const showCancelDetalle = () => {
+  const showCancelDetalle = () => {
     confirm({
       title: "¿Estás seguro de que quieres cancelar?",
       icon: <ExclamationCircleFilled />,
@@ -95,17 +102,19 @@ const showCancelDetalle = () => {
         setMostrarFormReclutamiento(false);
         setMostrarFormTaller(false);
         setMostrarFormTorneo(false);
+        setListaEtapas([]);
+        setHoraReservada(null)
         form.resetFields();
       },
       onCancel() {},
     });
   };
   //Guardar datos del formulario Detalle
-  const registrarDetalle= (values) => {
+  const registrarDetalle = (values) => {
     showConfirmDetalle(values);
     console.log("Los valores de los datos del detalle son ", values);
   };
-   //Mensaje de confirmacion al dar guardar en la parte de registro de los detalles
+  //Mensaje de confirmacion al dar guardar en la parte de registro de los detalles
   const showConfirmDetalle = (values) => {
     confirm({
       title: "¿Esta seguro de guardar este registro?",
@@ -117,14 +126,13 @@ const showCancelDetalle = () => {
       onOk() {
         guardarDetalle(values);
       },
-      onCancel() { },
+      onCancel() {},
     });
   };
   //Guardar DetalleEvento
-   const guardarDetalle = (values) => {
-   };
-   
-//
+  const guardarDetalle = (values) => {};
+
+  //
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
   const customRequest = ({ fileList, onSuccess }) => {
     onSuccess();
@@ -145,6 +153,7 @@ const showCancelDetalle = () => {
   //Obtener datos de la base de datos
   useEffect(() => {
     obtenerDatos();
+    obtenerListaUbicaciones();
   }, []);
   const obtenerDatos = () => {
     axios
@@ -230,10 +239,13 @@ const showCancelDetalle = () => {
   const onChangeParticipacion = (e) => {
     setValueParticipacion(e.target.value);
   };
+  const onChangeModalidad = (e) => {
+    setValueModalidad(e.target.value);
+  };
 
   const cerrarReservaHora = () => {
     confirm({
-      title: "¿Está seguro de que desea cerrar el evento?",
+      title: "¿Está seguro cancelar la reserva de horario?",
       icon: <ExclamationCircleFilled />, //
       content: "Todos los cambios se perderán",
       okText: "Si",
@@ -284,31 +296,87 @@ const showCancelDetalle = () => {
 
   //Modal para reservar una hora
   const reservarHora = () => {
-    setVerHoraReserva(true);
+    const fecha = form.getFieldValue("FECHA_ETAPA");
+    const nuevaFecha = fecha ? fecha.format("YYYY-MM-DD") : null; // Validar si fecha está definida
+    const ubicacion = listaUbicacion;
+
+    if (!nuevaFecha || !ubicacion) {
+      // Mostrar mensaje de error si nuevaFecha o ubicacion están vacíos
+      message.error("Por favor, selecciona una fecha y una ubicación");
+      // Puedes mostrar un mensaje en tu interfaz o utilizar una librería para notificaciones
+      return;
+    }
+
+    const datos = {
+      id_ubicacion: ubicacion,
+      fecha_etapa: nuevaFecha,
+    };
+    mostrarHorarios(listaHorarios)
+    axios
+      .get("http://localhost:8000/api/horarios-disponibles",datos )
+      .then((response) => {
+       
+        setVerHoraReserva(true);
+      })
+      .catch((error) => {
+        console.error(error);
+        // Puedes manejar el error de alguna manera, por ejemplo, mostrando un mensaje al usuario
+      });
   };
 
-  const horarios = [
-    { key: 1, hora: "8:00 - 8:30 AM", estado: "Libre" },
-    { key: 2, hora: "8:30 - 9:00 AM", estado: "Libre" },
-    { key: 3, hora: "9:00 - 9:30 AM", estado: "Libre" },
-    { key: 4, hora: "9:30 - 10:00 AM", estado: "Libre" },
-    { key: 5, hora: "10:00 - 10:30 AM", estado: "Libre" },
-    { key: 6, hora: "10:30 - 11:00 AM", estado: "Libre" },
-    { key: 7, hora: "11:00 - 11:30 AM", estado: "Libre" },
-    { key: 8, hora: "11:30 - 12:00 PM", estado: "Libre" },
-    { key: 9, hora: "12:00 - 12:30 PM", estado: "Libre" },
-    { key: 10, hora: "12:30 - 1:00 PM", estado: "Libre" },
-    { key: 11, hora: "1:00 - 1:30 PM", estado: "Libre" },
-    { key: 12, hora: "1:30 - 2:00 PM", estado: "Libre" },
-    { key: 13, hora: "2:00 - 2:30 PM", estado: "Libre" },
-    { key: 14, hora: "2:30 - 3:00 PM", estado: "Libre" },
-    { key: 15, hora: "3:00 - 3:30 PM", estado: "Libre" },
-    { key: 16, hora: "3:30 - 4:00 PM", estado: "Libre" },
-    { key: 17, hora: "4:00 - 4:30 PM", estado: "Libre" },
-    { key: 18, hora: "4:30 - 5:00 PM", estado: "Libre" },
-    { key: 19, hora: "5:00 - 5:30 PM", estado: "Libre" },
-    { key: 20, hora: "5:30 - 6:00 PM", estado: "Libre" },
-  ];
+  const mostrarHorarios = (data) => {
+    // Definir la lista de horarios
+    const horarios = [
+      { key: 1, hora: "8:00 - 8:30 AM", estado: "Libre" },
+      { key: 2, hora: "8:30 - 9:00 AM", estado: "Libre" },
+      { key: 3, hora: "9:00 - 9:30 AM", estado: "Libre" },
+      { key: 4, hora: "9:30 - 10:00 AM", estado: "Libre" },
+      { key: 5, hora: "10:00 - 10:30 AM", estado: "Libre" },
+      { key: 6, hora: "10:30 - 11:00 AM", estado: "Libre" },
+      { key: 7, hora: "11:00 - 11:30 AM", estado: "Libre" },
+      { key: 8, hora: "11:30 - 12:00 PM", estado: "Libre" },
+      { key: 9, hora: "12:00 - 12:30 PM", estado: "Libre" },
+      { key: 10, hora: "12:30 - 1:00 PM", estado: "Libre" },
+      { key: 11, hora: "1:00 - 1:30 PM", estado: "Libre" },
+      { key: 12, hora: "1:30 - 2:00 PM", estado: "Libre" },
+      { key: 13, hora: "2:00 - 2:30 PM", estado: "Libre" },
+      { key: 14, hora: "2:30 - 3:00 PM", estado: "Libre" },
+      { key: 15, hora: "3:00 - 3:30 PM", estado: "Libre" },
+      { key: 16, hora: "3:30 - 4:00 PM", estado: "Libre" },
+      { key: 17, hora: "4:00 - 4:30 PM", estado: "Libre" },
+      { key: 18, hora: "4:30 - 5:00 PM", estado: "Libre" },
+      { key: 19, hora: "5:00 - 5:30 PM", estado: "Libre" },
+      { key: 20, hora: "5:30 - 6:00 PM", estado: "Libre" },
+      { key: 21, hora: "6:00 - 6:30 PM", estado: "Libre" },
+      { key: 22, hora: "6:30 - 7:00 PM", estado: "Libre" },
+      { key: 23, hora: "7:00 - 7:30 PM", estado: "Libre" },
+      { key: 24, hora: "7:30 - 8:00 PM", estado: "Libre" },
+    ];
+  
+    console.log("Los horarios ocupados de la base de datos son ", data.length);
+  
+    // Verificar si la lista de data está vacía
+    if (data.length === 0) {
+      // Si está vacía, devolver la lista completa de horarios
+      setListaHorarios(horarios);
+    } else {
+      // Obtener la lista de horarios ocupados
+      const horariosOcupados = data.map(item => item.id_horario);
+  
+      // Filtrar la lista de horarios para excluir los ocupados
+      const horariosDisponibles = horarios.filter(
+        horario => !horariosOcupados.includes(horario.key)
+      );
+  
+      // Devolver la lista filtrada
+      console.log("Los horarios disponibles son ", horariosDisponibles);
+      setListaHorarios(horariosDisponibles);
+    }
+  };
+  
+  
+
+  
 
   // Puedes seguir agregando más objetos a la lista según tus necesidades
 
@@ -346,10 +414,39 @@ const showCancelDetalle = () => {
   };
 
   const handleGuardarClick = () => {
-    // Aquí puedes utilizar la variable selectedRows que contiene los elementos seleccionados.
-    console.log("Datos seleccionados:", selectedRows);
+    if (!selectedRows || selectedRows.length === 0) {
+      message.error("No hay horarios seleccionados");
+      return;
+    }
 
-    // Agrega aquí tu lógica para guardar o procesar los datos según tus necesidades.
+    // Obtén el primer y último elemento de la lista
+    const primerDato = selectedRows[0];
+    const ultimoDato = selectedRows[selectedRows.length - 1];
+    console.log("los datos selecionados son ", primerDato.key, " ", ultimoDato.key, " ", listaHorarios[0].key)
+
+    // Obtén la parte antes y después del guion en el campo 'hora'
+    const primeraParte = primerDato.hora.split(" - ")[0];
+    const segundaParte = ultimoDato.hora.split(" - ")[1];
+
+    // Combina las partes obtenidas
+    const nuevoTexto = `${primeraParte} - ${segundaParte}`;
+
+    let listaNueva = []
+    // Cambia el campo 'estado' de los elementos entre el primero y el último a 'Ocupado'
+    for(let i = primerDato.key; i<= ultimoDato.key; i++){
+      for(let j = 0; j< listaHorarios.length; j++){
+        if(i === listaHorarios[j].key){
+          listaNueva.push(i);
+        }
+      }
+    }
+    setListaHorarios(listaNueva)    
+    //Se asgina el valor al campo input de horario de la etapa
+    setHoraReservada(nuevoTexto);
+    // Muestra los resultados
+    console.log("Nuevo Texto:", nuevoTexto);
+    console.log("Lista actualizada:", listaNueva);
+    setVerHoraReserva(false);
   };
 
   const showGuardarHoras = (values) => {
@@ -366,6 +463,92 @@ const showCancelDetalle = () => {
       },
       onCancel() {},
     });
+  };
+
+  /*Parte de las etapas*/
+
+  const obtenerListaUbicaciones = () => {
+    axios
+      .get("http://localhost:8000/api/lista-ubicaciones")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_ubicacion,
+          nombre: element.nombre_ambiente,
+          value: element.nombre_ambiente,
+          label: element.nombre_ambiente,
+        }));
+        setObtenerUbicaciones(listaConFormato);
+        console.log("lista de ubicaciones ", response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const handleChangeUbicaciones = (value) => {
+    let idUbicacion = null;
+    console.log("El valor de la ubicación es ", value);
+
+    for (let i = 0; i < obtenerUbicaciones.length; i++) {
+      if (obtenerUbicaciones[i].nombre === value) {
+        idUbicacion = obtenerUbicaciones[i].id;
+        break;
+      }
+    }
+
+    console.log("ID de ubicación: ", idUbicacion);
+
+    // Usa la función de devolución de llamada para realizar acciones después de la actualización del estado
+    setListaUbicacion(idUbicacion);
+  };
+
+  const aniadirEtapa = () => {
+    const titulo = form.getFieldValue("TITULO_ETAPA")
+    const modalidad = form.getFieldValue("MODALIDAD_ETAPA")
+    const fecha = form.getFieldValue("FECHA_ETAPA");
+    const nuevaFecha = fecha.format("YYYY-MM-DD");
+    const ubicacion = form.getFieldValue("UBICACION_ETAPA");
+    const hora = horaReservada
+    let modalidadNueva = ""
+    if(modalidad === 1){
+      modalidadNueva = "En linea"
+    }else{
+      modalidadNueva = "Presencial"
+    }
+
+    // Crear un nuevo objeto con la información de la etapa
+    const nuevaEtapa = {
+      nombre_etapa: titulo,
+      modalidad_ubicacion: modalidadNueva,
+      id_ubicacion: ubicacion,
+      fecha_etapa: nuevaFecha,
+      hora: hora,
+      id_horario: listaHorarios,
+    };
+
+    // Verificar si la etapa ya existe en la lista
+    const etapaExistente = listaEtapas.find(
+      (etapa) =>
+        etapa.nombre_etapa === nuevaEtapa.nombre_etapa &&
+        etapa.id_ubicacion === nuevaEtapa.id_ubicacion &&
+        etapa.fecha_etapa === nuevaEtapa.fecha_etapa &&
+        etapa.hora === nuevaEtapa.hora
+    );
+
+    if (etapaExistente) {
+      // Mostrar un mensaje indicando que la etapa ya existe
+      message.error("La etapa ya se encuentra añadida");
+    } else {
+      // Clonar el array existente y agregar la nueva etapa
+      const nuevaListaEtapas = [...listaEtapas, nuevaEtapa];
+
+      // Actualizar el estado con la nueva lista de etapas
+      console.log("las list de añadir etapa es ", listaHorarios)
+      mostrarHorarios(listaHorarios)
+      setListaEtapas(nuevaListaEtapas);
+      form.resetFields()
+      setHoraReservada(null)
+    }
   };
 
   return (
@@ -429,29 +612,31 @@ const showCancelDetalle = () => {
           </Form>,
         ]}
       >
-        <Table
-          scroll={{ y: 350 }}
-          dataSource={horarios}
-          rowSelection={{
-            type: selectionType,
-            ...rowSelection,
-          }}
-          pagination={false}
-          locale={{
-            emptyText: (
-              <div style={{ padding: "30px", textAlign: "center" }}>
-                NO hay horarios para seleccionar
-              </div>
-            ),
-          }}
-        >
-          <Column title="Horario" dataIndex="hora" key="horario" />
-          <Column
-            title="Estado de la ubicacion"
-            dataIndex="estado"
-            key="estado"
-          />
-        </Table>
+        <Form form={form}>
+          <Table
+            scroll={{ y: 350 }}
+            dataSource={listaHorarios}
+            rowSelection={{
+              type: selectionType,
+              ...rowSelection,
+            }}
+            pagination={false}
+            locale={{
+              emptyText: (
+                <div style={{ padding: "30px", textAlign: "center" }}>
+                  No hay horarios para seleccionar
+                </div>
+              ),
+            }}
+          >
+            <Column title="Horario" dataIndex="hora" key="horario" />
+            <Column
+              title="Estado de la ubicacion"
+              dataIndex="estado"
+              key="estado"
+            />
+          </Table>
+        </Form>
       </Modal>
 
       {/*Modal para mostrar las pestañas */}
@@ -464,12 +649,17 @@ const showCancelDetalle = () => {
         closable={false}
         footer={[
           <Form form={form} onFinish={registrarDetalle}>
-            <Button onClick={showCancelDetalle} className="boton-cancelar-detalle">
-            Cancelar</Button>
-            <Button  
-            type="primary" 
-            htmlType="submit"
-            className="boton-guardar-detalle">
+            <Button
+              onClick={showCancelDetalle}
+              className="boton-cancelar-detalle"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="boton-guardar-detalle"
+            >
               Guardar
             </Button>
           </Form>,
@@ -480,12 +670,12 @@ const showCancelDetalle = () => {
           className="pestanias"
           width={1000}
           activeKey={activeTab}
-         >
+        >
           <TabPane
             tab={<span style={{ color: "black" }}>Etapas</span>}
-            key="1"
+            key="2"
             className="tab1"
-           >
+          >
             <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
               <Form form={form} className="formEtapas">
                 <div className="etapas-hora">
@@ -519,7 +709,10 @@ const showCancelDetalle = () => {
                         },
                       ]}
                     >
-                      <Radio.Group onChange={onChangeEtapa} value={value7}>
+                      <Radio.Group
+                        onChange={onChangeModalidad}
+                        value={valueModalidad}
+                      >
                         <Radio value={1}>En linea</Radio>
                         <Radio value={2}>Presencial</Radio>
                       </Radio.Group>
@@ -554,20 +747,12 @@ const showCancelDetalle = () => {
                     >
                       <Select
                         allowClear
-                        options={[
-                          {
-                            value: "1",
-                            label: "Auditorio",
-                          },
-                          {
-                            value: "2",
-                            label: "Laboratorio 1",
-                          },
-                          {
-                            value: "3",
-                            label: "Laboratorio 2",
-                          },
-                        ]}
+                        style={{
+                          width: "100%",
+                        }}
+                        placeholder="Selecione una ubicación"
+                        onChange={handleChangeUbicaciones}
+                        options={obtenerUbicaciones}
                       />
                     </Form.Item>
                   </div>
@@ -578,11 +763,31 @@ const showCancelDetalle = () => {
                           <Button onClick={reservarHora}>Reservar hora</Button>
                         </div>
                         <div>
-                          <Input></Input>
+                          <Input  readOnly={estadoFormulario} value={horaReservada}></Input>
                         </div>
                       </div>
                     </Form.Item>
-                    <Table></Table>
+                    <Form.Item>
+                      <Button onClick={aniadirEtapa}>Añadir etapa</Button>
+                    </Form.Item>
+                    <Table
+                      className="tabla-etapas"
+                      scroll={{ y: 180 }}
+                      dataSource={listaEtapas}
+                      pagination={false}
+                      locale={{
+                        emptyText: (
+                          <div style={{ padding: "40px", textAlign: "center" }}>
+                            No hay etapas registrados
+                          </div>
+                        ),
+                      }}
+                    >
+                      <Column title="Título" dataIndex="nombre_etapa"/>
+                      <Column title="Fecha" dataIndex="fecha_etapa" />
+                      <Column title="Ubicación" dataIndex="id_ubicacion" />
+                      <Column title="Hora" dataIndex="hora" />
+                    </Table>
                   </div>
                 </div>
               </Form>
@@ -590,22 +795,23 @@ const showCancelDetalle = () => {
           </TabPane>
           <TabPane
             tab={<span style={{ color: "black" }}>Detalles</span>}
-            key="2"
-           >
+            key="1"
+          >
             <div className={`contenido ${activeTab === "2" ? "color2" : ""}`}>
               {mostrarFormICPC && (
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item 
-                      label="Participación"
-                      name="participacion"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Por favor, seleccione un tipo de participacion",
-                        },
-                      ]}
+                      <Form.Item
+                        label="Participación"
+                        name="participacion"
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              "Por favor, seleccione un tipo de participacion",
+                          },
+                        ]}
                       >
                         <Radio.Group
                           onChange={onChangeParticipacion}
@@ -615,15 +821,14 @@ const showCancelDetalle = () => {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item 
-                      label="Modalidad"
-                      name="modalidad"
+                      <Form.Item
+                        label="Modalidad"
+                        name="modalidad"
                         rules={[
                           {
                             required: true,
                             message: "Seleccione una modalidad",
                           },
-                          
                         ]}
                       >
                         <Radio.Group onChange={onChangeICPC} value={value}>
@@ -637,14 +842,15 @@ const showCancelDetalle = () => {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" 
-                      name="dirigido a"
-                      className="icpc-dirigido"
+                      <Form.Item
+                        label="Dirigido a"
+                        name="dirigido a"
+                        className="icpc-dirigido"
                         rules={[
                           {
                             required: true,
-                            message:"Por favor, seleccione una opcion",
-                          }
+                            message: "Por favor, seleccione una opcion",
+                          },
                         ]}
                       >
                         <Select
@@ -666,18 +872,22 @@ const showCancelDetalle = () => {
                               value: "4",
                               label: "Técnico",
                             },
+                            {
+                              value: "5",
+                              label: "Todo público",
+                            },
                           ]}
                         />
                       </Form.Item>
 
-                      <Form.Item 
-                      label="Bases del evento reglas y premios"
-                      name="bases"
-                      rules={[
+                      <Form.Item
+                        label="Bases del evento reglas y premios"
+                        name="bases"
+                        rules={[
                           {
                             required: true,
                             message: "Suba los archivos necesarios",
-                          }
+                          },
                         ]}
                       >
                         <Upload
@@ -710,15 +920,16 @@ const showCancelDetalle = () => {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input 
-                        placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}/>
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                        />
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
-                        <TextArea showCount ></TextArea>
+                        <TextArea  showCount></TextArea>
                       </Form.Item>
                       <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
                         <Table
@@ -755,7 +966,8 @@ const showCancelDetalle = () => {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación"
+                      <Form.Item
+                        label="Participación"
                         name="participacion"
                         rules={[
                           {
@@ -771,7 +983,8 @@ const showCancelDetalle = () => {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad"
+                      <Form.Item
+                        label="Modalidad"
                         name="modalidad"
                         rules={[
                           {
@@ -791,15 +1004,16 @@ const showCancelDetalle = () => {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" 
-                      className="icpc-dirigido"
-                      name="dirigido a"
-                      rules={[
-                        {
-                          required: true,
-                          message:"Por favor, seleccione una opcion",
-                        },
-                      ]}
+                      <Form.Item
+                        label="Dirigido a"
+                        className="icpc-dirigido"
+                        name="dirigido a"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Por favor, seleccione una opcion",
+                          },
+                        ]}
                       >
                         <Select
                           allowClear
@@ -824,7 +1038,8 @@ const showCancelDetalle = () => {
                         />
                       </Form.Item>
 
-                      <Form.Item label="Bases del evento reglas y premios"
+                      <Form.Item
+                        label="Bases del evento reglas y premios"
                         name="bases"
                         rules={[
                           {
@@ -862,8 +1077,9 @@ const showCancelDetalle = () => {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -907,12 +1123,13 @@ const showCancelDetalle = () => {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación"
+                      <Form.Item
+                        label="Participación"
                         name="participacion"
                         rules={[
                           {
                             required: true,
-                          }
+                          },
                         ]}
                       >
                         <Radio.Group
@@ -923,13 +1140,14 @@ const showCancelDetalle = () => {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad"
+                      <Form.Item
+                        label="Modalidad"
                         name="modalidad"
                         rules={[
                           {
                             required: true,
-                             message: "Seleccione una modalidad",
-                          }
+                            message: "Seleccione una modalidad",
+                          },
                         ]}
                       >
                         <Radio.Group onChange={onChangeTaller} value={value3}>
@@ -943,12 +1161,14 @@ const showCancelDetalle = () => {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Facilitador" className="icpc-dirigido"
+                      <Form.Item
+                        label="Facilitador"
+                        className="icpc-dirigido"
                         name="facilitador"
                         rules={[
                           {
                             required: true,
-                          }
+                          },
                         ]}
                       >
                         <Select
@@ -965,13 +1185,15 @@ const showCancelDetalle = () => {
                           ]}
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido"
+                      <Form.Item
+                        label="Dirigido a"
+                        className="icpc-dirigido"
                         name="dirigido a"
                         rules={[
                           {
                             required: true,
-                            message:"Por favor, seleccione una opcion",
-                          }
+                            message: "Por favor, seleccione una opcion",
+                          },
                         ]}
                       >
                         <Select
@@ -1028,8 +1250,9 @@ const showCancelDetalle = () => {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1073,7 +1296,8 @@ const showCancelDetalle = () => {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación"
+                      <Form.Item
+                        label="Participación"
                         name="participacion"
                         rules={[
                           {
@@ -1089,12 +1313,13 @@ const showCancelDetalle = () => {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad"
+                      <Form.Item
+                        label="Modalidad"
                         name="modalidad"
                         rules={[
                           {
                             required: true,
-                             message: "Seleccione una modalidad",
+                            message: "Seleccione una modalidad",
                           },
                         ]}
                       >
@@ -1112,7 +1337,9 @@ const showCancelDetalle = () => {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Entrenador" className="icpc-dirigido"
+                      <Form.Item
+                        label="Entrenador"
+                        className="icpc-dirigido"
                         name="entrenador"
                         rules={[
                           {
@@ -1134,12 +1361,14 @@ const showCancelDetalle = () => {
                           ]}
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido"
+                      <Form.Item
+                        label="Dirigido a"
+                        className="icpc-dirigido"
                         name="dirigido a"
                         rules={[
                           {
                             required: true,
-                            message:"Por favor, seleccione una opcion",
+                            message: "Por favor, seleccione una opcion",
                           },
                         ]}
                       >
@@ -1197,15 +1426,16 @@ const showCancelDetalle = () => {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
-                        <TextArea showCount ></TextArea>
+                        <TextArea showCount></TextArea>
                       </Form.Item>
                       <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
                         <Table
@@ -1241,14 +1471,15 @@ const showCancelDetalle = () => {
               {mostrarFormReclutamiento && (
                 <Form>
                   <div className="form-reclutamiento">
-                    <div className="columna1-reclutamiento" >
-                      <Form.Item label="Modalidad"
+                    <div className="columna1-reclutamiento">
+                      <Form.Item
+                        label="Modalidad"
                         name="modalidad"
                         rules={[
                           {
                             required: true,
-                             message: "Seleccione una modalidad",
-                          }
+                            message: "Seleccione una modalidad",
+                          },
                         ]}
                       >
                         <Radio.Group onChange={onChangeTorneo} value={value4}>
@@ -1257,15 +1488,19 @@ const showCancelDetalle = () => {
                         </Radio.Group>
                       </Form.Item>
                       <Form.Item label="Fecha fin de inscripciones">
-                        <DatePicker placeholder="Seleccione una fecha" className="fecha-reclutamiento"/>
+                        <DatePicker
+                          placeholder="Seleccione una fecha"
+                          className="fecha-reclutamiento"
+                        />
                       </Form.Item>
-                      <Form.Item label="Dirigido a"
+                      <Form.Item
+                        label="Dirigido a"
                         name="dirigido a"
                         rules={[
                           {
                             required: true,
-                            message:"Por favor, seleccione una opcion",
-                          }
+                            message: "Por favor, seleccione una opcion",
+                          },
                         ]}
                       >
                         <Select
@@ -1295,12 +1530,13 @@ const showCancelDetalle = () => {
                       </Form.Item>
                     </div>
                     <div>
-                      <Form.Item label="Facilitador"
+                      <Form.Item
+                        label="Facilitador"
                         name="facilitador"
                         rules={[
                           {
                             required: true,
-                          }
+                          },
                         ]}
                       >
                         <Select
@@ -1360,7 +1596,8 @@ const showCancelDetalle = () => {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación"
+                      <Form.Item
+                        label="Participación"
                         name="participacion"
                         rules={[
                           {
@@ -1376,12 +1613,13 @@ const showCancelDetalle = () => {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad"
+                      <Form.Item
+                        label="Modalidad"
                         name="modalidad"
                         rules={[
                           {
                             required: true,
-                             message: "Seleccione una modalidad",
+                            message: "Seleccione una modalidad",
                           },
                         ]}
                       >
@@ -1396,13 +1634,14 @@ const showCancelDetalle = () => {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Dirigido a" 
-                      className="icpc-dirigido"
-                      name="dirigido a"
+                      <Form.Item
+                        label="Dirigido a"
+                        className="icpc-dirigido"
+                        name="dirigido a"
                         rules={[
                           {
                             required: true,
-                            message:"Por favor, seleccione una opcion",
+                            message: "Por favor, seleccione una opcion",
                           },
                         ]}
                       >
@@ -1429,7 +1668,8 @@ const showCancelDetalle = () => {
                         />
                       </Form.Item>
 
-                      <Form.Item label="Bases del evento reglas y premios"
+                      <Form.Item
+                        label="Bases del evento reglas y premios"
                         name="bases"
                         rules={[
                           {
@@ -1467,8 +1707,9 @@ const showCancelDetalle = () => {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1512,13 +1753,15 @@ const showCancelDetalle = () => {
                 <Form className="form-ICPC">
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
-                      <Form.Item label="Participación"
+                      <Form.Item
+                        label="Participación"
                         name="participacion"
                         rules={[
                           {
                             required: true,
-                            message: "Por favor, seleccione un tipo de participacion",
-                          }
+                            message:
+                              "Por favor, seleccione un tipo de participacion",
+                          },
                         ]}
                       >
                         <Radio.Group
@@ -1529,12 +1772,13 @@ const showCancelDetalle = () => {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Modalidad"
+                      <Form.Item
+                        label="Modalidad"
                         name="modalidad"
                         rules={[
                           {
                             required: true,
-                          }
+                          },
                         ]}
                       >
                         <Radio.Group onChange={onChangeOtros} value={value6}>
@@ -1548,35 +1792,39 @@ const showCancelDetalle = () => {
                           placeholder="Selecione una fecha"
                         />
                       </Form.Item>
-                      <Form.Item label="Responsable" className="icpc-dirigido"
+                      <Form.Item
+                        label="Responsable"
+                        className="icpc-dirigido"
                         name="responsable"
                         rules={[
                           {
                             required: true,
-                          }
+                          },
                         ]}
                       >
-                          <Select
-                            allowClear
-                            options={[
-                              {
-                                value: "1",
-                                label: "Santos",
-                              },
-                              {
-                                value: "2",
-                                label: "Simon",
-                              },
-                            ]}
-                          />
-                        </Form.Item>
-                      <Form.Item label="Dirigido a" className="icpc-dirigido"
+                        <Select
+                          allowClear
+                          options={[
+                            {
+                              value: "1",
+                              label: "Santos",
+                            },
+                            {
+                              value: "2",
+                              label: "Simon",
+                            },
+                          ]}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Dirigido a"
+                        className="icpc-dirigido"
                         name="dirigido a"
                         rules={[
                           {
                             required: true,
-                            message:"Por favor, seleccione una opcion",
-                          }
+                            message: "Por favor, seleccione una opcion",
+                          },
                         ]}
                       >
                         <Select
@@ -1633,8 +1881,9 @@ const showCancelDetalle = () => {
                     </div>
                     <div>
                       <Form.Item label="Costo">
-                        <Input placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">

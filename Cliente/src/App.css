@@ -398,6 +398,14 @@ h3 {
 .etapa-ubicacion{
     width: 320px;
 }
+
+.tabla-etapas{
+    border-radius: 15px;
+    background-color: #ffffff;
+    height: 220px;
+    width: 450px;
+}
+
   /*Modal de las pestañas*/
   .pestanias{
     padding-left: 15px;

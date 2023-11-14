@@ -65,7 +65,7 @@ export default function Menu() {
             }}
             className="menu-desplegable"
           >
-            <Link className="boton-administracion">ADMINISTRACION</Link>
+            <Link className="boton-administracion">ADMINISTRACIÓN</Link>
           </Dropdown>
           <Link className="boton-inicio">CONTACTO</Link>
         </div>

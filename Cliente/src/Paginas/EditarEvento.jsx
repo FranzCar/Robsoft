@@ -169,7 +169,7 @@ export default function EditarEvento() {
     beforeUpload: (file) => {
       if (!isImage(file)) {
         message.error(
-          "Solo se permiten archivos de imagen (JPEG, JPG, PNG, GIF)"
+          "Solo se permiten archivos de imagen (JPEG, JPG, PNG)"
         );
         return Upload.LIST_IGNORE; // Impedir la carga del archivo y no lo añade a la lista
       }
@@ -252,9 +252,9 @@ export default function EditarEvento() {
 
   const cerrarEdit = () => {
     confirm({
-      title: "¿Está seguro de que desea cancelar la edición del evento?",
+      title: "¿Estás seguro de que deseas cancelar?",
       icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
+      content: "No se guardarán los cambio realizados",
       okText: "Si",
       cancelText: "No",
       centered: "true",
@@ -606,7 +606,7 @@ export default function EditarEvento() {
               htmlType="submit"
               className="boton-cancelar-evento"
             >
-              Actualizar
+              Guardar
             </Button>
           </Form>,
         ]}

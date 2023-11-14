@@ -13,6 +13,7 @@ import React, { useState, useEffect } from "react";
 import { PlusOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 
 const { TextArea } = Input;
@@ -125,10 +126,19 @@ export default function CrearEvento() {
   const disabledDateFin = (current) => {
     // Obtenemos la fecha seleccionada en "Fecha inicio"
     const fechaInicioValue = form.getFieldValue('FECHA_INICIO');
-  
+    
     // Si no hay fecha seleccionada en "Fecha inicio" o la fecha actual es anterior, deshabilitar
-    return !fechaInicioValue || current < fechaInicioValue;
+    if (!fechaInicioValue || current < fechaInicioValue) {
+      return true;
+    }
+  
+    // Calculamos la fecha máxima permitida (180 días desde la fecha actual)
+    const fechaMaxima = moment().add(180, 'days');
+  
+    // Si la fecha actual es posterior a la fecha máxima permitida, deshabilitar
+    return current > fechaMaxima;
   };
+  
 
   //Restringir las horas
   const disabledHours = () => {
