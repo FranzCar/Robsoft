@@ -277,6 +277,7 @@ const showCancelDetalle = () => {
     return imageExtensions.includes(extension);
   };
 
+
   //Ver el modal de etapa
   const showEtapa = () => {
     setVerEtapa(true);
@@ -716,9 +717,10 @@ const showCancelDetalle = () => {
                         maxLength={3}/>
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
-                      <Form.Item label="Requisitos">
+                      <Form.Item label="Requisitos"
+                      >
                         <TextArea showCount ></TextArea>
                       </Form.Item>
                       <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
@@ -869,7 +871,7 @@ const showCancelDetalle = () => {
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount></TextArea>
@@ -1036,7 +1038,7 @@ const showCancelDetalle = () => {
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount></TextArea>
@@ -1206,7 +1208,7 @@ const showCancelDetalle = () => {
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount ></TextArea>
@@ -1477,7 +1479,7 @@ const showCancelDetalle = () => {
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea></TextArea>
@@ -1644,7 +1646,7 @@ const showCancelDetalle = () => {
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
-                        <Slider min={5} max={100} />
+                        <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos">
                         <TextArea showCount></TextArea>
