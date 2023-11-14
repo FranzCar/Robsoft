@@ -712,7 +712,8 @@ const showCancelDetalle = () => {
                       <Form.Item label="Costo">
                         <Input 
                         placeholder="Ingrese el costo" 
-                        onKeyPress={onlyNumbers}/>
+                        onKeyPress={onlyNumbers}
+                        maxLength={3}/>
                       </Form.Item>
                       <Form.Item label="Cupos">
                         <Slider min={5} max={100} />
@@ -864,6 +865,7 @@ const showCancelDetalle = () => {
                       <Form.Item label="Costo">
                         <Input placeholder="Ingrese el costo" 
                         onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1030,6 +1032,7 @@ const showCancelDetalle = () => {
                       <Form.Item label="Costo">
                         <Input placeholder="Ingrese el costo" 
                         onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1199,6 +1202,7 @@ const showCancelDetalle = () => {
                       <Form.Item label="Costo">
                         <Input placeholder="Ingrese el costo" 
                         onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1469,6 +1473,7 @@ const showCancelDetalle = () => {
                       <Form.Item label="Costo">
                         <Input placeholder="Ingrese el costo" 
                         onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
@@ -1635,6 +1640,7 @@ const showCancelDetalle = () => {
                       <Form.Item label="Costo">
                         <Input placeholder="Ingrese el costo" 
                         onKeyPress={onlyNumbers}
+                        maxLength={3}
                         />
                       </Form.Item>
                       <Form.Item label="Cupos">
