@@ -549,7 +549,7 @@ export default function DetalleEvento() {
     const titulo = form.getFieldValue("TITULO_ETAPA");
     const modalidad = form.getFieldValue("MODALIDAD_ETAPA");
     const fecha = form.getFieldValue("FECHA_ETAPA");
-    const nuevaFecha = fecha.format("YYYY-MM-DD");
+    const nuevaFecha = fecha ? fecha.format("YYYY-MM-DD") : null;
     const ubicacion = form.getFieldValue("UBICACION_ETAPA");
     const hora = horaReservada;
     let modalidadNueva = "";
@@ -559,6 +559,12 @@ export default function DetalleEvento() {
       modalidadNueva = "Presencial";
     }
 
+    // Validar que los campos obligatorios no estén vacíos
+    if (!titulo || !modalidad || !fecha || !ubicacion || !hora) {
+      // Mostrar un mensaje de error indicando campos vacíos
+      message.error("Por favor, complete todos los campos obligatorios");
+      return;
+    }
     // Crear un nuevo objeto con la información de la etapa
     const nuevaEtapa = {
       nombre_etapa: titulo,
@@ -880,7 +886,15 @@ export default function DetalleEvento() {
                     </Form.Item>
                   </div>
                   <div className="etapas-columna2">
-                    <Form.Item name="HORA_ETAPA">
+                    <Form.Item
+                      name="HORA_ETAPA"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Por favor, ingresa una hora.",
+                        },
+                      ]}
+                    >
                       <div className="reservar-hora-input">
                         <div>
                           <Button onClick={reservarHora}>Reservar hora</Button>
@@ -889,10 +903,11 @@ export default function DetalleEvento() {
                           <Input
                             readOnly={estadoFormulario}
                             value={horaReservada}
-                          ></Input>
+                          />
                         </div>
                       </div>
                     </Form.Item>
+
                     <Form.Item>
                       <Button onClick={aniadirEtapa}>Añadir etapa</Button>
                     </Form.Item>
