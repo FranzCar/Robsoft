@@ -1012,13 +1012,6 @@ export default function DetalleEvento() {
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Fecha límite de inscripción">
-                        <DatePicker
-                          style={{ width: "180px" }}
-                          placeholder="Selecione una fecha"
-                          disabledDate={validacionFechaLimite}
-                        />
-                      </Form.Item>
                       <Form.Item
                         label="Dirigido a"
                         name="dirigido a"
@@ -1207,12 +1200,6 @@ export default function DetalleEvento() {
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Fecha límite de inscripción">
-                        <DatePicker
-                          style={{ width: "180px" }}
-                          placeholder="Selecione una fecha"
-                        />
-                      </Form.Item>
                       <Form.Item
                         label="Dirigido a"
                         className="icpc-dirigido"
@@ -1395,12 +1382,6 @@ export default function DetalleEvento() {
                           <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
-                      </Form.Item>
-                      <Form.Item label="Fecha límite de inscripción">
-                        <DatePicker
-                          style={{ width: "180px" }}
-                          placeholder="Selecione una fecha"
-                        />
                       </Form.Item>
                       <Form.Item
                         label="Facilitador"
@@ -1610,12 +1591,6 @@ export default function DetalleEvento() {
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Fecha límite de inscripción">
-                        <DatePicker
-                          style={{ width: "180px" }}
-                          placeholder="Selecione una fecha"
-                        />
-                      </Form.Item>
                       <Form.Item
                         label="Entrenador"
                         className="icpc-dirigido"
@@ -1803,12 +1778,6 @@ export default function DetalleEvento() {
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Fecha fin de inscripciones">
-                        <DatePicker
-                          placeholder="Seleccione una fecha"
-                          className="fecha-reclutamiento"
-                        />
-                      </Form.Item>
                       <Form.Item
                         label="Dirigido a"
                         name="dirigido a"
@@ -1980,12 +1949,6 @@ export default function DetalleEvento() {
                           <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
-                      </Form.Item>
-                      <Form.Item label="Fecha límite de inscripción">
-                        <DatePicker
-                          style={{ width: "180px" }}
-                          placeholder="Selecione una fecha"
-                        />
                       </Form.Item>
                       <Form.Item
                         label="Dirigido a"
@@ -2171,12 +2134,6 @@ export default function DetalleEvento() {
                           <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
-                      </Form.Item>
-                      <Form.Item label="Fecha límite de inscripción">
-                        <DatePicker
-                          style={{ width: "180px" }}
-                          placeholder="Selecione una fecha"
-                        />
                       </Form.Item>
                       <Form.Item
                         label="Responsable"
