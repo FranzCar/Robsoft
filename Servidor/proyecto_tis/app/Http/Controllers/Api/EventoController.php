@@ -9,6 +9,8 @@ use App\Models\CaracteristicaFechaEvento;
 use App\Models\CaracteristicaIntEvento;
 use App\Models\CaracteristicaDecimalEvento;
 use App\Models\CaracteristicaLongtextEvento;
+use App\Models\Inscripcion;
+use App\Models\Etapa;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -240,13 +242,6 @@ public function update(Request $request, $id) {
     });
 }
 
-    
-    public function destroy($id)
-    {
-        $evento = Evento::destroy($id);
-        return $evento;
-    }
-
     public function getEventosNoMostrar() {
         $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
                      ->where('MOSTRAR', 0)
@@ -265,49 +260,114 @@ public function update(Request $request, $id) {
 
     return $this->transformarEventos($eventos);
 }
-    public function quitarEvento($id)
-    {
-        $this->actualizarEstadoTodos();
-    
-        $evento = Evento::find($id);
+public function quitarEvento($id)
+{
+    DB::beginTransaction();
 
-        if (!$evento) {
-            return response()->json(['message' => 'El evento no existe.',], 404);
+    try {
+        $evento = Evento::findOrFail($id);
+
+        switch ($evento->ESTADO) {
+            case 'En espera':
+                // Si el evento está en estado 'En espera', eliminar directamente
+                $this->eliminarEvento($evento);
+                break;
+            case 'Listo':
+                // Si el evento está en estado 'Listo', eliminar etapas y características del evento
+                $this->eliminarEtapaYCaracteristicas($evento);
+                $this->eliminarEvento($evento);
+                break;
+            case 'Inscrito':
+                // Si el evento está en estado 'Inscrito', eliminar inscripciones, etapas y características del evento
+                $this->eliminarInscripciones($evento);
+                $this->eliminarEtapaYCaracteristicas($evento);
+                $this->eliminarEvento($evento);
+                break;
+            default:
+                return response()->json(['message' => 'El evento no se puede eliminar en el estado actual.'], 400);
         }
 
-        $evento->MOSTRAR = false;
-        $estadoEvento = $evento->ESTADO;
-
-        if ($estadoEvento == 'En espera') {
-            $evento->save();
-            return response()->json(['message' => 'Atributo MOSTRAR actualizado a FALSE con éxito.', 'id' => $id,], 200);
-        } else {
-            return response()->json(['message' => 'El evento no se puede eliminar porque no está en estado En espera.',], 400);
-        }
+        DB::commit();
+        return response()->json(['message' => 'Evento eliminado con éxito.'], 200);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['message' => 'Error al eliminar el evento', 'error' => $e->getMessage()], 500);
     }
+}
+
+private function eliminarEvento($evento)
+{
+    try {
+        // Iniciar transacción
+        DB::beginTransaction();
+
+        // Eliminar relaciones en EVENTO_AUSPICIADOR
+        DB::table('EVENTO_AUSPICIADOR')->where('id_evento', $evento->id_evento)->delete();
+
+        // Eliminar relaciones en ROL_PERSONA_EN_EVENTO
+        DB::table('ROL_PERSONA_EN_EVENTO')->where('id_evento', $evento->id_evento)->delete();
+
+        // Agrega aquí la eliminación de otras relaciones si es necesario
+
+        // Eliminar el evento
+        $evento->delete();
+
+        // Confirmar transacción
+        DB::commit();
+    } catch (\Exception $e) {
+        // Revertir todas las operaciones en caso de error
+        DB::rollBack();
+        \Log::error("Error al eliminar evento: " . $e->getMessage());
+        throw $e;
+    }
+}
+
+private function eliminarEtapaYCaracteristicas($evento)
+{
+    // Eliminar etapas y características asociadas al evento
+    Etapa::where('id_evento', $evento->id)->delete();
+    CaracteristicaLongtextEvento::where('id_evento', $evento->id)->delete();
+    CaracteristicaTextoEvento::where('id_evento', $evento->id)->delete();
+    CaracteristicaIntEvento::where('id_evento', $evento->id)->delete();
+    CaracteristicaFechaEvento::where('id_evento', $evento->id)->delete();
+}
+
+private function eliminarInscripciones($evento)
+{
+    // Eliminar inscripciones asociadas al evento
+    Inscripcion::where('id_evento', $evento->id)->delete();
+}
+
     public function actualizarEstadoTodos()
     {
-        $fechaHora = Carbon::now()->subHours(4);
-        $fechaActual = $fechaHora->format('Y-m-d');
-        $horaActual = $fechaHora->format('H:i:s');
-
+        $fechaActual = Carbon::now();
+    
         $eventos = Evento::all();
-
+    
         foreach ($eventos as $evento) {
-            $fechaEvento = $evento->FECHA_INICIO;
-            $horaEvento = $evento->HORA;
-
-            $estado = 'En espera';
-            if ($fechaActual == $fechaEvento && $horaActual >= $horaEvento) {
-                $estado = 'En proceso';
-            } elseif ($fechaActual > $fechaEvento ) {
-                $estado = 'Terminado';
+            // Determinar si el evento tiene inscripciones, etapas, o características
+            $tieneInscripciones = Inscripcion::where('id_evento', $evento->id_evento)->exists();
+            $tieneCaracteristicasOEtapa = Etapa::where('id_evento', $evento->id_evento)->exists()  && (
+                                          CaracteristicaLongtextEvento::where('id_evento', $evento->id_evento)->exists() ||
+                                          CaracteristicaTextoEvento::where('id_evento', $evento->id_evento)->exists() ||
+                                          CaracteristicaIntEvento::where('id_evento', $evento->id_evento)->exists() ||
+                                          CaracteristicaFechaEvento::where('id_evento', $evento->id_evento)->exists());    
+            // Lógica para actualizar el estado
+            if ($evento->ESTADO == 'En espera' && $tieneCaracteristicasOEtapa) {
+                $evento->ESTADO = 'Listo';
+            } elseif ($evento->ESTADO == 'Listo' && $tieneInscripciones) {
+                $evento->ESTADO = 'Inscrito';
+            } elseif ($evento->ESTADO == 'Inscrito' && $fechaActual->between($evento->FECHA_INICIO, $evento->FECHA_FIN)) {
+                $evento->ESTADO = 'En curso';
+            } elseif (($evento->ESTADO == 'En espera' || $evento->ESTADO == 'Listo') && $fechaActual->gt($evento->FECHA_FIN)) {
+                $evento->ESTADO = 'Abandono';
+            } elseif ($evento->ESTADO == 'En curso' && $fechaActual->gt($evento->FECHA_FIN)) {
+                $evento->ESTADO = 'Terminado';
             }
-
-            $evento->ESTADO = $estado;
+    
             $evento->save();
         }
-
+    
         return response()->json(['success' => true]);
     }
     public function getEventosEnEspera() {
