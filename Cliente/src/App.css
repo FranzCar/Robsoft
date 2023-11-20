@@ -442,3 +442,9 @@ h3 {
  .columna1-reclutamiento{
     padding-right: 40px;
  }
+
+ /*Cards*/
+ .cards{
+    padding: 3%;
+    padding-top: 2%;
+ }
