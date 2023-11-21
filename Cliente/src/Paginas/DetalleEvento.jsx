@@ -10,7 +10,6 @@ import {
   DatePicker,
   Select,
   Input,
-  QRCode,
   Slider,
   message,
   Upload,
@@ -25,9 +24,12 @@ import {
 import axios from "axios";
 import TextArea from "antd/es/input/TextArea";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
+
 const { TabPane } = Tabs;
 const { Column } = Table;
 const { confirm } = Modal;
+const { RangePicker } = DatePicker;
 
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -46,15 +48,12 @@ export default function DetalleEvento() {
   const [value4, setValue4] = useState(1);
   const [value5, setValue5] = useState(1);
   const [value6, setValue6] = useState(1);
-  const [value7, setValue7] = useState(1);
   const handleCancelIMG = () => setPreviewOpen(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   const [fileList, setFileList] = useState([]);
-  const [verEtapa, setVerEtapa] = useState(false);
   const [verHoraReserva, setVerHoraReserva] = useState(false);
-  const [selectionType, setSelectionType] = useState("checkbox");
   const [selectedRows, setSelectedRows] = useState([]);
   const [mostrarPestanias, setMostrarPestanias] = useState(false);
   const [activeTab, setActiveTab] = useState("1");
@@ -70,15 +69,20 @@ export default function DetalleEvento() {
   const [valueParticipacion, setValueParticipacion] = useState(1);
   const [valueModalidad, setValueModalidad] = useState(1);
   const [form] = Form.useForm();
-  const [formICPC] = Form.useForm();
+  const [formActividades] = Form.useForm();
   const [obtenerUbicaciones, setObtenerUbicaciones] = useState([]);
   const [listaUbicacion, setListaUbicacion] = useState(null);
   const [listaEtapas, setListaEtapas] = useState([]);
-  const [estadoFormulario, setEstadoFormulario] = useState(true);
   const [horaReservada, setHoraReservada] = useState(null);
   const [listaHorarios, setListaHorarios] = useState([]);
   const [fechaInicioBD, setFechaInicioBD] = useState(null);
   const [requisitos, setRequisitos] = useState([]);
+  const [mostrarInputURL, setMostrarInputURL] = useState(false);
+  const [mostrarUbicacion, setMostrarUbicacion] = useState(false);
+  const [fechaInicio, setFechaInicio] = useState(null);
+  const [horaInicio, setHoraInicio] = useState(null);
+  const [fechaFin, setFechaFin] = useState(null);
+  const [horafin, setHoraFin] = useState(null);
   //Kevin
   const [form2] = Form.useForm();
   //Solo permitir numeros en los input
@@ -108,19 +112,25 @@ export default function DetalleEvento() {
         setListaEtapas([]);
         setHoraReservada(null);
         setFechaInicioBD(null);
+        setFechaInicio(null);
+        setFechaFin(null);
+        setHoraInicio(null);
+        setHoraFin(null);
         form.resetFields();
-        formICPC.resetFields();
+        formActividades.resetFields();
       },
       onCancel() {},
     });
   };
   //Guardar datos del formulario Detalle
   const registrarDetalle = (values) => {
-    showConfirmDetalle(values);
-    console.log("Los valores de los datos del detalle son ", values);
-  };
-  const onFinish = (values) => {
-    showConfirmDetalle(values);
+    console.log("Lista de actividades ", listaEtapas);
+    if (listaEtapas.length === 0) {
+      message.error("Tiene que añadir uno o más actividades");
+    } else {
+      showConfirmDetalle(values);
+      console.log("Los valores de los datos del detalle son ", values);
+    }
   };
   //Mensaje de confirmacion al dar guardar en la parte de registro de los detalles
   const showConfirmDetalle = (values) => {
@@ -145,7 +155,6 @@ export default function DetalleEvento() {
     navigate("/evento");
   };
   const navigate = useNavigate();
-  const Footer = ({ children }) => <footer>{children}</footer>;
   //
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
   const customRequest = ({ fileList, onSuccess }) => {
@@ -272,30 +281,28 @@ export default function DetalleEvento() {
     setValue6(e.target.value);
   };
 
-  const onChangeEtapa = (e) => {
-    setValue7(e.target.value);
-  };
   const onChangeParticipacion = (e) => {
     setValueParticipacion(e.target.value);
   };
   const onChangeModalidad = (e) => {
+    if (e.target.value === 1) {
+      // Verificar si UBICACION_ETAPA tiene un valor y borrarlo
+      if (formActividades.getFieldValue("UBICACION_ETAPA")) {
+        formActividades.setFieldValue("UBICACION_ETAPA", ""); // Establecer el valor a una cadena vacía
+      }
+
+      setMostrarInputURL(true);
+      setMostrarUbicacion(false);
+    } else {
+      // Verificar si UBICACION_ETAPA tiene un valor y borrarlo
+      if (formActividades.getFieldValue("UBICACION_ETAPA")) {
+        formActividades.setFieldValue("UBICACION_ETAPA", ""); // Establecer el valor a una cadena vacía
+      }
+
+      setMostrarInputURL(false);
+      setMostrarUbicacion(true);
+    }
     setValueModalidad(e.target.value);
-  };
-
-  const cerrarReservaHora = () => {
-    confirm({
-      title: "¿Está seguro cancelar la reserva de horario?",
-      icon: <ExclamationCircleFilled />, //
-      content: "Todos los cambios se perderán",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        setVerHoraReserva(false);
-      },
-      onCancel() {},
-    });
   };
 
   // Configuración de las opciones del componente Upload
@@ -326,40 +333,6 @@ export default function DetalleEvento() {
     const imageExtensions = ["pdf"];
     const extension = file.name.split(".").pop().toLowerCase();
     return imageExtensions.includes(extension);
-  };
-
-  //Ver el modal de etapa
-  const showEtapa = () => {
-    setVerEtapa(true);
-  };
-
-  //Modal para reservar una hora
-  const reservarHora = () => {
-    const fecha = form.getFieldValue("FECHA_ETAPA");
-    const nuevaFecha = fecha ? fecha.format("YYYY-MM-DD") : null; // Validar si fecha está definida
-    const ubicacion = listaUbicacion;
-
-    if (!nuevaFecha || !ubicacion) {
-      // Mostrar mensaje de error si nuevaFecha o ubicacion están vacíos
-      message.error("Por favor, selecciona una fecha y una ubicación");
-      // Puedes mostrar un mensaje en tu interfaz o utilizar una librería para notificaciones
-      return;
-    }
-
-    const datos = {
-      id_ubicacion: ubicacion,
-      fecha_etapa: nuevaFecha,
-    };
-    mostrarHorarios(listaHorarios);
-    axios
-      .get("http://localhost:8000/api/horarios-disponibles", datos)
-      .then((response) => {
-        setVerHoraReserva(true);
-      })
-      .catch((error) => {
-        console.error(error);
-        // Puedes manejar el error de alguna manera, por ejemplo, mostrando un mensaje al usuario
-      });
   };
 
   const mostrarHorarios = (data) => {
@@ -437,72 +410,6 @@ export default function DetalleEvento() {
         setMostrarFormTorneo(false);
         setFechaInicioBD(null);
         form.resetFields();
-        formICPC.resetFields();
-      },
-      onCancel() {},
-    });
-  };
-
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      setSelectedRows(selectedRows);
-    },
-  };
-
-  const handleGuardarClick = () => {
-    if (!selectedRows || selectedRows.length === 0) {
-      message.error("No hay horarios seleccionados");
-      return;
-    }
-
-    // Obtén el primer y último elemento de la lista
-    const primerDato = selectedRows[0];
-    const ultimoDato = selectedRows[selectedRows.length - 1];
-    console.log(
-      "los datos selecionados son ",
-      primerDato.key,
-      " ",
-      ultimoDato.key,
-      " ",
-      listaHorarios[0].key
-    );
-
-    // Obtén la parte antes y después del guion en el campo 'hora'
-    const primeraParte = primerDato.hora.split(" - ")[0];
-    const segundaParte = ultimoDato.hora.split(" - ")[1];
-
-    // Combina las partes obtenidas
-    const nuevoTexto = `${primeraParte} - ${segundaParte}`;
-
-    let listaNueva = [];
-    // Cambia el campo 'estado' de los elementos entre el primero y el último a 'Ocupado'
-    for (let i = primerDato.key; i <= ultimoDato.key; i++) {
-      for (let j = 0; j < listaHorarios.length; j++) {
-        if (i === listaHorarios[j].key) {
-          listaNueva.push(i);
-        }
-      }
-    }
-    setListaHorarios(listaNueva);
-    //Se asgina el valor al campo input de horario de la etapa
-    setHoraReservada(nuevoTexto);
-    // Muestra los resultados
-    console.log("Nuevo Texto:", nuevoTexto);
-    console.log("Lista actualizada:", listaNueva);
-    setVerHoraReserva(false);
-  };
-
-  const showGuardarHoras = (values) => {
-    confirm({
-      title: "¿Desea agregar las horas seleccionadas?",
-      icon: <ExclamationCircleFilled />,
-      content: "",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        handleGuardarClick();
       },
       onCancel() {},
     });
@@ -546,21 +453,20 @@ export default function DetalleEvento() {
   };
 
   const aniadirEtapa = () => {
-    const titulo = form.getFieldValue("TITULO_ETAPA");
-    const modalidad = form.getFieldValue("MODALIDAD_ETAPA");
-    const fecha = form.getFieldValue("FECHA_ETAPA");
-    const nuevaFecha = fecha ? fecha.format("YYYY-MM-DD") : null;
-    const ubicacion = form.getFieldValue("UBICACION_ETAPA");
-    const hora = horaReservada;
-    let modalidadNueva = "";
-    if (modalidad === 1) {
-      modalidadNueva = "En linea";
-    } else {
-      modalidadNueva = "Presencial";
-    }
+    const titulo = formActividades.getFieldValue("TITULO_ETAPA");
+    const modalidad = formActividades.getFieldValue("MODALIDAD_ETAPA");
+    const ubicacion = formActividades.getFieldValue("UBICACION_ETAPA");
+    const fechaInicio = formActividades.getFieldValue("FECHA_INICIO");
+    const fechaFin = formActividades.getFieldValue("FECHA_FIN");
+    const nuevaFechaInicio = fechaInicio
+      ? fechaInicio.format("YYYY-MM-DD HH:mm")
+      : null;
+    const nuevaFechaFin = fechaFin ? fechaFin.format("YYYY-MM-DD HH:mm") : null;
+
+    const modalidadNueva = modalidad === 1 ? "En linea" : "Presencial";
 
     // Validar que los campos obligatorios no estén vacíos
-    if (!titulo || !modalidad || !fecha || !ubicacion || !hora) {
+    if (!titulo || !modalidad || !ubicacion || !fechaInicio || !fechaFin) {
       // Mostrar un mensaje de error indicando campos vacíos
       message.error("Por favor, complete todos los campos obligatorios");
       return;
@@ -570,32 +476,22 @@ export default function DetalleEvento() {
       nombre_etapa: titulo,
       modalidad_ubicacion: modalidadNueva,
       id_ubicacion: ubicacion,
-      fecha_etapa: nuevaFecha,
-      hora: hora,
-      id_horario: listaHorarios,
+      fecha_inicio: nuevaFechaInicio,
+      fecha_fin: nuevaFechaFin,
     };
 
     // Verificar si la etapa ya existe en la lista
     const etapaExistente = listaEtapas.find(
-      (etapa) =>
-        etapa.nombre_etapa === nuevaEtapa.nombre_etapa &&
-        etapa.id_ubicacion === nuevaEtapa.id_ubicacion &&
-        etapa.fecha_etapa === nuevaEtapa.fecha_etapa &&
-        etapa.hora === nuevaEtapa.hora
+      (etapa) => etapa.nombre_etapa === nuevaEtapa.nombre_etapa
     );
 
     if (etapaExistente) {
       // Mostrar un mensaje indicando que la etapa ya existe
       message.error("La etapa ya se encuentra añadida");
     } else {
-      // Clonar el array existente y agregar la nueva etapa
-      const nuevaListaEtapas = [...listaEtapas, nuevaEtapa];
-
       // Actualizar el estado con la nueva lista de etapas
-      console.log("las list de añadir etapa es ", listaHorarios);
-      mostrarHorarios(listaHorarios);
-      setListaEtapas(nuevaListaEtapas);
-      form.resetFields();
+      setListaEtapas([...listaEtapas, nuevaEtapa]);
+      formActividades.resetFields();
       setHoraReservada(null);
     }
   };
@@ -667,17 +563,121 @@ export default function DetalleEvento() {
   };
 
   const disabledDate = (current) => {
-    // Convertimos fechaInicioBD a un objeto Date si no lo es
-    const minDate =
-      fechaInicioBD instanceof Date ? fechaInicioBD : new Date(fechaInicioBD);
-
-    // Establecemos la fecha máxima como 180 días después de la fecha inicial
+    // Establecemos la fecha mínima como la fecha de inicio proveniente de la base de datos
+    const minDate = new Date(fechaInicioBD);
+    minDate.setDate(minDate.getDate());
+  
+    // Establecemos la fecha máxima como 180 días después de la fecha de inicio
     const maxDate = new Date(minDate);
-    maxDate.setDate(minDate.getDate() + 180);
+    maxDate.setDate(maxDate.getDate() + 180);
+  
+    // Solo permitimos fechas dentro del rango [minDate, maxDate]
+    return current < minDate || current > maxDate;
+  };
+  
+
+  //4to sprint
+
+  const onChange = (value, dateString) => {
+    // Verificar si dateString tiene un valor antes de intentar dividirlo
+    if (dateString) {
+      var partesFecha = dateString.split(" ");
+
+      // Almacenar la fecha y la hora en variables separadas
+      var fechaInicio = partesFecha[0];
+      var horaInicio = partesFecha[1];
+
+      setFechaInicio(fechaInicio);
+      setHoraInicio(horaInicio);
+    } else {
+      // Si dateString es undefined, establecer las variables de estado como cadenas vacías
+      setFechaFin(null);
+      setHoraFin(null);
+      setFechaInicio(null);
+      setHoraInicio(null);
+      formActividades.setFieldsValue({ FECHA_FIN: null });
+    }
+  };
+
+  const onChange2 = (value, dateString) => {
+    // Verificar si dateString tiene un valor antes de intentar dividirlo
+    if (dateString) {
+      var partesFecha = dateString.split(" ");
+
+      // Almacenar la fecha y la hora en variables separadas
+      var fechaFin = partesFecha[0];
+      var horaFin = partesFecha[1];
+
+      setFechaFin(fechaFin);
+      setHoraFin(horaFin);
+    } else {
+      console.error(
+        "dateString es undefined. Asegúrate de que estás recibiendo la fecha correctamente."
+      );
+      setFechaFin(null);
+      setHoraFin(null);
+    }
+  };
+  const onOk = (value) => {
+    console.log("onOk: ", value);
+  };
+  
+  const onOk2 = (value) => {
+    console.log("onOk: ", value);
+  };
+
+  const disabledDate2 = (current) => {
+    // Verificamos si fechaInicio está vacío
+    if (!fechaInicio) {
+      // Si fechaInicio está vacío, deshabilitamos todas las fechas
+      return true;
+    }
+
+    // Establecemos la fecha mínima como la fecha de inicio proveniente del campo de fecha inicio
+    const minDate = new Date(fechaInicio);
+
+    // Establecemos la fecha máxima como 180 días después de la fecha actual
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 180);
 
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
   };
+
+  const obtenerHorasHabilitadas = () => {
+    const horasHabilitadas = [];
+  console.log("fecha inicio es ", fechaInicio, " fecha fin es ", fechaFin)
+    // Verificar si fechaInicio es igual a fechaFin
+    if (fechaInicio === fechaFin) {
+      if (horaInicio) {
+        const horaInicioArray = horaInicio.split(":");
+        const horaInicioNum = parseInt(horaInicioArray[0], 10);
+  
+        if (!isNaN(horaInicioNum)) {
+          const horaFinBloqueo = 20; // Hora de fin del bloqueo hasta las 20:00
+  
+          for (let i = horaInicioNum + 1; i <= horaFinBloqueo; i++) {
+            horasHabilitadas.push(i);
+          }
+        } else {
+          console.log("La hora de inicio no es un número válido.");
+        }
+      } else {
+        console.log("La hora de inicio no está definida. Asegúrate de establecerla correctamente.")
+      }
+    } else {
+      // Si fechaInicio es diferente de fechaFin, habilitar las horas desde las 08:00 hasta las 20:00
+      for (let i = 8; i <= 20; i++) {
+        horasHabilitadas.push(i);
+      }
+    }
+  
+    return horasHabilitadas;
+  };
+  
+  
+  
+  
 
   return (
     <div>
@@ -724,49 +724,6 @@ export default function DetalleEvento() {
         />
       </Table>
 
-      {/*Modal para elegir las horas q se quiere reservar */}
-      <Modal
-        title="??"
-        open={verHoraReserva}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form>
-            <Button onClick={cerrarReservaHora}>Cancelar</Button>
-            <Button type="primary" onClick={showGuardarHoras}>
-              Agregar
-            </Button>
-          </Form>,
-        ]}
-      >
-        <Form form={form}>
-          <Table
-            scroll={{ y: 350 }}
-            dataSource={listaHorarios}
-            rowSelection={{
-              type: selectionType,
-              ...rowSelection,
-            }}
-            pagination={false}
-            locale={{
-              emptyText: (
-                <div style={{ padding: "30px", textAlign: "center" }}>
-                  No hay horarios para seleccionar
-                </div>
-              ),
-            }}
-          >
-            <Column title="Horario" dataIndex="hora" key="horario" />
-            <Column
-              title="Estado de la ubicacion"
-              dataIndex="estado"
-              key="estado"
-            />
-          </Table>
-        </Form>
-      </Modal>
-
       {/*Modal para mostrar las pestañas */}
       <Modal
         open={mostrarPestanias}
@@ -800,16 +757,20 @@ export default function DetalleEvento() {
           activeKey={activeTab}
         >
           <TabPane
-            tab={<span style={{ color: "black" }}>Etapas</span>}
+            tab={<span style={{ color: "black" }}>Actividades</span>}
             key="2"
             className="tab1"
           >
             <div className={`contenido ${activeTab === "1" ? "color1" : ""}`}>
-              <Form form={form} className="formEtapas">
+              <Form
+                form={formActividades}
+                className="formEtapas"
+                onFinish={aniadirEtapa}
+              >
                 <div className="etapas-hora">
                   <div className="etapas-columna1">
                     <Form.Item
-                      label="Nombre de la etapa"
+                      label="Nombre de la actividad"
                       name="TITULO_ETAPA"
                       rules={[
                         {
@@ -828,7 +789,7 @@ export default function DetalleEvento() {
                     </Form.Item>
 
                     <Form.Item
-                      label="Modalidad de la etapa"
+                      label="Modalidad"
                       name="MODALIDAD_ETAPA"
                       rules={[
                         {
@@ -847,23 +808,6 @@ export default function DetalleEvento() {
                     </Form.Item>
 
                     <Form.Item
-                      label="Fecha de etapa"
-                      name="FECHA_ETAPA"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Por favor, seleccione una fecha",
-                        },
-                      ]}
-                    >
-                      <DatePicker
-                        placeholder="Seleccione una fecha"
-                        className="etapa-fecha"
-                        disabledDate={disabledDate}
-                      />
-                    </Form.Item>
-
-                    <Form.Item
                       label="Ubicación"
                       name="UBICACION_ETAPA"
                       className="etapa-ubicacion"
@@ -874,63 +818,124 @@ export default function DetalleEvento() {
                         },
                       ]}
                     >
-                      <Select
-                        allowClear
-                        style={{
-                          width: "100%",
-                        }}
-                        placeholder="Selecione una ubicación"
-                        onChange={handleChangeUbicaciones}
-                        options={obtenerUbicaciones}
-                      />
+                      {mostrarUbicacion && (
+                        <Select
+                          allowClear
+                          style={{
+                            width: "100%",
+                          }}
+                          placeholder="Selecione una ubicación"
+                          onChange={handleChangeUbicaciones}
+                          options={obtenerUbicaciones}
+                        />
+                      )}
+                      {mostrarInputURL && <Input></Input>}
                     </Form.Item>
                   </div>
                   <div className="etapas-columna2">
                     <Form.Item
-                      name="HORA_ETAPA"
+                      label="Fecha y hora de inicio"
+                      name="FECHA_INICIO"
                       rules={[
                         {
                           required: true,
-                          message: "Por favor, ingresa una hora.",
+                          message: "Por favor, seleccione una fecha",
                         },
                       ]}
                     >
-                      <div className="reservar-hora-input">
-                        <div>
-                          <Button onClick={reservarHora}>Reservar hora</Button>
-                        </div>
-                        <div>
-                          <Input
-                            readOnly={estadoFormulario}
-                            value={horaReservada}
-                          />
-                        </div>
-                      </div>
+                      <DatePicker
+                        placeholder="Seleccione una fecha"
+                        className="etapa-fecha"
+                        showTime={{
+                          defaultValue: moment("08:00", "HH:mm"),
+                          format: "HH:mm", // Muestra solo horas y minutos
+                          minuteStep: 1,
+                          disabledHours: () => {
+                            const currentHour = new Date().getHours();
+                            // Deshabilita las horas antes de las 8 y después de las 20
+                            return Array.from({ length: 24 }, (_, i) =>
+                              i < 8 || i > 20 ? i : null
+                            );
+                          },
+                          disabledMinutes: (selectedHour) => {
+                            // Si la hora seleccionada es 20, deshabilita los minutos que no son 00
+                            if (selectedHour === 20) {
+                              return Array.from({ length: 60 }, (_, i) =>
+                                i !== 0 ? i : null
+                              );
+                            }
+                          },
+                        }}
+                        format="YYYY-MM-DD HH:mm"
+                        onChange={onChange}
+                        onOk={onOk}
+                        disabledDate={disabledDate}
+                        showNow={false}
+                      />
                     </Form.Item>
-
-                    <Form.Item>
-                      <Button onClick={aniadirEtapa}>Añadir etapa</Button>
-                    </Form.Item>
-                    <Table
-                      className="tabla-etapas"
-                      scroll={{ y: 180 }}
-                      dataSource={listaEtapas}
-                      pagination={false}
-                      locale={{
-                        emptyText: (
-                          <div style={{ padding: "40px", textAlign: "center" }}>
-                            No hay etapas registrados
-                          </div>
-                        ),
-                      }}
+                    <Form.Item
+                      label="Fecha y hora de fin"
+                      name="FECHA_FIN"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Por favor, seleccione una fecha",
+                        },
+                      ]}
                     >
-                      <Column title="Título" dataIndex="nombre_etapa" />
-                      <Column title="Fecha" dataIndex="fecha_etapa" />
-                      <Column title="Ubicación" dataIndex="id_ubicacion" />
-                      <Column title="Hora" dataIndex="hora" />
-                    </Table>
+                      <DatePicker
+                        placeholder="Seleccione una fecha"
+                        className="etapa-fecha"
+                        showTime={{
+                          format: "HH:mm",
+                          minuteStep: 1,
+                          disabledHours: () => {
+                            return Array.from({ length: 24 }, (_, i) =>
+                              obtenerHorasHabilitadas().indexOf(i) === -1
+                                ? i
+                                : null
+                            );
+                          },
+                          disabledMinutes: (selectedHour) => {
+                            if (selectedHour === 20) {
+                              return Array.from({ length: 60 }, (_, i) =>
+                                i !== 0 ? i : null
+                              );
+                            }
+                          },
+                        }}
+                        format="YYYY-MM-DD HH:mm"
+                        onChange={onChange2}
+                        onOk={onOk2}
+                        disabledDate={disabledDate2}
+                        showNow={false}
+                      />
+                    </Form.Item>
+                    <Form.Item>
+                      <Button className="boton_aniadir_etapa" htmlType="submit">
+                        Añadir etapa
+                      </Button>
+                    </Form.Item>
                   </div>
                 </div>
+                <Table
+                  className="tabla-etapas"
+                  scroll={{ y: 180 }}
+                  dataSource={listaEtapas}
+                  pagination={false}
+                  locale={{
+                    emptyText: (
+                      <div style={{ padding: "40px", textAlign: "center" }}>
+                        No hay actividades registrados
+                      </div>
+                    ),
+                  }}
+                >
+                  <Column title="Título" dataIndex="nombre_etapa" />
+                  <Column title="Fecha inicio" dataIndex="fecha_inicio" />
+                  <Column title="Fecha fin" dataIndex="fecha_fin" />
+                  <Column title="Ubicación" dataIndex="id_ubicacion" />
+                </Table>
               </Form>
             </div>
           </TabPane>
@@ -1097,33 +1102,26 @@ export default function DetalleEvento() {
                       <Form.Item label="Requisitos">
                         <TextArea disabled={true} value={requisitos}></TextArea>
                       </Form.Item>
-                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                        <Table
-                          //dataSource={horarios}
-                          pagination={false}
-                          locale={{
-                            emptyText: (
-                              <div
-                                style={{ padding: "30px", textAlign: "center" }}
-                              >
-                                No hay etapas
-                              </div>
-                            ),
-                          }}
-                        >
-                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                          <Column
-                            title="Ubicación"
-                            dataIndex="ubicacion"
-                            key="ubicacion"
-                          />
-                          <Column
-                            title="Horario"
-                            dataIndex="horario"
-                            key="horario"
-                          />
-                        </Table>
-                      </Form.Item>
+                      <Table
+                        className="tabla-etapas"
+                        scroll={{ y: 180 }}
+                        dataSource={listaEtapas}
+                        pagination={false}
+                        locale={{
+                          emptyText: (
+                            <div
+                              style={{ padding: "40px", textAlign: "center" }}
+                            >
+                              No hay actividades registrados
+                            </div>
+                          ),
+                        }}
+                      >
+                        <Column title="Título" dataIndex="nombre_etapa" />
+                        <Column title="Fecha inicio" dataIndex="fecha_inicio" />
+                        <Column title="Fecha fin" dataIndex="fecha_fin" />
+                        <Column title="Ubicación" dataIndex="id_ubicacion" />
+                      </Table>
                     </div>
                   </div>
                 </Form>

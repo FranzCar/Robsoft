@@ -398,19 +398,19 @@ h3 {
 .etapa-ubicacion{
     width: 320px;
 }
-
 .tabla-etapas{
     border-radius: 15px;
     background-color: #ffffff;
     height: 220px;
-    width: 450px;
+    width: 100%;
 }
-
-  /*Modal de las pestañas*/
-  .pestanias{
+.boton_aniadir_etapa{
+    margin-left: 74.7%;
+}
+/*Modal de las pestañas*/
+.pestanias{
     padding-left: 15px;
-}
-  
+}  
 .contenido {
     display: grid;
     margin-top: -16px;
@@ -420,6 +420,12 @@ h3 {
  .form-ICPC{
     padding: 20px ;
     padding-bottom: 0;
+ }
+ .tablaICPC{
+    border-radius: 15px;
+    background-color: #ffffff;
+    height: 220px;
+    width: 480px;
  }
  .icpc-dirigido{
     width: 356px;
@@ -435,4 +441,10 @@ h3 {
  }
  .columna1-reclutamiento{
     padding-right: 40px;
+ }
+
+ /*Cards*/
+ .cards{
+    padding: 3%;
+    padding-top: 2%;
  }

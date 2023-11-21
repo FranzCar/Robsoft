@@ -12,18 +12,19 @@ import {
   Col,
   Row,
   Table,
+  Card,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
   PlusOutlined,
   ExclamationCircleFilled,
   DeleteOutlined,
+  FormOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import Column from "antd/es/table/Column";
 
 import { useNavigate } from "react-router-dom";
-
 
 const { confirm } = Modal;
 const { Search } = Input;
@@ -74,6 +75,7 @@ export default function Participante() {
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
   const handleCancelIMG = () => setPreviewOpen(false);
+  const [datosEventos, setDatosEventos] = useState([]);
 
   useEffect(() => {
     obtenerParticipantes();
@@ -81,19 +83,32 @@ export default function Participante() {
     obtenerEntrenadores();
     obtenerGrupos();
     obtenerInstituciones();
+    obtenerDatos();
   }, []);
 
-//*Kevin
-const navigate = useNavigate();
+  const obtenerDatos = () => {
+    axios
+      .get("http://localhost:8000/api/eventos-mostrar")
+      .then((response) => {
+        setDatosEventos(response.data);
+        console.log("los datos ", response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
-//Validacion de los tipos de imagenes
+  //*Kevin
+  const navigate = useNavigate();
+
+  //Validacion de los tipos de imagenes
 
   const isImage = (file) => {
     const imageExtensions = ["jpeg", "jpg", "png"];
     const extension = file.name.split(".").pop().toLowerCase();
     return imageExtensions.includes(extension);
   };
-// Configuración de las opciones del componente Upload
+  // Configuración de las opciones del componente Upload
   const uploadProps = {
     name: "file",
     beforeUpload: (file) => {
@@ -105,7 +120,7 @@ const navigate = useNavigate();
     },
   };
 
-const [isInstitucionDisabled, setIsInstitucionDisabled] = useState(true);
+  const [isInstitucionDisabled, setIsInstitucionDisabled] = useState(true);
 
   const onInstitutionChange = (value) => {
     if (value !== 1) {
@@ -114,16 +129,16 @@ const [isInstitucionDisabled, setIsInstitucionDisabled] = useState(true);
       setIsInstitucionDisabled(false);
     }
   };
- const [instituciones, setInstituciones] = useState([]);
+  const [instituciones, setInstituciones] = useState([]);
 
-//Obtener instituciones
+  //Obtener instituciones
   const obtenerInstituciones = () => {
     axios
       .get("http://localhost:8000/api/lista-instituciones")
       .then((response) => {
         const lista = response.data.map((element) => ({
-         value: element.id_institucion,
-          label: element.nombre_institucion
+          value: element.id_institucion,
+          label: element.nombre_institucion,
         }));
         setInstituciones(lista);
       })
@@ -131,7 +146,7 @@ const [isInstitucionDisabled, setIsInstitucionDisabled] = useState(true);
         console.error(err);
       });
   };
-const options = [
+  const options = [
     { value: "1er semestre", label: "1er semestre" },
     { value: "2do semestre", label: "2do semestre" },
     { value: "3er semestre", label: "3er semestre" },
@@ -142,9 +157,9 @@ const options = [
     { value: "8vo semestre", label: "8vo semestre" },
     { value: "9no semestre", label: "9no semestre" },
     { value: "10mo semestre", label: "10mo semestre" },
-     { value: "Otro", label: "Otro" },
+    { value: "Otro", label: "Otro" },
   ];
-//Obtener participantes para validar
+  //Obtener participantes para validar
   const obtenerParticipantesCI = () => {
     axios
       .get("http://localhost:8000/api/lista-participantes")
@@ -155,11 +170,11 @@ const options = [
         console.error(error);
       });
   };
-const [data, setData] = useState([]);
+  const [data, setData] = useState([]);
 
-const validarDuplicadoCI = (values) => {
+  const validarDuplicadoCI = (values) => {
     const carnet = values.CI;
-    let resultado = false; 
+    let resultado = false;
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].ci === carnet) {
@@ -167,7 +182,7 @@ const validarDuplicadoCI = (values) => {
           `Se encontró un objeto con campo Objetivo igual a "${carnet}" en el índice ${i}.`
         );
         resultado = true;
-        break; 
+        break;
       }
     }
     if (!resultado) {
@@ -176,7 +191,7 @@ const validarDuplicadoCI = (values) => {
 
     return resultado;
   };
-//
+  //
   //Registrar Imagen 1
   const [fileList, setFileList] = useState([]);
   const handlePreview = async (file) => {
@@ -205,14 +220,14 @@ const validarDuplicadoCI = (values) => {
   const handleChange1 = ({ fileList: newfileList }) =>
     setFileList1(newfileList);
   const handlePreview1 = async (file) => {
-      if (!file.url && !file.preview) {
-        file.preview = await getBase64(file.originFileObj);
-      }
-      setPreviewImage(file.url || file.preview);
-      setPreviewOpen(true);
-      setPreviewTitle(
-        file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
-      );
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+    setPreviewTitle(
+      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
+    );
   };
   const customRequest1 = ({ fileList1, onSuccess }) => {
     onSuccess();
@@ -224,7 +239,7 @@ const validarDuplicadoCI = (values) => {
       <div style={{ marginTop: 10 }}>Subir fotografia. </div>
     </div>
   );
-//Restringir las fechas de 17 a 30 años a la fecha actual
+  //Restringir las fechas de 17 a 30 años a la fecha actual
   const disabledDate = (current) => {
     // Obtenemos la fecha actual
     const today = new Date();
@@ -233,11 +248,11 @@ const validarDuplicadoCI = (values) => {
     maxDate.setDate(today.getDate() - 6205);
 
     // Establecemos la fecha mínima como 3 días después de la fecha actual
-    const minDate = new Date()
-    minDate.setDate(today.getDate() -10957);
+    const minDate = new Date();
+    minDate.setDate(today.getDate() - 10957);
 
     // Comparamos si la fecha actual está antes de la fecha máxima
-    return current > maxDate | current < minDate;
+    return (current > maxDate) | (current < minDate);
   };
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
@@ -261,7 +276,7 @@ const validarDuplicadoCI = (values) => {
     confirm({
       title: "¿Está seguro de que desea cancelar su registro? ",
       icon: <ExclamationCircleFilled />,
-      content:"Se perdera el progreso realizado.",
+      content: "Se perdera el progreso realizado.",
       okText: "Si",
       cancelText: "No",
       centered: "true",
@@ -271,13 +286,12 @@ const validarDuplicadoCI = (values) => {
         setIsInstitucionDisabled(true);
         setFileList([]);
         setFileList1([]);
-       obtenerParticipantesCI();
+        obtenerParticipantesCI();
         form.resetFields();
-        
       },
       onCancel() {
-    setIsInstitucionDisabled(true);
-    },
+        setIsInstitucionDisabled(true);
+      },
     });
   };
 
@@ -303,9 +317,9 @@ const validarDuplicadoCI = (values) => {
       foto: fileList1.length > 0 ? fileList1[0].thumbUrl : null,
       certificado_estudiante: fileList.length > 0 ? fileList[0].thumbUrl : null,
     };
-     if (values.INSTITUCION !== 1) {
-    datos.codigoSIS = null;
-  }
+    if (values.INSTITUCION !== 1) {
+      datos.codigoSIS = null;
+    }
     return datos;
   };
 
@@ -320,33 +334,32 @@ const validarDuplicadoCI = (values) => {
       setVisible(true);
       message.error("El carnet de identidad ya esta registrado.");
     } else {
-    console.log("Se guarda los datos en la BD");
-    axios
-      .post("http://localhost:8000/api/guardar-participante", datos)
-      .then((response) => {
-        console.log("Datos guardados con éxito", response.data);
-        message.success("El participante se registró correctamente");
-      obtenerParticipantesCI();
-      obtenerParticipantes();
-      navigate("/");
-      })
-      .catch((error) => {
-        if (error.response) {
-          // El servidor respondió con un código de estado fuera del rango 2xx
-          const errores = error.response.data.errors;
-          for (let campo in errores) {
-            message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
-            
+      console.log("Se guarda los datos en la BD");
+      axios
+        .post("http://localhost:8000/api/guardar-participante", datos)
+        .then((response) => {
+          console.log("Datos guardados con éxito", response.data);
+          message.success("El participante se registró correctamente");
+          obtenerParticipantesCI();
+          obtenerParticipantes();
+          navigate("/");
+        })
+        .catch((error) => {
+          if (error.response) {
+            // El servidor respondió con un código de estado fuera del rango 2xx
+            const errores = error.response.data.errors;
+            for (let campo in errores) {
+              message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+            }
+          } else {
+            // Otros errores (problemas de red, etc.)
+            message.error("Ocurrió un error al guardar el registro.");
           }
-        } else {
-          // Otros errores (problemas de red, etc.)
-          message.error("Ocurrió un error al guardar el registro.");
-        }
-      });
-    setVisible(false);
-    form.resetFields();
-    setFileList([]);
-    setFileList1([]);
+        });
+      setVisible(false);
+      form.resetFields();
+      setFileList([]);
+      setFileList1([]);
     }
   };
 
@@ -388,14 +401,15 @@ const validarDuplicadoCI = (values) => {
       onOk() {
         guardarEquipo(values);
       },
-      onCancel() { },
+      onCancel() {},
     });
   };
 
   //Mensaje al dar al boton cancelar del formulario de registrar equipo
   const showCancelGrupal = () => {
     confirm({
-      title: "¿Estás seguro de que desea cancelar su registro? Se perdera el progreso realizado. ",
+      title:
+        "¿Estás seguro de que desea cancelar su registro? Se perdera el progreso realizado. ",
       icon: <ExclamationCircleFilled />,
       okText: "Si",
       cancelText: "No",
@@ -403,7 +417,7 @@ const validarDuplicadoCI = (values) => {
       onOk() {
         setNombreEntrenador("");
         setListaParticipante([]);
-        setListaID_Persona([])
+        setListaID_Persona([]);
         setVerModalGrupal(false);
         form.resetFields();
       },
@@ -416,7 +430,7 @@ const validarDuplicadoCI = (values) => {
     form.resetFields();
     setNombreEntrenador("");
     setListaParticipante([]);
-    setListaID_Persona([])
+    setListaID_Persona([]);
     setVerModalGrupal(false);
   };
 
@@ -462,7 +476,7 @@ const validarDuplicadoCI = (values) => {
     const datos = {
       nombre_equipo: values.EQUIPO,
       id_coach_persona: datoFiltradoEntrenador[0].id_persona,
-      participantes:listaID_Persona,
+      participantes: listaID_Persona,
     };
     return datos;
   };
@@ -484,7 +498,7 @@ const validarDuplicadoCI = (values) => {
   const guardarEquipo = (values) => {
     const datos = datosGrupal(values);
     const duplicado = validarDuplicadoGrupal(values);
-    console.log("los datos que se recuperan del grupo son ", datos)
+    console.log("los datos que se recuperan del grupo son ", datos);
     if (duplicado === true) {
       message.error("Existe un equipo con el mismo nombre");
     } else {
@@ -590,12 +604,12 @@ const validarDuplicadoCI = (values) => {
     const nuevaListaParticipante = listaParticipante.filter(
       (item) => !selectedRows.includes(item)
     );
-  
+
     // Crear una nueva lista de IDs excluyendo los IDs de los participantes eliminados
     const nuevaListaID_Persona = listaID_Persona.filter(
       (id) => !selectedRows.map((item) => item.key).includes(id)
     );
-  
+
     setListaParticipante(nuevaListaParticipante);
     setListaID_Persona(nuevaListaID_Persona);
   };
@@ -650,7 +664,6 @@ const validarDuplicadoCI = (values) => {
     }
   };
 
-
   //
   const validarEntrenador = (rule, value, callback) => {
     // Realiza la validación personalizada aquí
@@ -670,7 +683,6 @@ const validarDuplicadoCI = (values) => {
     } else {
       callback();
     }
-
   };
   //validar carnet de identidad del participante
   const validarMinimoCI = (_, value, callback) => {
@@ -686,60 +698,61 @@ const validarDuplicadoCI = (values) => {
   };
   //Solo permitir numeros en los input
   function onlyNumbers(event) {
-  const key = event.key;
+    const key = event.key;
 
-  if (!key.match(/[0-9]/)) {
-    event.preventDefault();
+    if (!key.match(/[0-9]/)) {
+      event.preventDefault();
+    }
   }
-}
 
   //Solo permitir letras en los input
-function onlyLetters(event) {
-  const key = event.key;
+  function onlyLetters(event) {
+    const key = event.key;
 
-  if (!key.match(/[a-zA-Z\s]/)) {
-    event.preventDefault();
+    if (!key.match(/[a-zA-Z\s]/)) {
+      event.preventDefault();
+    }
   }
-}
-//validar telefono del participante
+  //validar telefono del participante
   const validarTelefono = (_, value, callback) => {
     if (!value) {
       callback("");
     } else if (!/^(6|7)/.test(value)) {
       callback("El número de teléfono debe comenzar con 6 o 7.");
     } else if (!value.match(/^[0-9]{8}$/)) {
-    callback("El número de teléfono debe tener 8 dígitos.");
-    }else {
-      callback();//sin error
+      callback("El número de teléfono debe tener 8 dígitos.");
+    } else {
+      callback(); //sin error
     }
   };
   //validar CodigoSis
   const validarCodigoSis = (_, value, callback) => {
-   if(isInstitucionDisabled===false){
-    const anoActual = new Date().getFullYear();
+    if (isInstitucionDisabled === false) {
+      const anoActual = new Date().getFullYear();
 
-  // Obtener el año del código de estudiante
-  const codsisValue = value.substring(0, 4);
+      // Obtener el año del código de estudiante
+      const codsisValue = value.substring(0, 4);
 
-    if (!value) {
-    callback("");
-  } else if (!/^(199|200|201|202)([0-9]{6}$)/.test(value)) {
-    callback("El códigoSIS no es valido.");
-  } else if (codsisValue > anoActual) {
-    callback("El códigoSIS no existe.");
-  } else {
-    callback();//sin error
-  }
-}else{
-  callback();//sin error
-}
+      if (!value) {
+        callback("");
+      } else if (!/^(199|200|201|202)([0-9]{6}$)/.test(value)) {
+        callback("El códigoSIS no es valido.");
+      } else if (codsisValue > anoActual) {
+        callback("El códigoSIS no existe.");
+      } else {
+        callback(); //sin error
+      }
+    } else {
+      callback(); //sin error
+    }
   };
-  
+
   return (
     <div>
       <div className="tabla-descripcion-editarEv">
-          <p>REGISTRO INDIVIDUAL</p>
+        <p>REGISTRO INDIVIDUAL</p>
       </div>
+
       {/*
         <Row gutter={[16, 8]}>
           <Col className="main-content" span={12}>
@@ -768,8 +781,8 @@ function onlyLetters(event) {
           </Col>
         </Row>
       */}
-        {/*Ventana emergente para el formulario de crear participante Individual */}
-        <Form
+      {/*Ventana emergente para el formulario de crear participante Individual */}
+      {/* <Form
              layout="vertical"
             
             autoComplete="off"
@@ -987,7 +1000,7 @@ function onlyLetters(event) {
                   </Select>
                 </Form.Item>
 
-              {/*
+              
                 <Form.Item
                   label="Certificacion del estudiante"
                   name="CERTIFICADO"
@@ -1019,7 +1032,7 @@ function onlyLetters(event) {
                     />
                   </Modal>
                 </Form.Item>
-              */}
+              
               </Col>
             </Row>
          <div style={{
@@ -1044,188 +1057,214 @@ function onlyLetters(event) {
                   Guardar
                 </Button>
           </div>
-        </Form>
-      
-        {/*Modal para la parte de registrar equipo grupal */}
-        <Modal
-          title="Formulario de registro grupal"
-          open={verModalGrupal}
-          onCancel={handleCancelGrupal}
-          style={{
-            top: 20,
-          }}
-          width={600}
-          footer={[
-            <Form form={form} onFinish={registrarGrupo}>
-              <Button onClick={showCancelGrupal} className="boton-cancelar-registro">
-              Cancelar</Button>
-              <Button  
-              type="primary" 
-              htmlType="submit"
-              className="boton-guardar-registro">
-                Guardar
-              </Button>
-            </Form>,
-          ]}
-         >
-          <Form
-            onFinishFailed={onFinishFailed}
-            form={form}
-            initialValues={nombreEntrenador}
-            onFinish={registrarGrupo}
-            layout="vertical"
-          >
-            <Form.Item
-              label="Nombre del equipo"
-              name="EQUIPO"
-              rules={[
-                {
-                  required: true,
-                  message: "Por favor, ingrese el nombre del equipo",
-                },
-              ]}
+        </Form>/*}
+                */}
+
+      {/*Modal para la parte de registrar equipo grupal */}
+      <Modal
+        title="Formulario de registro grupal"
+        open={verModalGrupal}
+        onCancel={handleCancelGrupal}
+        style={{
+          top: 20,
+        }}
+        width={600}
+        footer={[
+          <Form form={form} onFinish={registrarGrupo}>
+            <Button
+              onClick={showCancelGrupal}
+              className="boton-cancelar-registro"
             >
-              <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
-            </Form.Item>
-            {/*<Form.Item label="Institución" name="INSTITUCION">
+              Cancelar
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="boton-guardar-registro"
+            >
+              Guardar
+            </Button>
+          </Form>,
+        ]}
+      >
+        <Form
+          onFinishFailed={onFinishFailed}
+          form={form}
+          initialValues={nombreEntrenador}
+          onFinish={registrarGrupo}
+          layout="vertical"
+        >
+          <Form.Item
+            label="Nombre del equipo"
+            name="EQUIPO"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, ingrese el nombre del equipo",
+              },
+            ]}
+          >
+            <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
+          </Form.Item>
+          {/*<Form.Item label="Institución" name="INSTITUCION">
               <Input placeholder="Ingrese el nombre de la institución" />
             </Form.Item>*/}
-            <Form.Item label="Entrenador" name="ENTRENADOR">
-              <div className="botones-entrenador">
-                <label>Añadir</label>
-                <Button
-                  type="link"
-                  onClick={showModalEntrenador}
-                  className="icono-aniadir"
-                >
-                  <PlusOutlined />
-                </Button>
-              </div>
-
-              <Input
-                value={nombreEntrenador}
-                readOnly={estadoFormulario}
-                placeholder="Ingrese el nombre del entrenador"
-              />
-            </Form.Item>
-
-            <div className="aniadir-participante">
-              <div>
-                <label>Participantes</label>
-              </div>
-              <div className="boton-aniadir-participante">
-                <label>Eliminar</label>
-                <Button
-                  type="link"
-                  onClick={eliminarParticipante}
-                  className="icono-eliminar"
-                >
-                  <DeleteOutlined />
-                </Button>
-
-                <label>Añadir</label>
-                <Button
-                  type="link"
-                  onClick={aniadirPArticipante}
-                  className="icono-aniadir"
-                >
-                  <PlusOutlined />
-                </Button>
-              </div>
+          <Form.Item label="Entrenador" name="ENTRENADOR">
+            <div className="botones-entrenador">
+              <label>Añadir</label>
+              <Button
+                type="link"
+                onClick={showModalEntrenador}
+                className="icono-aniadir"
+              >
+                <PlusOutlined />
+              </Button>
             </div>
-            <Table
-              className="tabla-participantes"
-              dataSource={listaParticipante}
-              rowSelection={{
-                type: selectionType,
-                ...rowSelection,
-              }}
-              pagination={false}
-              locale={{
-                emptyText: (
-                  <div style={{ padding: "30px", textAlign: "center" }}>
-                    No hay participantes añadidos.
-                  </div>
-                ),
-              }}
-            >
-              <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
-            </Table>
-          </Form>
-        </Modal>
 
-        {/*Modal para buscar un participante*/}
-        <Modal
-          title="Buscar participante"
-          open={buscarParticipante}
-          onCancel={handleCancelBuscador}
-          footer={[
-            <Form onFinish={aniadirEntrenador}>
-              <Button type="primary" onClick={aniadirParticipante}>
-                Añadir
-              </Button>
-            </Form>,
-          ]}
-        >
-          <label>CI del participante</label>
-          <div>
-            <Search
-              className="buscador-participante"
-              value={searchText}
-              placeholder="Buscar participante"
-              onSearch={onSearch}
-              onChange={(e) => onSearch(e.target.value)}
-              maxLength={30}
-              allowClear
+            <Input
+              value={nombreEntrenador}
+              readOnly={estadoFormulario}
+              placeholder="Ingrese el nombre del entrenador"
             />
-          </div>
-          <Form layout="vertical">
-            <Form.Item label="Nombre del participante">
-              {datoFiltrado.map((item) => (
-                <div key={item}>
-                  <p> {item.nombre}</p>
-                </div>
-              ))}
-            </Form.Item>
-          </Form>
-        </Modal>
+          </Form.Item>
 
-        {/*Modal para buscar un entrenador*/}
-        <Modal
-          title="Selecionar un entrenador"
-          open={buscarEntrenador}
-          onCancel={handleCancelEntrenador}
-          footer={[
-            <Form>
-              <Button type="primary" onClick={aniadirEntrenador}>
-                Añadir
+          <div className="aniadir-participante">
+            <div>
+              <label>Participantes</label>
+            </div>
+            <div className="boton-aniadir-participante">
+              <label>Eliminar</label>
+              <Button
+                type="link"
+                onClick={eliminarParticipante}
+                className="icono-eliminar"
+              >
+                <DeleteOutlined />
               </Button>
-            </Form>,
-          ]}
-        >
-          <label>CI del entrenador</label>
-          <div>
-            <Search
-              placeholder="Buscar entrenador"
-              value={searchEntrenador}
-              onSearch={onSearchEntrenador}
-              onChange={(e) => onSearchEntrenador(e.target.value)}
-              maxLength={30}
-              allowClear
-            />
+
+              <label>Añadir</label>
+              <Button
+                type="link"
+                onClick={aniadirPArticipante}
+                className="icono-aniadir"
+              >
+                <PlusOutlined />
+              </Button>
+            </div>
           </div>
-          <Form layout="vertical">
-            <Form.Item label="Nombre del Entrenador">
-              {datoFiltradoEntrenador.map((item) => (
-                <div key={item}>
-                  <p> {item.nombre}</p>
+          <Table
+            className="tabla-participantes"
+            dataSource={listaParticipante}
+            rowSelection={{
+              type: selectionType,
+              ...rowSelection,
+            }}
+            pagination={false}
+            locale={{
+              emptyText: (
+                <div style={{ padding: "30px", textAlign: "center" }}>
+                  No hay participantes añadidos.
                 </div>
-              ))}
-            </Form.Item>
-          </Form>
-        </Modal>
+              ),
+            }}
+          >
+            <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
+          </Table>
+        </Form>
+      </Modal>
+
+      {/*Modal para buscar un participante*/}
+      <Modal
+        title="Buscar participante"
+        open={buscarParticipante}
+        onCancel={handleCancelBuscador}
+        footer={[
+          <Form onFinish={aniadirEntrenador}>
+            <Button type="primary" onClick={aniadirParticipante}>
+              Añadir
+            </Button>
+          </Form>,
+        ]}
+      >
+        <label>CI del participante</label>
+        <div>
+          <Search
+            className="buscador-participante"
+            value={searchText}
+            placeholder="Buscar participante"
+            onSearch={onSearch}
+            onChange={(e) => onSearch(e.target.value)}
+            maxLength={30}
+            allowClear
+          />
+        </div>
+        <Form layout="vertical">
+          <Form.Item label="Nombre del participante">
+            {datoFiltrado.map((item) => (
+              <div key={item}>
+                <p> {item.nombre}</p>
+              </div>
+            ))}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/*Modal para buscar un entrenador*/}
+      <Modal
+        title="Selecionar un entrenador"
+        open={buscarEntrenador}
+        onCancel={handleCancelEntrenador}
+        footer={[
+          <Form>
+            <Button type="primary" onClick={aniadirEntrenador}>
+              Añadir
+            </Button>
+          </Form>,
+        ]}
+      >
+        <label>CI del entrenador</label>
+        <div>
+          <Search
+            placeholder="Buscar entrenador"
+            value={searchEntrenador}
+            onSearch={onSearchEntrenador}
+            onChange={(e) => onSearchEntrenador(e.target.value)}
+            maxLength={30}
+            allowClear
+          />
+        </div>
+        <Form layout="vertical">
+          <Form.Item label="Nombre del Entrenador">
+            {datoFiltradoEntrenador.map((item) => (
+              <div key={item}>
+                <p> {item.nombre}</p>
+              </div>
+            ))}
+          </Form.Item>
+        </Form>
+      </Modal>
+      
+      {/*Cards*/}
+      <div className="cards">
+        <Row gutter={[16, 16]}>
+          {datosEventos.map((item, index) => (
+            <Col key={index} xs={24} sm={12} md={8}>
+              <Card
+                title={item.TITULO}
+                style={{ marginBottom: 16 }}
+                actions={[
+                  <FormOutlined
+                    key="inscripcion"
+                    onClick={() => showModalGrupal(item.id_evento)}
+                  />,
+                ]}
+              >
+                <p>{item.DESCRIPCION}</p>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
     </div>
   );
 }
-
-  
