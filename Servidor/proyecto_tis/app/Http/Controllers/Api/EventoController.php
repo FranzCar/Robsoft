@@ -11,10 +11,13 @@ use App\Models\CaracteristicaDecimalEvento;
 use App\Models\CaracteristicaLongtextEvento;
 use App\Models\Inscripcion;
 use App\Models\Etapa;
+use App\Models\Persona;
+use App\Notifications\EventoNotificacion;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -457,6 +460,16 @@ private function eliminarInscripciones($evento)
             DB::rollBack();
             return response()->json(['message' => 'Error al guardar las características', 'error' => $e->getMessage()], 500);
         }
+    }
+    public function enviarNotificacion(Request $request)
+    {
+        $persona = Persona::findOrFail($request->persona_id);
+        $evento = Evento::findOrFail($request->evento_id);
+        $tipo = $request->tipo; // 'eliminado' o 'modificado'
+
+        Notification::send($persona, new EventoNotificacion($evento, $tipo));
+
+        return response()->json(['message' => 'Notificación enviada con éxito.']);
     }
                    
 }
