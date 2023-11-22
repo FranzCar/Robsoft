@@ -21,35 +21,18 @@ class EtapaController extends Controller
             // Crear la etapa
             $etapa = new Etapa;
             $etapa->nombre_etapa = $request->nombre_etapa;
-            $etapa->fecha_etapa = $request->fecha_etapa;
+            $etapa->fecha_hora_inicio = $request->fecha_hora_inicio;
+            $etapa->fecha_hora_fin= $request->fecha_hora_fin;
             $etapa->modalidad_ubicacion = $request->modalidad_ubicacion;
             $etapa->id_evento = $id; // Usar el $id pasado al método directamente
+            $etapa->url_etapa = $request->url_etapa;
             $etapa->save();
-
-            // Asociar horarios con la etapa
-            foreach ($request->id_horario as $idHorario) {
-                $horarioEtapa = new HorarioEtapa;
-                $horarioEtapa->id_horario = $idHorario;
-                $horarioEtapa->id_etapa = $etapa->id_etapa;
-                $horarioEtapa->save();
-                
-                // Registrar en Disponibilidad
-                DB::table('DISPONIBILIDAD')->insert([
-                    'id_ubicacion' => $request->id_ubicacion,
-                    'id_horario' => $idHorario,
-                    'fecha_ocupacion' => $request->fecha_etapa,
-                    'Ocupacion' => "Ocupado",
-            ]);
-
-            }
 
             // Asociar ubicación con la etapa
             DB::table('UBICACION_ETAPA')->insert([
                 'id_ubicacion' => $request->id_ubicacion,
                 'id_etapa' => $etapa->id_etapa,
             ]);
-
-            
 
             DB::commit();
 

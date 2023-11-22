@@ -13,11 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('disponibilidad', function (Blueprint $table) {
-            $table->string('Ocupacion', 20)->nullable();
-            $table->date('fecha_ocupacion')->nullable();
-            $table->integer('id_horario')->nullable()->index('id_horario');
-            $table->integer('id_ubicacion')->nullable()->index('id_ubicacion');
+        Schema::table('codigos_verificacion', function (Blueprint $table) {
+            $table->foreign(['id_evento'], 'codigos_verificacion_ibfk_1')->references(['id_evento'])->on('evento');
         });
     }
 
@@ -28,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('disponibilidad');
+        Schema::table('codigos_verificacion', function (Blueprint $table) {
+            $table->dropForeign('codigos_verificacion_ibfk_1');
+        });
     }
 };
