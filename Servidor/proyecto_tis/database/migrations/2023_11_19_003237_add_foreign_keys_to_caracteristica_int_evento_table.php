@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('caracteristica_int_evento', function (Blueprint $table) {
-            $table->foreign(['id_evento'], 'caracteristica_int_evento_ibfk_2')->references(['id_evento'])->on('evento');
             $table->foreign(['id_caracteristica_evento'], 'caracteristica_int_evento_ibfk_1')->references(['id_caracteristica_evento'])->on('caracteristicas_evento');
+            $table->foreign(['id_evento'], 'caracteristica_int_evento_ibfk_2')->references(['id_evento'])->on('evento');
         });
     }
 
@@ -27,8 +27,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('caracteristica_int_evento', function (Blueprint $table) {
-            $table->dropForeign('caracteristica_int_evento_ibfk_2');
             $table->dropForeign('caracteristica_int_evento_ibfk_1');
+            $table->dropForeign('caracteristica_int_evento_ibfk_2');
         });
     }
 };

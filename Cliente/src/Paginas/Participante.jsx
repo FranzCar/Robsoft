@@ -13,7 +13,7 @@ import {
   Row,
   Table,
   Card,
-  Image,
+  Image
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
@@ -63,6 +63,7 @@ export default function Participante() {
 
   const showModal = () => {
     setVisible(true);
+    setTipoParticipante(false);
   };
 
   const handleCancel = () => {
@@ -101,6 +102,40 @@ export default function Participante() {
   };
 
   //*Kevin
+  const [tituloEvento,setTituloEvento] = useState("");
+  const [verificado, setVerificado] = useState(false);
+  const [enviarCodigo, setEnviarCodigo] = useState(false);
+   //Verificar CODIGO INGRESADO
+  const verificarCodigo = () => {
+    setEnviarCodigo(false);
+    setVerificado(true);
+      message.success("Se verifico correctamente");
+    
+  };
+  //Modal para mostrar enviar Codigo
+  const showModalCodigo = () => {
+    setEnviarCodigo(true); 
+  };
+  const handleCancelCodigo = () => {
+    setEnviarCodigo(false);
+    setVerificado(false);
+  };
+  const [tipoParticipante, setTipoParticipante] = useState(false);
+  
+   //Verificar CODIGO INGRESADO
+  const verificarTipoParticipante = () => {
+    setTipoParticipante(false);
+      message.success("");
+    
+  };
+  //Modal para mostrar enviar Codigo
+  const showModalTipoParticipante= () => {
+    setTipoParticipante(true); 
+  };
+  const handleCancelTipoParticipante = () => {
+    setTipoParticipante(false);
+  };
+
   const navigate = useNavigate();
 
   //Validacion de los tipos de imagenes
@@ -256,6 +291,80 @@ export default function Participante() {
     // Comparamos si la fecha actual está antes de la fecha máxima
     return (current > maxDate) | (current < minDate);
   };
+  //validar Nombre participante
+  const validarMinimo = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 5) {
+      callback("Ingrese al menos 5 caracteres");
+    } else {
+      callback();
+    }
+  };
+  //validar carnet de identidad del participante
+  const validarMinimoCI = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (value.trim() !== value) {
+      callback("No se permiten espacios en blanco al inicio ni al final");
+    } else if (value.replace(/\s/g, "").length < 7) {
+      callback("Ingrese al menos 7 digitos del CI.");
+    } else {
+      callback();
+    }
+  };
+  //Solo permitir numeros en los input
+  function onlyNumbers(event) {
+    const key = event.key;
+
+    if (!key.match(/[0-9]/)) {
+      event.preventDefault();
+    }
+  }
+
+  //Solo permitir letras en los input
+  function onlyLetters(event) {
+    const key = event.key;
+
+    if (!key.match(/[a-zA-Z\s]/)) {
+      event.preventDefault();
+    }
+  }
+  //validar telefono del participante
+  const validarTelefono = (_, value, callback) => {
+    if (!value) {
+      callback("");
+    } else if (!/^(6|7)/.test(value)) {
+      callback("El número de teléfono debe comenzar con 6 o 7.");
+    } else if (!value.match(/^[0-9]{8}$/)) {
+      callback("El número de teléfono debe tener 8 dígitos.");
+    } else {
+      callback(); //sin error
+    }
+  };
+  //validar CodigoSis
+  const validarCodigoSis = (_, value, callback) => {
+    if (isInstitucionDisabled === false) {
+      const anoActual = new Date().getFullYear();
+
+      // Obtener el año del código de estudiante
+      const codsisValue = value.substring(0, 4);
+
+      if (!value) {
+        callback("");
+      } else if (!/^(199|200|201|202)([0-9]{6}$)/.test(value)) {
+        callback("El códigoSIS no es valido.");
+      } else if (codsisValue > anoActual) {
+        callback("El códigoSIS no existe.");
+      } else {
+        callback(); //sin error
+      }
+    } else {
+      callback(); //sin error
+    }
+  };
   //Mensaje de confirmacion al dar guardar en la parte de modal del participante
   const showConfirm = (values) => {
     confirm({
@@ -290,6 +399,7 @@ export default function Participante() {
         setFileList1([]);
         obtenerParticipantesCI();
         form.resetFields();
+        setVerificado(false);
       },
       onCancel() {
         setIsInstitucionDisabled(true);
@@ -674,84 +784,33 @@ export default function Participante() {
     } else {
     }
   };
-  //validar Nombre participante
-  const validarMinimo = (_, value, callback) => {
-    if (!value) {
-      callback("");
-    } else if (value.trim() !== value) {
-      callback("No se permiten espacios en blanco al inicio ni al final");
-    } else if (value.replace(/\s/g, "").length < 5) {
-      callback("Ingrese al menos 5 caracteres");
-    } else {
-      callback();
-    }
-  };
-  //validar carnet de identidad del participante
-  const validarMinimoCI = (_, value, callback) => {
-    if (!value) {
-      callback("");
-    } else if (value.trim() !== value) {
-      callback("No se permiten espacios en blanco al inicio ni al final");
-    } else if (value.replace(/\s/g, "").length < 7) {
-      callback("Ingrese al menos 7 digitos del CI.");
-    } else {
-      callback();
-    }
-  };
-  //Solo permitir numeros en los input
-  function onlyNumbers(event) {
-    const key = event.key;
-
-    if (!key.match(/[0-9]/)) {
-      event.preventDefault();
-    }
-  }
-
-  //Solo permitir letras en los input
-  function onlyLetters(event) {
-    const key = event.key;
-
-    if (!key.match(/[a-zA-Z\s]/)) {
-      event.preventDefault();
-    }
-  }
-  //validar telefono del participante
-  const validarTelefono = (_, value, callback) => {
-    if (!value) {
-      callback("");
-    } else if (!/^(6|7)/.test(value)) {
-      callback("El número de teléfono debe comenzar con 6 o 7.");
-    } else if (!value.match(/^[0-9]{8}$/)) {
-      callback("El número de teléfono debe tener 8 dígitos.");
-    } else {
-      callback(); //sin error
-    }
-  };
-  //validar CodigoSis
-  const validarCodigoSis = (_, value, callback) => {
-    if (isInstitucionDisabled === false) {
-      const anoActual = new Date().getFullYear();
-
-      // Obtener el año del código de estudiante
-      const codsisValue = value.substring(0, 4);
-
-      if (!value) {
-        callback("");
-      } else if (!/^(199|200|201|202)([0-9]{6}$)/.test(value)) {
-        callback("El códigoSIS no es valido.");
-      } else if (codsisValue > anoActual) {
-        callback("El códigoSIS no existe.");
-      } else {
-        callback(); //sin error
-      }
-    } else {
-      callback(); //sin error
-    }
-  };
   return (
     <div>
       <div className="tabla-descripcion-editarEv">
-        <p>REGISTRO INDIVIDUAL</p>
+        <p>EVENTOS DISPONIBLES</p>
+      </div>
+       {/*Cards*/}
+      <div className="cards">
+        <Row gutter={[16, 16]}>
+          {datosEventos.map((item, index) => (
+            <Col key={index} xs={24} sm={12} md={8}>
+              <Card
+                title={item.TITULO}
+                style={{ marginBottom: 16 }}
+                actions={[
+                  <FormOutlined
+                    key="inscripcion"
+                    onClick={() => {showModalGrupal(item.id_evento);
+                    setTituloEvento(item.TITULO);
+                    }}
+                  />,
+                ]}
+              >
+                <p>{item.DESCRIPCION}</p>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       </div>
 
       {/*
@@ -782,285 +841,373 @@ export default function Participante() {
           </Col>
         </Row>
       */}
+      {/*Modal Elegir tipo*/}
+      <Modal
+        title={`Inscribirme al evento: ${tituloEvento}`}
+        open={tipoParticipante}
+        onCancel={handleCancelTipoParticipante}
+        centered={true}
+        maskClosable={false}
+        keyboard={false}
+        footer={[
+          <Form>
+            <Button style={{ centered: "true",float:"left"}} onClick={showModal}>
+                Buscar Participante
+              </Button>
+            <Button style={{ centered: "true",float:"rigth"}} onClick={showModal}>
+              Nuevo Participante
+            </Button>
+            
+          </Form>,
+        ]}
+       >
+          <Form layout="vertical">
+          <Form.Item 
+                label="Ingrese su carnet de identidad:"
+                name="CI´s"
+                 style={{ paddingTop: "3%",centered: "true"}}
+                 >
+                  <Input
+                    placeholder="Por favor, ingrese el ci"
+                    maxLength={8}
+                    minLength={8}
+                    style={{ maxWidth: "50%" , centered:"true",}}
+                    onKeyPress={onlyNumbers}
+                  ></Input>
+                </Form.Item>
+              </Form>
+        
+        
+      </Modal>
+       {/*Modal para enviar Codigo*/}
+      <Modal
+        title="Confirmar accion"
+        open={enviarCodigo}
+        onCancel={handleCancelCodigo}
+        centered={true}
+        maskClosable={false}
+        keyboard={false}
+        footer={[
+          <Form>
+            <Button  onClick={verificarCodigo}>
+              Verificar
+            </Button>
+          </Form>,
+        ]}
+       >
+       <p>Deberías haber recibido un correo electrónico con un código.</p>
+       <p> Ingrese el código a continuación:</p>
+          <Form layout="vertical">
+          <Form.Item 
+                label="Codigo verificacion :"
+                name="CODIGOVERIFICACION"
+                 style={{ paddingTop: "3%",}}
+                 >
+                  <Input
+                    placeholder="Por favor, ingrese el codigo"
+                    maxLength={8}
+                    minLength={8}
+                    style={{ maxWidth: "50%" , centered:"true",}}
+                    onKeyPress={onlyNumbers}
+                  ></Input>
+                </Form.Item>
+              </Form>
+        
+        
+      </Modal>
       {/*Ventana emergente para el formulario de crear participante Individual */}
-      {/* <Form
-             layout="vertical"
+      <Modal
+        title="Formulario de registro Individual"
+        open={visible}
+        onCancel={handleCancel}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
+        style={{
+          top: 20,
+        }}
+        width={1000}
+        footer={[
+          <Form form={form} onFinish={onFinish}>
+            <Button onClick={showCancel} className="boton-cancelar-registro">
+              Cancelar
+            </Button>
             
-            autoComplete="off"
-            maskClosable={false}
-            keyboard={false}
-            closable={false}
-            onFinishFailed={onFinishFailed}
-            form={form} 
-            onFinish={onFinish}
-            style={{
-              width: "95%",
-              paddingLeft: "3%",
-              backgroundColor: "#ffff",
-              width: "90%",
-              margin: "0% 5% 5% 5%",
-              paddingTop: "4%",
-              paddingRight: "3%",
-              borderRadius: "15px",
-              display: "grid",
-            }}>
-            
-              
-            <Row gutter={[16, 8]}>
-              <Col span={12}>
+              <Button onClick={showModalCodigo} className="boton-verificar">
+              Enviar codigo
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="boton-guardar-registro"
+              disabled={!verificado}
+            >
+              Inscribirme
+            </Button>
+          </Form>,
+        ]}
+      >
+        <Form
+          onFinishFailed={onFinishFailed}
+          form={form}
+          onFinish={onFinish}
+          layout="vertical"
+          autoComplete="off"
+          style={{
+            width: "95%",
+            paddingLeft: "3%",
+            backgroundColor: "#ffff",
+            margin: "0% 5% 5% 5%",
+            paddingRight: "3%",
+            borderRadius: "15px",
+            display: "grid",
+          }}
+        >
+          <Row gutter={[16, 8]}>
+            <Col span={12}>
+            <div style={{
+              color: "black",
+              weight: "bold",
+              size: "18px",
+              bottom: "20px",
+
+            }}
+            >
+                <h4>Datos Personales:</h4>
+              </div>
               <Form.Item
-                  label="Nombre completo"
-                  name="NOMBRE"
-                  rules={[
-                    { required: true, message: "Ingrese un nombre, por favor." },
-                    { validator: validarMinimo },
-                  ]}
-                >
+                label="Carnet de identidad"
+                name="CI"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingrese su numero de carnet",
+                  },
+                  { validator: validarMinimoCI },
+                ]}
+              >
+                <Input
+                  maxLength={8}
+                  minLength={7}
+                  placeholder="Ingrese su numero de carnet"
+                  onKeyPress={onlyNumbers}
+                ></Input>
+              </Form.Item>
+              <Form.Item
+                label="Nombre completo"
+                name="NOMBRE"
+                rules={[
+                  { required: true, message: "Ingrese un nombre, por favor." },
+                  { validator: validarMinimo },
+                ]}
+              >
                 <Input
                   maxLength={50}
                   minLength={5}
                   placeholder="Ingrese su nombre completo."
-                  style={{maxWidth: "100%"}}
+                  style={{ maxWidth: "100%" }}
                   onKeyPress={onlyLetters}
                 ></Input>
-             </Form.Item>
-                <Form.Item
-                    label="Fecha de nacimiento"
-                    name="FECHA"
-                    rules={[
-                      { required: true, message: "Ingrese una fecha, por favor." },
-                    ]}
-                  >
-                    <DatePicker
-                      style={{ width: "200px", maxWidth: "100%" }}
-                      placeholder="Selecciona una fecha"
-                      disabledDate={disabledDate}
-                    />
               </Form.Item>
               <Form.Item
-                  label="Carnet de identidad"
-                  name="CI"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Por favor ingrese su numero de carnet",
-                    },
-                    { validator: validarMinimoCI },
-                  ]}
-                >
-                  <Input
-                    maxLength={8}
-                    minLength={7}
-                    placeholder="Ingrese su numero de carnet"
-                    onKeyPress={onlyNumbers}
-                  ></Input>
-                </Form.Item>
+                label="Fecha de nacimiento"
+                name="FECHA"
+                rules={[
+                  { required: true, message: "Ingrese una fecha, por favor." },
+                ]}
+              >
+                <DatePicker
+                  style={{ width: "200px", maxWidth: "100%" }}
+                  placeholder="Selecciona una fecha"
+                  disabledDate={disabledDate}
+                />
+              </Form.Item>
+              
 
-                <Form.Item
-                  label="Celular"
-                  name="TELEFONO"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Por favor ingrese un celular",
-                    },
-                    {
-                      validator:validarTelefono,
-                    },
-                  ]}
-                >
-                  <Input
-                    placeholder="Ingrese el celular"
-                    maxLength={8}
-                    minLength={8}
-                    style={{ maxWidth: "100%"}}
-                    onKeyPress={onlyNumbers}
-                  ></Input>
-                </Form.Item>
-
-                <Form.Item
-                  label="Genéro"
-                  name="GENERO"
+              <Form.Item
+                label="Celular"
+                name="TELEFONO"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingrese un celular",
+                  },
+                  {
+                    validator: validarTelefono,
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Ingrese el celular"
+                  maxLength={8}
+                  minLength={8}
                   style={{ maxWidth: "100%" }}
-                  rules={[
-                    {
-                      required: true,message: "Por favor seleccione un género ",
-                    },
-                  ]}
-                >
-                  <Select  placeholder="Seleccione un género.">
-                    <Select.Option value="Femenino">Femenino</Select.Option>
-                    <Select.Option value="Masculino">Masculino</Select.Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item label="Foto" name="FOTO">
-                  <Upload
+                  onKeyPress={onlyNumbers}
+                ></Input>
+              </Form.Item>
+
+              <Form.Item
+                label="Genéro"
+                name="GENERO"
+                style={{ maxWidth: "100%" }}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor seleccione un género ",
+                  },
+                ]}
+              >
+                <Select placeholder="Seleccione un género.">
+                  <Select.Option value="Femenino">Femenino</Select.Option>
+                  <Select.Option value="Masculino">Masculino</Select.Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Correo electrónico"
+                name="CORREO"
+                rules={[
+                  {
+                    type: "email",
+                    required: true,
+                    message: "El correo electrónico no es válido.",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Ingrese su correo electrónico"
+                  maxLength={30}
+                  minLength={5}
+                ></Input>
+              </Form.Item>
+              {/*
+              <Form.Item label="Foto" name="FOTO">
+                <Upload
                   {...uploadProps}
-                    name="FOTO"
-                    customRequest={customRequest1}
-                    listType="picture-card"
-                    onPreview={handlePreview1}
-                    onChange={handleChange1}
-                    fileList={fileList1}
-                    maxCount={1}
-                  >
-                    {fileList1.length >= 1 ? null : uploadButton1}
-                  </Upload>
-                  <Modal
-                    open={previewOpen}
-                    title={previewTitle}
-                    footer={null}
-                    onCancel={handleCancelIMG}
-                  >
-                    <img
-                      alt="example"
-                      style={{
-                        width: "auto",
-                        height: "300px",
-                      }}
-                      src={previewImage}
-                    />
-                  </Modal>
-                </Form.Item>
-                
-              </Col>
-              <Col span={12}>
-                <Form.Item 
-                  label="Correo electrónico" 
-                  name="CORREO"
-                  rules={[
-                    {
-                            type: "email",
-                            message: "El correo electrónico no es válido.",
-                          },
-                  ]}
-                    >
-                    <Input
-                    placeholder="Ingrese su correo electrónico"
-                    maxLength={30}
-                    minLength={5}
-                  ></Input>
-                </Form.Item>
-                <Form.Item
-                  label="Institución"
-                  name="INSTITUCION"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Por favor ingrese la institución",
-                    },
-                  ]}
-                 >
-                  <Select
+                  name="FOTO"
+                  customRequest={customRequest1}
+                  listType="picture-card"
+                  onPreview={handlePreview1}
+                  onChange={handleChange1}
+                  fileList={fileList1}
+                  maxCount={1}
+                >
+                  {fileList1.length >= 1 ? null : uploadButton1}
+                </Upload>
+                <Modal
+                  open={previewOpen}
+                  title={previewTitle}
+                  footer={null}
+                  onCancel={handleCancelIMG}
+                >
+                  <img
+                    alt="example"
+                    style={{
+                      width: "auto",
+                      height: "300px",
+                    }}
+                    src={previewImage}
+                  />
+                </Modal>
+              </Form.Item>
+              */}
+            </Col>
+            <Col span={12}>
+              <div style={{
+              color: "black",
+              weight: "bold",
+              size: "18px",
+              bottom: "20px",
+
+            }}>
+                <h4>Datos especificos al evento:</h4>
+              </div>
+              <Form.Item
+                label="Institución"
+                name="INSTITUCION"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingrese la institución",
+                  },
+                ]}
+              >
+                <Select
                   placeholder="Seleccione una institución."
                   options={instituciones}
                   onChange={onInstitutionChange}
-                  />
-                </Form.Item>
-                <Form.Item
-                  label="Semestre"
-                  name="SEMESTRE"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Por favor ingrese el semestre",
-                    },
-                  ]}
-                 >
-                  <Select placeholder="Ingrese el semestre" options={options} />
-                </Form.Item>
-                <Form.Item
-                  label="Código SIS"
-                  name="CODIGOSIS"
-                  style={{maxWidth: "100%"}}
-                  rules={[
-                    {
-                      requires:false,
-                      validator:validarCodigoSis,
-                    },
-                  ]}
-                 >
-                  <Input
-                    placeholder="Ingrese su código sis"
-                    maxLength={9}
-                    minLength={9}
-                    onKeyPress={onlyNumbers}
-                    disabled={isInstitucionDisabled}
-                  ></Input>
-                </Form.Item>
-                <Form.Item
-                  label="Talla de polera"
-                  name="TALLA_POLERA"
-                 >
-                  <Select placeholder="Seleccione una talla de polera">
-                    <Select.Option value="S">S</Select.Option>
-                    <Select.Option value="M">M</Select.Option>
-                    <Select.Option value="L">L</Select.Option>
-                    <Select.Option value="XL">XL</Select.Option>
-                    <Select.Option value="XXL">XXL</Select.Option>
-                  </Select>
-                </Form.Item>
+                />
+              </Form.Item>
+              <Form.Item
+                label="Semestre"
+                name="SEMESTRE"
+                
+              >
+                <Select placeholder="Ingrese el semestre" options={options} />
+              </Form.Item>
+              <Form.Item
+                label="Código SIS"
+                name="CODIGOSIS"
+                style={{ maxWidth: "100%" }}
+                rules={[
+                  {
+                    requires: false,
+                    validator: validarCodigoSis,
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Ingrese su código sis"
+                  maxLength={9}
+                  minLength={9}
+                  onKeyPress={onlyNumbers}
+                  disabled={isInstitucionDisabled}
+                ></Input>
+              </Form.Item>
+              <Form.Item label="Talla de polera" name="TALLA_POLERA">
+                <Select placeholder="Seleccione una talla de polera">
+                  <Select.Option value="S">S</Select.Option>
+                  <Select.Option value="M">M</Select.Option>
+                  <Select.Option value="L">L</Select.Option>
+                  <Select.Option value="XL">XL</Select.Option>
+                  <Select.Option value="XXL">XXL</Select.Option>
+                </Select>
+              </Form.Item>
 
-              
-                <Form.Item
-                  label="Certificacion del estudiante"
+              <Form.Item
+                label="Certificacion del estudiante"
+                name="CERTIFICADO"
+              >
+                <Upload
                   name="CERTIFICADO"
+                  customRequest={customRequest}
+                  listType="picture-card"
+                  onPreview={handlePreview}
+                  onChange={handleChange}
+                  fileList={fileList}
+                  maxCount={1}
                 >
-                  <Upload
-                    name="CERTIFICADO"
-                    customRequest={customRequest}
-                    listType="picture-card"
-                    onPreview={handlePreview}
-                    onChange={handleChange}
-                    fileList={fileList}
-                    maxCount={1}
-                  >
-                    {fileList.length >= 1 ? null : uploadButton}
-                  </Upload>
-                  <Modal
-                    open={previewOpen}
-                    title={previewTitle}
-                    footer={null}
-                    onCancel={handleCancelIMG}
-                  >
-                    <img
-                      alt="example"
-                      style={{
-                        width: "auto",
-                        height: "300px",
-                      }}
-                      src={previewImage}
-                    />
-                  </Modal>
-                </Form.Item>
-              
-              </Col>
-            </Row>
-         <div style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "flex-end",
-              margin: "10px",
-            }}>
-          <Button onClick={showCancel}
-                style={{
-                margin: "10px",
-                }}>
-                  Cancelar
-                </Button>
-                <Button
-                  htmlType="submit"
-                  type="primary"
-                  style={{
-                    margin: "10px",
-                  }}
+                  {fileList.length >= 1 ? null : uploadButton}
+                </Upload>
+                <Modal
+                  open={previewOpen}
+                  title={previewTitle}
+                  footer={null}
+                  onCancel={handleCancelIMG}
                 >
-                  Guardar
-                </Button>
-          </div>
-        </Form>/*}
-                */}
-
+                  <img
+                    alt="example"
+                    style={{
+                      width: "auto",
+                      height: "300px",
+                    }}
+                    src={previewImage}
+                  />
+                </Modal>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Modal>
       {/*Modal para la parte de registrar equipo grupal */}
       <Modal
         title="Formulario de registro grupal"
@@ -1245,40 +1392,7 @@ export default function Participante() {
         </Form>
       </Modal>
 
-      {/*Cards*/}
-      <div className="cards">
-        <Row gutter={[16, 16]}>
-          {datosEventos.map((item, index) => (
-            <Col key={index} xs={24} sm={12} md={8}>
-              <Card
-                title={item.TITULO}
-                style={{ marginBottom: 16 }}
-                hoverable
-                bordered={false}
-                actions={[
-                  <Button key="inscripcion" onClick={() => showModalGrupal()}>
-                    Inscribirse
-                  </Button>,
-                ]}
-              >
-                <div className="cards-informacion">
-                  <div className="cards-columna1">
-                    <p>{item.DESCRIPCION}</p>
-                  </div>
-                  <div className="cards-columna2">
-                    <Image
-                      width={160}
-                      height={160}
-                      src={item.AFICHE}
-                      fallback="data:image/png;base64,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"
-                    />
-                  </div>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </div>
+     
     </div>
   );
 }

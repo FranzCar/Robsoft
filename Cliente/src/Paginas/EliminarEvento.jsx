@@ -47,7 +47,7 @@ export default function EliminarEvento() {
   //Eliminar evento
   function eliminarEvento(key) {
     axios
-      .patch(`http://localhost:8000/api/quitar-evento/${key}`)
+      .delete(`http://localhost:8000/api/quitar-evento/${key}`)
       .then((response) => {
         message.success("El evento se eliminó correctamente");
         obtenerDatos();

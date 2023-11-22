@@ -52,7 +52,7 @@ export default function Menu() {
               location.pathname === "/Participante" ? "activo" : ""
             }`}
           >
-            PARTICIPANTES
+            INSCRIPCIONES
           </Link>
           <Dropdown
             menu={{

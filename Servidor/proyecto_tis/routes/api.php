@@ -36,6 +36,6 @@ Route::get('lista-auspiciadores',[AuspiciadorController::class, 'listaAuspiciado
 Route::get('lista-instituciones',[InstitucionController::class, 'listaInstitucion']);
 Route::post('detallar-evento/{id}',[EventoController::class, 'guardarCaracteristicasEvento']);
 Route::get('lista-facilitadores',[RolPersonaController::class, 'listaFacilitadores']);
-Route::get('horarios-disponibles', [DisponibilidadController::class, 'obtenerHorarios']);
 Route::post('guardar-etapa/{id}', [EtapaController::class, 'guardarEtapa']);
 Route::get('lista-ubicaciones',[UbicacionController::class, 'listaUbicaciones']);
+Route::post('/enviar-notificacion', [EventoController::class, 'enviarNotificacion']);

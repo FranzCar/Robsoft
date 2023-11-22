@@ -16,6 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    Notification::route('mail', 'correo@deprueba.com')->notify(new PruebaNotificacion());
+    Notification::route('mail', 'franzluiz10@gmail.com')->notify(new PruebaNotificacion());
     return view('welcome');
 });
