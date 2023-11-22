@@ -448,3 +448,11 @@ h3 {
     padding: 3%;
     padding-top: 2%;
  }
+ .cards-informacion{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+ }
+ .cards-columna1{
+    text-align: left;
+ }
+  

@@ -496,22 +496,6 @@ export default function DetalleEvento() {
     }
   };
 
-  const validacionFechaLimite = (current) => {
-    // Obtenemos la fecha actual
-    const today = new Date();
-
-    // Establecemos la fecha mínima como 1 día antes de la fecha actual
-    const minDate = new Date();
-    minDate.setDate(today.getDate() - 1);
-
-    // Establecemos la fecha máxima como fechaInicioBD - 1 día
-    const maxDate = new Date(fechaInicioBD);
-    maxDate.setDate(maxDate.getDate() - 0);
-
-    // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
-    return current < minDate || current > maxDate;
-  };
-
   const insertarRequisitos = (value) => {
     if (value === "1") {
       // Si el valor es "1", quitar el texto "RUDE" si existe en requisitos
@@ -646,7 +630,6 @@ export default function DetalleEvento() {
 
   const obtenerHorasHabilitadas = () => {
     const horasHabilitadas = [];
-  console.log("fecha inicio es ", fechaInicio, " fecha fin es ", fechaFin)
     // Verificar si fechaInicio es igual a fechaFin
     if (fechaInicio === fechaFin) {
       if (horaInicio) {
