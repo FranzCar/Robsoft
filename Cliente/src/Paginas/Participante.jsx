@@ -784,6 +784,46 @@ export default function Participante() {
     } else {
     }
   };
+
+    //Registro nuevo participante
+const [verModalParticipanteNuevo, setVerModalParticipanteNuevo] = useState(false);
+const [formNuevoParticipante] = Form.useForm();
+const [nuevoParticipanteCI, setNuevoParticipanteCI] = useState('');
+const [nuevoParticipanteNombre, setNuevoParticipanteNombre] = useState('');
+const [nuevoParticipanteNacimiento, setNuevoParticipanteNacimiento] = useState('');
+const [nuevoParticipanteGenero, setNuevoParticipanteGenero]=useState('');
+const [nuevoParticipanteMail, setNuevoParticipanteMail] = useState('');
+const [nuevoParticipanteCelular, setNuevoParticipanteCelular] = useState('');
+
+
+  const handleAbrirModalParticipanteNuevo = () => {
+    /*setNuevoParticipanteCI('');
+    setNuevoParticipanteNombre('');
+    setNuevoParticipanteNacimiento('');
+    setNuevoParticipanteGenero('');
+    setNuevoParticipanteMail('');
+    setNuevoParticipanteCelular('');*/
+
+  setVerModalParticipanteNuevo(true);
+  console.log('Modal abierto');
+
+  };
+
+  const handleCancelNuevoParticipante = () => {
+    // Configura otros estados según sea necesario
+    // Cierra el modal de nuevo participante
+    setVerModalParticipanteNuevo(false);
+  };
+
+  const registrarNuevoParticipante = (values) => {
+    //envío del formulario
+    console.log('Formulario enviado:', values);
+  
+    // Cierra el modal después de enviar el formulario si es necesario
+    setVerModalParticipanteNuevo(false);
+  };
+
+
   return (
     <div>
       <div className="tabla-descripcion-editarEv">
@@ -1298,6 +1338,9 @@ export default function Participante() {
               >
                 <PlusOutlined />
               </Button>
+              <Button type="text" onClick={handleAbrirModalParticipanteNuevo}>
+               Registrar Nuevo Participante 
+            </Button>
             </div>
           </div>
           <Table
