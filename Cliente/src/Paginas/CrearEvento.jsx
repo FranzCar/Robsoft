@@ -199,13 +199,20 @@ export default function CrearEvento() {
     if (tipo === "7") return "Otros";
   };
 
-  const datosEvento = (values) => {
+  const datosEvento = async (values) => {
     const fecha = values.FECHA_INICIO;
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
     const fecha_fin = values.FECHA_FIN;
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const organizadores = listaOrganizador[listaOrganizador.length - 1];
     const patrocinadores = listaPatrocinador[listaPatrocinador.length - 1];
+  
+    let base64Image = null;
+    if (fileList.length > 0) {
+      const file = fileList[0].originFileObj;
+      base64Image = await getBase64(file); // Convertir el archivo a Base64
+    }
+  
     const datos = {
       TITULO: values.TITULO,
       id_tipo_evento: values.TIPO_EVENTO,
@@ -214,11 +221,12 @@ export default function CrearEvento() {
       DESCRIPCION: values.DESCRIPCION,
       auspiciadores: patrocinadores,
       organizadores: organizadores,
-      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : null,
+      AFICHE: base64Image // Usar la imagen en Base64
     };
+  
     return datos;
   };
-
+  
   const validarDuplicado = (values) => {
     const titulo = values.TITULO;
     let resultado = false;
@@ -246,8 +254,8 @@ export default function CrearEvento() {
     }
   };
 
-  const confirmSave = (values) => {
-    const datos = datosEvento(values);
+  const confirmSave = async (values) => {
+    const datos = await datosEvento(values);
     const duplicado = validarDuplicado(values);
     console.log("Los datos del formulario son ", datos);
     if (duplicado === true) {
