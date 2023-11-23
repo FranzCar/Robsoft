@@ -788,21 +788,16 @@ export default function Participante() {
     //Registro nuevo participante
 const [verModalParticipanteNuevo, setVerModalParticipanteNuevo] = useState(false);
 const [formNuevoParticipante] = Form.useForm();
-const [nuevoParticipanteCI, setNuevoParticipanteCI] = useState('');
-const [nuevoParticipanteNombre, setNuevoParticipanteNombre] = useState('');
-const [nuevoParticipanteNacimiento, setNuevoParticipanteNacimiento] = useState('');
-const [nuevoParticipanteGenero, setNuevoParticipanteGenero]=useState('');
-const [nuevoParticipanteMail, setNuevoParticipanteMail] = useState('');
-const [nuevoParticipanteCelular, setNuevoParticipanteCelular] = useState('');
 
+const datosParticipanteRegistro = (values) =>{
+  const datos = {
+    nombre: values.Nombre,
+
+  }
+
+}
 
   const handleAbrirModalParticipanteNuevo = () => {
-    /*setNuevoParticipanteCI('');
-    setNuevoParticipanteNombre('');
-    setNuevoParticipanteNacimiento('');
-    setNuevoParticipanteGenero('');
-    setNuevoParticipanteMail('');
-    setNuevoParticipanteCelular('');*/
 
   setVerModalParticipanteNuevo(true);
   console.log('Modal abierto');
@@ -810,19 +805,44 @@ const [nuevoParticipanteCelular, setNuevoParticipanteCelular] = useState('');
   };
 
   const handleCancelNuevoParticipante = () => {
-    // Configura otros estados según sea necesario
-    // Cierra el modal de nuevo participante
-    setVerModalParticipanteNuevo(false);
+    confirm({
+      title:
+      "¿Estas seguro de cancelar el registro?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk(){
+        formNuevoParticipante.resetFields();
+        setVerModalParticipanteNuevo(false);
+      }
+    })
   };
 
   const registrarNuevoParticipante = (values) => {
-    //envío del formulario
+   
     console.log('Formulario enviado:', values);
   
-    // Cierra el modal después de enviar el formulario si es necesario
+    
     setVerModalParticipanteNuevo(false);
   };
 
+  const showConfirmParticipante = (values) => {
+    confirm({
+      title: "¿Está seguro de registrar este participante?",
+      icon: <ExclamationCircleFilled />,
+      content: "",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+
+      onOk() {
+        confirmSave(values);
+        obtenerParticipantesCI();
+      },
+      onCancel() {},
+    });
+  };
 
   return (
     <div>
@@ -1439,13 +1459,14 @@ const [nuevoParticipanteCelular, setNuevoParticipanteCelular] = useState('');
     <Modal
     title="Registrar nuevo participante"
     open={verModalParticipanteNuevo}
-    //closable={true}
     onCancel={handleCancelNuevoParticipante}
     footer={[
       <Button onClick={handleCancelNuevoParticipante} className="boton-cancelar-registro">
         Cancelar
       </Button>,
-      <Button type="primary" htmlType="submit" className="boton-guardar-registro">
+      <Button 
+      onClick={showConfirmParticipante}
+      type="primary" htmlType="submit" className="boton-guardar-registro">
         Añadir
       </Button>,
     ]}
