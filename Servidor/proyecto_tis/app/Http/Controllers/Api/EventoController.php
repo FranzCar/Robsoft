@@ -9,6 +9,7 @@ use App\Models\CaracteristicaFechaEvento;
 use App\Models\CaracteristicaIntEvento;
 use App\Models\CaracteristicaDecimalEvento;
 use App\Models\CaracteristicaLongtextEvento;
+use App\Models\CaracteristicaBooleanEvento;
 use App\Models\Inscripcion;
 use App\Models\Etapa;
 use App\Models\Persona;
@@ -444,6 +445,13 @@ private function eliminarInscripciones($evento)
                     case 'int':
                         CaracteristicaIntEvento::create([
                             'valor_int_evento' => $valor,
+                            'id_caracteristica_evento' => $caracteristica->id_caracteristica_evento,
+                            'id_evento' => $evento->id_evento,
+                        ]);
+                        break;
+                    case 'boolean':
+                        CaracteristicaBooleanEvento::create([
+                            'valor_boolean_evento' => $valor,
                             'id_caracteristica_evento' => $caracteristica->id_caracteristica_evento,
                             'id_evento' => $evento->id_evento,
                         ]);

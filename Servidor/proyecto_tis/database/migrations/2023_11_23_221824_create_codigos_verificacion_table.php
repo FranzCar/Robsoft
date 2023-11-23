@@ -19,7 +19,6 @@ return new class extends Migration
             $table->boolean('confirmado')->nullable()->default(false);
             $table->dateTime('expiracion')->nullable();
             $table->string('uuid', 36)->nullable();
-            $table->longText('datos_registro')->nullable();
             $table->integer('id_evento')->nullable()->index('id_evento');
         });
     }
