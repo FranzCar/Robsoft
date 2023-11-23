@@ -1435,6 +1435,128 @@ const [nuevoParticipanteCelular, setNuevoParticipanteCelular] = useState('');
         </Form>
       </Modal>
 
+      {/*modal para registrar nuevo participante*/}
+    <Modal
+    title="Registrar nuevo participante"
+    open={verModalParticipanteNuevo}
+    //closable={true}
+    onCancel={handleCancelNuevoParticipante}
+    footer={[
+      <Button onClick={handleCancelNuevoParticipante} className="boton-cancelar-registro">
+        Cancelar
+      </Button>,
+      <Button type="primary" htmlType="submit" className="boton-guardar-registro">
+        Añadir
+      </Button>,
+    ]}
+    >  
+    <Form
+      form={formNuevoParticipante}
+      onFinish={registrarNuevoParticipante}
+      layout="horizontal"
+    >
+    
+      <Form.Item
+        label="Carnet de identidad"
+        name="CI"
+        rules={[
+        {
+          required: true,
+          message: 'Por favor, ingrese el CI del participante',
+        },
+      ]}
+      >
+      <Input
+        minLength={5}
+        maxLength={25}
+        placeholder="Ingrese el CI"
+       />  
+      </Form.Item>
+      <Form.Item
+        label="Nombre completo"
+        name="nombre"
+        rules={[
+          {
+            required: true,
+            message:'Por favor, ingrese el nombre del participante',
+          }
+        ]}
+      >
+      <Input
+        minLength={10}
+        maxLength={30}
+        placeholder="Ingrese un nombre"
+       /> 
+      </Form.Item>
+      <Form.Item
+        label="Fecha de nacimiento"
+        name="FECHA"
+        rules={[
+          { required: true, message: "Ingrese una fecha, por favor." },
+        ]}
+      >
+        <DatePicker
+          style={{ width: "200px", maxWidth: "100%" }}
+          placeholder="Selecciona una fecha"
+          //disabledDate={disabledDate}
+        />
+  
+      </Form.Item>
+      <Form.Item
+        label="Genéro"
+        name="GENERO"
+        style={{ maxWidth: "100%" }}
+        rules={[
+         {
+           required: true,message: "Por favor seleccione un género ",
+         },
+        ]}
+       >
+      <Select  placeholder="Seleccione un género.">
+      <Select.Option value="Femenino">Femenino</Select.Option>
+      <Select.Option value="Masculino">Masculino</Select.Option>
+      </Select>
+      </Form.Item>
+      <Form.Item 
+         label="Correo electrónico" 
+         name="CORREO"
+         rules={[
+           {
+            required: true,
+            type: "email",
+            message: "El correo electrónico no es válido.",
+            },
+            ]}
+            >
+           <Input
+            placeholder="Ingrese su correo electrónico"
+            maxLength={30}
+            minLength={5}
+          ></Input>
+         </Form.Item>
+         <Form.Item
+           label="Celular"
+           name="TELEFONO"
+           rules={[
+            {
+             required: true,
+             message: "Por favor ingrese un celular",
+           },
+           {
+           validator:validarTelefono,
+           },
+          ]}
+          >
+          <Input
+           placeholder="Ingrese el celular"
+           maxLength={8}
+           minLength={8}
+           style={{ maxWidth: "100%"}}
+            onKeyPress={onlyNumbers}
+             ></Input>
+          </Form.Item>
+    </Form>
+    </Modal>
      
     </div>
   );
