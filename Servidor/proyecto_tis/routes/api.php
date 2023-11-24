@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\InstitucionController;
 use App\Http\Controllers\Api\DisponibilidadController;
 use App\Http\Controllers\Api\EtapaController;
 use App\Http\Controllers\Api\UbicacionController;
+use App\Http\Controllers\Api\CodigosVerificacionController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -38,4 +39,6 @@ Route::post('detallar-evento/{id}',[EventoController::class, 'guardarCaracterist
 Route::get('lista-facilitadores',[RolPersonaController::class, 'listaFacilitadores']);
 Route::post('guardar-etapa/{id}', [EtapaController::class, 'guardarEtapa']);
 Route::get('lista-ubicaciones',[UbicacionController::class, 'listaUbicaciones']);
-Route::post('/enviar-notificacion', [EventoController::class, 'enviarNotificacion']);
+Route::post('enviar-notificacion', [EventoController::class, 'enviarNotificacion']);
+Route::post('enviar-codigo-verificacion', [CodigosVerificacionController::class, 'generarYEnviarCodigo']);
+Route::post('confirmar-codigo-verificacion', [CodigosVerificacionController::class, 'confirmarCodigo']);
