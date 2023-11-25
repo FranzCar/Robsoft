@@ -442,6 +442,12 @@ h3 {
  .columna1-reclutamiento{
     padding-right: 40px;
  }
+ .botones-detalle{
+    float: right;
+ }
+ .boton-cancelar-detalle{
+    margin-right: 20px;
+ }
 
  /*Cards*/
  .cards{

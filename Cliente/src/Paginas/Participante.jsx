@@ -933,7 +933,7 @@ export default function Participante() {
       <div className="cards">
         <Row gutter={[16, 16]}>
           {datosEventos.map((item, index) => (
-            <Col key={index} xs={24} sm={12} md={8}>
+            <Col key={index} xs={24} sm={12} md={12}>
               <Card
                 title={item.TITULO}
                 style={{ marginBottom: 16 }}
