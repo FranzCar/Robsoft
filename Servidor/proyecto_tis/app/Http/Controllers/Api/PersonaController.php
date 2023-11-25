@@ -50,12 +50,11 @@ class PersonaController extends Controller
     }
 
     public function listParticipantes(Request $request) {
-        $participantes = Persona::select('id_persona', 'nombre', 'ci','correo_electronico')
-                        ->whereHas('RolPersona', function($query) {
-                         $query->where('id_roles', 6);
+        $participantes = Persona::whereHas('RolPersona', function($query) {
+                            $query->where('id_roles', 6);
                         })
-                         ->get();
-
+                        ->get();
+    
         return $participantes;           
     }
 }
