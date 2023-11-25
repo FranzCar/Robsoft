@@ -13,7 +13,7 @@ import {
   Row,
   Table,
   Card,
-  Image
+  Image,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
@@ -142,8 +142,11 @@ export default function Participante() {
   const showModalCodigo = (values) => {
     const datos = formatDatos(values);
     const duplicado = validarDuplicadoCI(values);
-
+    const correoDuplicado = validarDuplicadoCorreo(values);
     if (duplicado === true) {
+      if (correoDuplicado === true) {
+        message.error("El correo ya esta registrado.");
+      }
       setVisible(true);
       message.error("El carnet de identidad ya esta registrado.");
     } else {
@@ -260,6 +263,22 @@ export default function Participante() {
       if (data[i].ci === carnet) {
         console.log(
           `Se encontró un objeto con campo Objetivo igual a "${carnet}" en el índice ${i}.`
+        );
+        resultado = true;
+        break;
+      }
+    }
+    return resultado;
+  };
+  const validarDuplicadoCorreo = (values) => {
+    const correo = values.CORREO;
+    console.log("correo validarCORR ",correo);
+    let resultado = false;
+
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].correo_electronico === correo) {
+        console.log(
+          `Se encontró un objeto con campo Objetivo igual a "${correo}" en el índice ${i}.`
         );
         resultado = true;
         break;
@@ -467,6 +486,7 @@ export default function Participante() {
       setTipoParticipante(false);
       setVisible(true);
       message.success("El carnet de identidad ya esta registrado.");
+      console.log("El ci de participante encontrado: ", values.CI);
       formCI.resetFields();
     } else {
       message.error("El carnet de identidad no se encuentra registrado.");
