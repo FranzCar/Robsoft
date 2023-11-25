@@ -1,7 +1,5 @@
 <?php
 
-use App\Notifications\PruebaNotificacion;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,6 +14,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    Notification::route('mail', 'franzluiz10@gmail.com')->notify(new PruebaNotificacion());
     return view('welcome');
 });
