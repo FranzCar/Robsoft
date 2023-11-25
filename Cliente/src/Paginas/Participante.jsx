@@ -62,6 +62,8 @@ export default function Participante() {
   const [formCI] = Form.useForm();
   const [formCodigo] = Form.useForm();
 
+  const [data, setData] = useState([]);
+ const [indice,setIndice] = useState();
   const [visible, setVisible] = useState(false);
 
   const showModal = () => {
@@ -143,13 +145,7 @@ export default function Participante() {
     const datos = formatDatos(values);
     const duplicado = validarDuplicadoCI(values);
     const correoDuplicado = validarDuplicadoCorreo(values);
-    if (duplicado === true) {
-      if (correoDuplicado === true) {
-        message.error("El correo ya esta registrado.");
-      }
-      setVisible(true);
-      message.error("El carnet de identidad ya esta registrado.");
-    } else {
+    if (duplicado === false && correoDuplicado === false) {
       axios
         .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
         .then((response) => {
@@ -159,7 +155,16 @@ export default function Participante() {
           message.error("Ocurrió un error al guardar el registro.");
         });
       setEnviarCodigo(true);
-    }
+      
+    } else {
+      if (duplicado === true) {
+        message.error("El carnet de identidad ya esta registrado.");
+      }
+      if (correoDuplicado === true) {
+        message.error("El correo ya esta registrado.");
+      }
+      setVisible(true);
+     }
   };
   const handleCancelCodigo = () => {
     setEnviarCodigo(false);
@@ -253,14 +258,14 @@ export default function Participante() {
         console.error(error);
       });
   };
-  const [data, setData] = useState([]);
-
+  
   const validarDuplicadoCI = (values) => {
     const carnet = values.CI;
     let resultado = false;
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].ci === carnet) {
+        setIndice(i);
         console.log(
           `Se encontró un objeto con campo Objetivo igual a "${carnet}" en el índice ${i}.`
         );
@@ -268,6 +273,7 @@ export default function Participante() {
         break;
       }
     }
+    
     return resultado;
   };
   const validarDuplicadoCorreo = (values) => {
@@ -475,6 +481,7 @@ export default function Participante() {
   };
   const onFinishCI = (values) => {
     buscarCi(values);
+
   };
   const onFinishCodigo = (values) => {
     verificarCodigo(values);
@@ -482,12 +489,30 @@ export default function Participante() {
 
   const buscarCi = (values) => {
     const duplicado = validarDuplicadoCI(values);
+    
     if (duplicado === true) {
       setTipoParticipante(false);
-      setVisible(true);
+      
+      console.log("data[indice ]   :",data[indice].nombre)
+      console.log("El form: ", form.getFieldValue());
       message.success("El carnet de identidad ya esta registrado.");
       console.log("El ci de participante encontrado: ", values.CI);
+      if(!indice){
+        console.log("El indice es: ", indice);
+      }else{console.log("Todavia no hay indice ", indice);}
+      const datos = {
+      CI: values.CI,
+      NOMBRE: data[indice].nombre,
+      CORREO: data[indice].correo_electronico,
+      telefono: values.TELEFONO,
+      genero: values.GENERO,
+      fecha_nacimiento: values.FECHA,
+    };
+    form.setFieldsValue(datos);
+    console.log("El form 1212 : ", form.getFieldValue());
       formCI.resetFields();
+       setVerificado(true);
+       setVisible(true);
     } else {
       message.error("El carnet de identidad no se encuentra registrado.");
     }
