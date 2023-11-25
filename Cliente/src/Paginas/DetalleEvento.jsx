@@ -48,6 +48,7 @@ export default function DetalleEvento() {
   const [value4, setValue4] = useState(1);
   const [value5, setValue5] = useState(1);
   const [value6, setValue6] = useState(1);
+  const [valueEntrenador, setValueEntrenador] = useState(1);
   const handleCancelIMG = () => setPreviewOpen(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -76,13 +77,15 @@ export default function DetalleEvento() {
   const [horaReservada, setHoraReservada] = useState(null);
   const [listaHorarios, setListaHorarios] = useState([]);
   const [fechaInicioBD, setFechaInicioBD] = useState(null);
-  const [requisitos, setRequisitos] = useState([]);
+  const [requisitos, setRequisitos] = useState("");
   const [mostrarInputURL, setMostrarInputURL] = useState(false);
   const [mostrarUbicacion, setMostrarUbicacion] = useState(false);
   const [fechaInicio, setFechaInicio] = useState(null);
   const [horaInicio, setHoraInicio] = useState(null);
   const [fechaFin, setFechaFin] = useState(null);
   const [horafin, setHoraFin] = useState(null);
+  const [idEvento, setIdEvento] = useState(null);
+  const [listaFacilitadores, setListaFacilitadores] = useState([])
   //Kevin
   const [form2] = Form.useForm();
   //Solo permitir numeros en los input
@@ -110,27 +113,32 @@ export default function DetalleEvento() {
         setMostrarFormTaller(false);
         setMostrarFormTorneo(false);
         setListaEtapas([]);
+        setFileList([]);
         setHoraReservada(null);
         setFechaInicioBD(null);
         setFechaInicio(null);
         setFechaFin(null);
         setHoraInicio(null);
         setHoraFin(null);
+        setMostrarInputURL(false)
+        setMostrarUbicacion(false)
         form.resetFields();
         formActividades.resetFields();
       },
       onCancel() {},
     });
   };
+
+  const verificarCategoria = (categoria) => {
+    if (categoria === "1") return "Universitarios";
+    if (categoria === "2") return "Colegios";
+    if (categoria === "3") return "Profesionales";
+    if (categoria === "4") return "Técnico";
+  };
+
   //Guardar datos del formulario Detalle
-  const registrarDetalle = (values) => {
-    console.log("Lista de actividades ", listaEtapas);
-    if (listaEtapas.length === 0) {
-      message.error("Tiene que añadir uno o más actividades");
-    } else {
-      showConfirmDetalle(values);
-      console.log("Los valores de los datos del detalle son ", values);
-    }
+  const registrarDetalle = async (values) => {
+    showConfirmDetalle(values);
   };
   //Mensaje de confirmacion al dar guardar en la parte de registro de los detalles
   const showConfirmDetalle = (values) => {
@@ -142,19 +150,112 @@ export default function DetalleEvento() {
       cancelText: "No",
       centered: "true",
       onOk() {
-        guardarDetalle(values);
+        guardarDetalles(values, idEvento);
       },
       onCancel() {},
     });
   };
 
-  //Guardar DetalleEvento
-  const guardarDetalle = (values) => {
-    message.success("Los detalles del evento se registraron correctamente");
-
-    navigate("/evento");
+  const verificarUbicacion = (ubicacion) => {
+    if (ubicacion === "Auditorio 1") return 1;
+    if (ubicacion === "Auditorio 2") return 2;
+    if (ubicacion === "Laboratorio 1") return 3;
+    if (ubicacion === "Laboratorio 2") return 4;
+    if (ubicacion === "Laboratorio 3") return 5;
+    if (ubicacion === "Laboratorio 4") return 6;
   };
-  const navigate = useNavigate();
+
+  //Guardamos los detalles del evento y las actividades q se tiene
+  const guardarDetalles = async (values, id) => {
+    console.log("Lista de actividades ", listaEtapas);
+    console.log("detalles del formulario ", values);
+    if (listaEtapas.length === 0) {
+      message.error("Tiene que añadir uno o más actividades");
+    } else {
+      //Obtenemos los datos de los formularios
+      const formModalidad = form.getFieldValue("modalidad");
+      const formParticipacion = form.getFieldValue("participacion");
+      const formCategoria = form.getFieldValue("categoria");
+      const formCosto = form.getFieldValue("costo");
+      const formCupos = form.getFieldValue("cupos");
+      const formRequisitos = form.getFieldValue("requisitos");
+      const formEntrenador = form.getFieldValue("entrenador");
+
+      let base64Image = null;
+      if (fileList.length > 0) {
+        const file = fileList[0].originFileObj;
+        base64Image = await getBase64(file); // Convertir el archivo a Base64
+      }
+      // le damos el valor que se requiere guardar dependiendo del dato del formulario
+      let modalidad = formModalidad === 1 ? "Cerrado" : "Abierto";
+      let participacion = formParticipacion === 1 ? "Grupal" : "Individual";
+      let categoria = verificarCategoria(formCategoria);
+      let costoNuevo = parseFloat(formCosto)
+      console.log("el formato del costo es ", costoNuevo)
+      let entrenador = formEntrenador === 1 ? true : false;
+      const datos = {
+        caracteristica_1: modalidad,
+        caracteristica_2: participacion,
+        caracteristica_3: categoria,
+        caracteristica_4: costoNuevo,
+        caracteristica_6: formCupos,
+        caracteristica_7: base64Image,
+        caracteristica_8: formRequisitos,
+        caracteristica_10: entrenador,
+      };
+      console.log("Los datos a enviar a la base de datos son ", datos);
+
+      for (let i = 0; i < listaEtapas.length; i++) {
+        let datosEtapas = listaEtapas[i];
+        let nuevoIdUbicacion = verificarUbicacion(datosEtapas.id_ubicacion);
+
+        let nuevosDatosEtapas = {
+          nombre_etapa: datosEtapas.nombre_etapa,
+          modalidad_ubicacion: datosEtapas.modalidad_ubicacion,
+          id_ubicacion: nuevoIdUbicacion,
+          fecha_hora_inicio: datosEtapas.fecha_hora_inicio,
+          fecha_hora_fin: datosEtapas.fecha_hora_fin,
+          url_etapa: datosEtapas.url_etapa,
+        };
+        axios
+          .post(`http://localhost:8000/api/guardar-etapa/${id}`, nuevosDatosEtapas)
+          .then((response) => {})
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      axios
+        .post(`http://localhost:8000/api/detallar-evento/${id}`, datos)
+        .then((response) => {
+          message.success("Los detalles del evento se guardo correctamente");
+          setMostrarPestanias(false);
+          setMostrarFormEntrenamiento(false);
+          setMostrarFormICPC(false);
+          setMostrarFormLibre(false);
+          setMostrarFormOtro(false);
+          setMostrarFormReclutamiento(false);
+          setMostrarFormTaller(false);
+          setMostrarFormTorneo(false);
+          setListaEtapas([]);
+          setFileList([]);
+          setHoraReservada(null);
+          setFechaInicioBD(null);
+          setFechaInicio(null);
+          setFechaFin(null);
+          setHoraInicio(null);
+          setHoraFin(null);
+          setMostrarInputURL(false)
+          setMostrarUbicacion(false)
+          form.resetFields();
+          formActividades.resetFields();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
   //
   const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
   const customRequest = ({ fileList, onSuccess }) => {
@@ -177,7 +278,9 @@ export default function DetalleEvento() {
   useEffect(() => {
     obtenerDatos();
     obtenerListaUbicaciones();
+    obtenerListaFacilitadores()
   }, []);
+
   const obtenerDatos = () => {
     axios
       .get("http://localhost:8000/api/eventos-modificables")
@@ -212,16 +315,16 @@ export default function DetalleEvento() {
 
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
-    console.log("El record es ", record.FECHA_INICIO);
+    console.log("El record es ", record.id_evento);
     setFechaInicioBD(record.FECHA_INICIO);
+    setIdEvento(record.id_evento);
     const tipoEvento = record.TIPO_EVENTO;
-    console.log("El tipo de evento es ", tipoEvento);
     setMostrarPestanias(true);
     if (tipoEvento === "Competencia estilo ICPC") {
       setMostrarFormICPC(true);
     } else if (tipoEvento === "Competencia estilo libre") {
       setMostrarFormLibre(true);
-    } else if (tipoEvento === "Taller de Programacion") {
+    } else if (tipoEvento === "Taller de programación") {
       setMostrarFormTaller(true);
     } else if (tipoEvento === "Entrenamiento") {
       setMostrarFormEntrenamiento(true);
@@ -236,25 +339,13 @@ export default function DetalleEvento() {
 
   const onChangeICPC = (e) => {
     const requisito = e.target.value;
-
+    console.log("El valor de onchange ICPC es ", requisito)
     // Divide los requisitos actuales en un array
     if (requisito === 1) {
-      // Agrega "Código SIS" solo si no está presente
-      setRequisitos((prevRequisitos) =>
-        prevRequisitos.includes("- Código SIS")
-          ? prevRequisitos
-          : prevRequisitos + "- Código SIS"
-      );
+      setRequisitos("Codigo SIS")
+      console.log("el requisito es codigo sis", requisitos)
     } else if (requisito === 2) {
-      // Verifica si prevRequisitos es una cadena antes de llamar a replace
-      setRequisitos((prevRequisitos) => {
-        if (typeof prevRequisitos === "string") {
-          return prevRequisitos.replace("- Código SIS", "");
-        }
-        // Si prevRequisitos no es una cadena, puedes manejarlo según tus necesidades
-        console.error("prevRequisitos no es una cadena:", prevRequisitos);
-        return prevRequisitos;
-      });
+      console.log("se quita el requisito condigo sis")
     }
 
     // Actualiza el valor
@@ -305,6 +396,10 @@ export default function DetalleEvento() {
     setValueModalidad(e.target.value);
   };
 
+  const onChangeEntrenador = (e) => {
+    setValueEntrenador(e.target.value);
+  };
+
   // Configuración de las opciones del componente Upload
   const uploadProps = {
     name: "file",
@@ -335,56 +430,7 @@ export default function DetalleEvento() {
     return imageExtensions.includes(extension);
   };
 
-  const mostrarHorarios = (data) => {
-    // Definir la lista de horarios
-    const horarios = [
-      { key: 1, hora: "8:00 - 8:30 AM", estado: "Libre" },
-      { key: 2, hora: "8:30 - 9:00 AM", estado: "Libre" },
-      { key: 3, hora: "9:00 - 9:30 AM", estado: "Libre" },
-      { key: 4, hora: "9:30 - 10:00 AM", estado: "Libre" },
-      { key: 5, hora: "10:00 - 10:30 AM", estado: "Libre" },
-      { key: 6, hora: "10:30 - 11:00 AM", estado: "Libre" },
-      { key: 7, hora: "11:00 - 11:30 AM", estado: "Libre" },
-      { key: 8, hora: "11:30 - 12:00 PM", estado: "Libre" },
-      { key: 9, hora: "12:00 - 12:30 PM", estado: "Libre" },
-      { key: 10, hora: "12:30 - 1:00 PM", estado: "Libre" },
-      { key: 11, hora: "1:00 - 1:30 PM", estado: "Libre" },
-      { key: 12, hora: "1:30 - 2:00 PM", estado: "Libre" },
-      { key: 13, hora: "2:00 - 2:30 PM", estado: "Libre" },
-      { key: 14, hora: "2:30 - 3:00 PM", estado: "Libre" },
-      { key: 15, hora: "3:00 - 3:30 PM", estado: "Libre" },
-      { key: 16, hora: "3:30 - 4:00 PM", estado: "Libre" },
-      { key: 17, hora: "4:00 - 4:30 PM", estado: "Libre" },
-      { key: 18, hora: "4:30 - 5:00 PM", estado: "Libre" },
-      { key: 19, hora: "5:00 - 5:30 PM", estado: "Libre" },
-      { key: 20, hora: "5:30 - 6:00 PM", estado: "Libre" },
-      { key: 21, hora: "6:00 - 6:30 PM", estado: "Libre" },
-      { key: 22, hora: "6:30 - 7:00 PM", estado: "Libre" },
-      { key: 23, hora: "7:00 - 7:30 PM", estado: "Libre" },
-      { key: 24, hora: "7:30 - 8:00 PM", estado: "Libre" },
-    ];
-
-    console.log("Los horarios ocupados de la base de datos son ", data.length);
-
-    // Verificar si la lista de data está vacía
-    if (data.length === 0) {
-      // Si está vacía, devolver la lista completa de horarios
-      setListaHorarios(horarios);
-    } else {
-      // Obtener la lista de horarios ocupados
-      const horariosOcupados = data.map((item) => item.id_horario);
-
-      // Filtrar la lista de horarios para excluir los ocupados
-      const horariosDisponibles = horarios.filter(
-        (horario) => !horariosOcupados.includes(horario.key)
-      );
-
-      // Devolver la lista filtrada
-      console.log("Los horarios disponibles son ", horariosDisponibles);
-      setListaHorarios(horariosDisponibles);
-    }
-  };
-
+ 
   // Puedes seguir agregando más objetos a la lista según tus necesidades
 
   function onChangeTabs(key) {
@@ -437,8 +483,6 @@ export default function DetalleEvento() {
 
   const handleChangeUbicaciones = (value) => {
     let idUbicacion = null;
-    console.log("El valor de la ubicación es ", value);
-
     for (let i = 0; i < obtenerUbicaciones.length; i++) {
       if (obtenerUbicaciones[i].nombre === value) {
         idUbicacion = obtenerUbicaciones[i].id;
@@ -462,9 +506,7 @@ export default function DetalleEvento() {
       ? fechaInicio.format("YYYY-MM-DD HH:mm")
       : null;
     const nuevaFechaFin = fechaFin ? fechaFin.format("YYYY-MM-DD HH:mm") : null;
-
     const modalidadNueva = modalidad === 1 ? "En linea" : "Presencial";
-
     // Validar que los campos obligatorios no estén vacíos
     if (!titulo || !modalidad || !ubicacion || !fechaInicio || !fechaFin) {
       // Mostrar un mensaje de error indicando campos vacíos
@@ -476,9 +518,11 @@ export default function DetalleEvento() {
       nombre_etapa: titulo,
       modalidad_ubicacion: modalidadNueva,
       id_ubicacion: ubicacion,
-      fecha_inicio: nuevaFechaInicio,
-      fecha_fin: nuevaFechaFin,
+      fecha_hora_inicio: nuevaFechaInicio,
+      fecha_hora_fin: nuevaFechaFin,
+      url_etapa: ubicacion,
     };
+    console.log("los datos de las actividades son: ", nuevaEtapa);
 
     // Verificar si la etapa ya existe en la lista
     const etapaExistente = listaEtapas.find(
@@ -498,51 +542,11 @@ export default function DetalleEvento() {
 
   const insertarRequisitos = (value) => {
     if (value === "1") {
-      // Si el valor es "1", quitar el texto "RUDE" si existe en requisitos
-      setRequisitos((prevRequisitos) =>
-        typeof prevRequisitos === "string"
-          ? prevRequisitos.replace(/-?RUDE/g, "").trim()
-          : prevRequisitos
-      );
-
-      // Agregar "Certificado de estudiante" al estado de requisitos
-      setRequisitos((prevRequisitos) =>
-        typeof prevRequisitos === "string"
-          ? (prevRequisitos.endsWith("-")
-              ? prevRequisitos
-              : prevRequisitos + " - ") + "Certificado de estudiante"
-          : "Certificado de estudiante"
-      );
+     
     } else if (value === "2") {
-      // Si el valor es "2", quitar el texto "Certificado de estudiante" si existe en requisitos
-      setRequisitos((prevRequisitos) =>
-        typeof prevRequisitos === "string"
-          ? prevRequisitos.replace(/-?Certificado de estudiante/g, "").trim()
-          : prevRequisitos
-      );
-
-      // Agregar "RUDE" al estado de requisitos
-      setRequisitos((prevRequisitos) =>
-        typeof prevRequisitos === "string"
-          ? (prevRequisitos.endsWith("-")
-              ? prevRequisitos
-              : prevRequisitos + " - ") + "RUDE"
-          : "RUDE"
-      );
+      
     } else {
-      // Verificar si hay datos en requisitos antes de realizar alguna acción
-      if (requisitos) {
-        // Eliminar ambos campos si existen en requisitos
-        const nuevoRequisitos =
-          typeof requisitos === "string"
-            ? requisitos
-                .replace(/-?Certificado de estudiante/g, "")
-                .replace(/-?RUDE/g, "")
-                .trim()
-            : requisitos;
-        setRequisitos(nuevoRequisitos);
-      }
-      // Puedes agregar más lógica aquí según sea necesario
+      
     }
   };
 
@@ -550,15 +554,14 @@ export default function DetalleEvento() {
     // Establecemos la fecha mínima como la fecha de inicio proveniente de la base de datos
     const minDate = new Date(fechaInicioBD);
     minDate.setDate(minDate.getDate());
-  
+
     // Establecemos la fecha máxima como 180 días después de la fecha de inicio
     const maxDate = new Date(minDate);
     maxDate.setDate(maxDate.getDate() + 180);
-  
+
     // Solo permitimos fechas dentro del rango [minDate, maxDate]
     return current < minDate || current > maxDate;
   };
-  
 
   //4to sprint
 
@@ -605,7 +608,7 @@ export default function DetalleEvento() {
   const onOk = (value) => {
     console.log("onOk: ", value);
   };
-  
+
   const onOk2 = (value) => {
     console.log("onOk: ", value);
   };
@@ -635,10 +638,10 @@ export default function DetalleEvento() {
       if (horaInicio) {
         const horaInicioArray = horaInicio.split(":");
         const horaInicioNum = parseInt(horaInicioArray[0], 10);
-  
+
         if (!isNaN(horaInicioNum)) {
           const horaFinBloqueo = 20; // Hora de fin del bloqueo hasta las 20:00
-  
+
           for (let i = horaInicioNum + 1; i <= horaFinBloqueo; i++) {
             horasHabilitadas.push(i);
           }
@@ -646,7 +649,9 @@ export default function DetalleEvento() {
           console.log("La hora de inicio no es un número válido.");
         }
       } else {
-        console.log("La hora de inicio no está definida. Asegúrate de establecerla correctamente.")
+        console.log(
+          "La hora de inicio no está definida. Asegúrate de establecerla correctamente."
+        );
       }
     } else {
       // Si fechaInicio es diferente de fechaFin, habilitar las horas desde las 08:00 hasta las 20:00
@@ -654,13 +659,26 @@ export default function DetalleEvento() {
         horasHabilitadas.push(i);
       }
     }
-  
+
     return horasHabilitadas;
   };
-  
-  
-  
-  
+
+  const obtenerListaFacilitadores = () => {
+    axios
+      .get("http://localhost:8000/api/lista-facilitadores")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_rol_persona,
+          nombre: element.nombre,
+          value: element.nombre,
+          label: element.nombre,
+        }));
+        setListaFacilitadores(listaConFormato);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 
   return (
     <div>
@@ -715,23 +733,7 @@ export default function DetalleEvento() {
         maskClosable={false}
         keyboard={false}
         closable={false}
-        footer={[
-          <Form form={form} onFinish={registrarDetalle}>
-            <Button
-              onClick={showCancelDetalle}
-              className="boton-cancelar-detalle"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="boton-guardar-detalle"
-            >
-              Guardar
-            </Button>
-          </Form>,
-        ]}
+        footer={null}
       >
         <Tabs
           onChange={onChangeTabs}
@@ -915,8 +917,8 @@ export default function DetalleEvento() {
                   }}
                 >
                   <Column title="Título" dataIndex="nombre_etapa" />
-                  <Column title="Fecha inicio" dataIndex="fecha_inicio" />
-                  <Column title="Fecha fin" dataIndex="fecha_fin" />
+                  <Column title="Fecha inicio" dataIndex="fecha_hora_inicio" />
+                  <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
                   <Column title="Ubicación" dataIndex="id_ubicacion" />
                 </Table>
               </Form>
@@ -932,37 +934,6 @@ export default function DetalleEvento() {
                   className="form-ICPC"
                   form={form}
                   onFinish={registrarDetalle}
-                  footer={[
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                        margin: "10px",
-                      }}
-                    >
-                      <Button
-                        onClick={showCancelDetalle}
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-cancelar-detalle"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={showConfirmDetalle}
-                        htmlType="submit"
-                        type="primary"
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-guardar-detalle"
-                      >
-                        Guardar
-                      </Button>
-                    </div>,
-                  ]}
                 >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
@@ -985,6 +956,15 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
+                      <Form.Item label="Entrenador requerido" name="entrenador">
+                        <Radio.Group
+                          onChange={onChangeEntrenador}
+                          value={valueEntrenador}
+                        >
+                          <Radio value={1}>Si</Radio>
+                          <Radio value={2}>No</Radio>
+                        </Radio.Group>
+                      </Form.Item>
                       <Form.Item
                         label="Modalidad"
                         name="modalidad"
@@ -1002,7 +982,7 @@ export default function DetalleEvento() {
                       </Form.Item>
                       <Form.Item
                         label="Dirigido a"
-                        name="dirigido a"
+                        name="categoria"
                         className="icpc-dirigido"
                         rules={[
                           {
@@ -1038,7 +1018,21 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-
+                    </div>
+                    <div>
+                      <Form.Item label="Costo" name="costo">
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Cupos" name="cupos">
+                        <Slider min={20} max={100} />
+                      </Form.Item>
+                      <Form.Item label="Requisitos" name="requisitos">
+                        <TextArea defaultValue={requisitos}></TextArea>
+                      </Form.Item>
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
@@ -1071,41 +1065,42 @@ export default function DetalleEvento() {
                         </Modal>
                       </Form.Item>
                     </div>
-                    <div>
-                      <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
-                          maxLength={3}
-                        />
-                      </Form.Item>
-                      <Form.Item label="Cupos">
-                        <Slider min={20} max={100} />
-                      </Form.Item>
-                      <Form.Item label="Requisitos">
-                        <TextArea disabled={true} value={requisitos}></TextArea>
-                      </Form.Item>
-                      <Table
-                        className="tabla-etapas"
-                        scroll={{ y: 180 }}
-                        dataSource={listaEtapas}
-                        pagination={false}
-                        locale={{
-                          emptyText: (
-                            <div
-                              style={{ padding: "40px", textAlign: "center" }}
-                            >
-                              No hay actividades registrados
-                            </div>
-                          ),
-                        }}
-                      >
-                        <Column title="Título" dataIndex="nombre_etapa" />
-                        <Column title="Fecha inicio" dataIndex="fecha_inicio" />
-                        <Column title="Fecha fin" dataIndex="fecha_fin" />
-                        <Column title="Ubicación" dataIndex="id_ubicacion" />
-                      </Table>
-                    </div>
+                  </div>
+                  <Table
+                    className="tabla-etapas"
+                    scroll={{ y: 180 }}
+                    dataSource={listaEtapas}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div style={{ padding: "40px", textAlign: "center" }}>
+                          No hay actividades registrados
+                        </div>
+                      ),
+                    }}
+                  >
+                    <Column title="Título" dataIndex="nombre_etapa" />
+                    <Column
+                      title="Fecha inicio"
+                      dataIndex="fecha_hora_inicio"
+                    />
+                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Ubicación" dataIndex="id_ubicacion" />
+                  </Table>
+                  <div className="botones-detalle">
+                    <Button
+                      onClick={showCancelDetalle}
+                      className="boton-cancelar-detalle"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="boton-guardar-detalle"
+                    >
+                      Guardar
+                    </Button>
                   </div>
                 </Form>
               )}
@@ -1114,37 +1109,6 @@ export default function DetalleEvento() {
                   className="form-ICPC"
                   form={form}
                   onFinish={registrarDetalle}
-                  footer={[
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                        margin: "10px",
-                      }}
-                    >
-                      <Button
-                        onClick={showCancelDetalle}
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-cancelar-detalle"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={showConfirmDetalle}
-                        htmlType="submit"
-                        type="primary"
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-guardar-detalle"
-                      >
-                        Guardar
-                      </Button>
-                    </div>,
-                  ]}
                 >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
@@ -1166,6 +1130,15 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
+                      <Form.Item label="Entrenador requerido" name="entrenador">
+                        <Radio.Group
+                          onChange={onChangeEntrenador}
+                          value={valueEntrenador}
+                        >
+                          <Radio value={1}>Si</Radio>
+                          <Radio value={2}>No</Radio>
+                        </Radio.Group>
+                      </Form.Item>
                       <Form.Item
                         label="Modalidad"
                         name="modalidad"
@@ -1184,7 +1157,7 @@ export default function DetalleEvento() {
                       <Form.Item
                         label="Dirigido a"
                         className="icpc-dirigido"
-                        name="dirigido a"
+                        name="categoria"
                         rules={[
                           {
                             required: true,
@@ -1214,7 +1187,21 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-
+                    </div>
+                    <div>
+                      <Form.Item label="Costo" name="costo">
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Cupos" name="cupos">
+                        <Slider min={20} max={100} />
+                      </Form.Item>
+                      <Form.Item label="Requisitos" name="requisitos">
+                        <TextArea showCount></TextArea>
+                      </Form.Item>
                       <Form.Item
                         label="Bases del evento reglas y premios"
                         name="bases"
@@ -1247,48 +1234,42 @@ export default function DetalleEvento() {
                         </Modal>
                       </Form.Item>
                     </div>
-                    <div>
-                      <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
-                          maxLength={3}
-                        />
-                      </Form.Item>
-                      <Form.Item label="Cupos">
-                        <Slider min={20} max={100} />
-                      </Form.Item>
-                      <Form.Item label="Requisitos">
-                        <TextArea showCount></TextArea>
-                      </Form.Item>
-                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                        <Table
-                          //dataSource={horarios}
-                          pagination={false}
-                          locale={{
-                            emptyText: (
-                              <div
-                                style={{ padding: "30px", textAlign: "center" }}
-                              >
-                                No hay etapas
-                              </div>
-                            ),
-                          }}
-                        >
-                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                          <Column
-                            title="Ubicación"
-                            dataIndex="ubicacion"
-                            key="ubicacion"
-                          />
-                          <Column
-                            title="Horario"
-                            dataIndex="horario"
-                            key="horario"
-                          />
-                        </Table>
-                      </Form.Item>
-                    </div>
+                  </div>
+                  <Table
+                    className="tabla-etapas"
+                    scroll={{ y: 180 }}
+                    dataSource={listaEtapas}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div style={{ padding: "40px", textAlign: "center" }}>
+                          No hay actividades registrados
+                        </div>
+                      ),
+                    }}
+                  >
+                    <Column title="Título" dataIndex="nombre_etapa" />
+                    <Column
+                      title="Fecha inicio"
+                      dataIndex="fecha_hora_inicio"
+                    />
+                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Ubicación" dataIndex="id_ubicacion" />
+                  </Table>
+                  <div className="botones-detalle">
+                    <Button
+                      onClick={showCancelDetalle}
+                      className="boton-cancelar-detalle"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="boton-guardar-detalle"
+                    >
+                      Guardar
+                    </Button>
                   </div>
                 </Form>
               )}
@@ -1297,37 +1278,6 @@ export default function DetalleEvento() {
                   className="form-ICPC"
                   form={form}
                   onFinish={registrarDetalle}
-                  footer={[
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                        margin: "10px",
-                      }}
-                    >
-                      <Button
-                        onClick={showCancelDetalle}
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-cancelar-detalle"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={showConfirmDetalle}
-                        htmlType="submit"
-                        type="primary"
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-guardar-detalle"
-                      >
-                        Guardar
-                      </Button>
-                    </div>,
-                  ]}
                 >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
@@ -1347,6 +1297,15 @@ export default function DetalleEvento() {
                         >
                           <Radio value={1}>Grupal</Radio>
                           <Radio value={2}>Individual</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item label="Entrenador requerido" name="entrenador">
+                        <Radio.Group
+                          onChange={onChangeEntrenador}
+                          value={valueEntrenador}
+                        >
+                          <Radio value={1}>Si</Radio>
+                          <Radio value={2}>No</Radio>
                         </Radio.Group>
                       </Form.Item>
                       <Form.Item
@@ -1377,22 +1336,14 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
-                          options={[
-                            {
-                              value: "1",
-                              label: "Santos",
-                            },
-                            {
-                              value: "2",
-                              label: "Simon",
-                            },
-                          ]}
+                          placeholder= "Seleccione un facilitador"
+                          options={listaFacilitadores}
                         />
                       </Form.Item>
                       <Form.Item
                         label="Dirigido a"
                         className="icpc-dirigido"
-                        name="dirigido a"
+                        name="categoria"
                         rules={[
                           {
                             required: true,
@@ -1422,8 +1373,22 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-
-                      <Form.Item label="Contenido del taller">
+                    </div>
+                    <div>
+                      <Form.Item label="Costo" name="costo">
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Cupos" name="cupos">
+                        <Slider min={20} max={100} />
+                      </Form.Item>
+                      <Form.Item label="Requisitos" name="requisitos">
+                        <TextArea showCount></TextArea>
+                      </Form.Item>
+                      <Form.Item label="Contenido del taller" name="bases">
                         <Upload
                           {...uploadProps}
                           customRequest={customRequest}
@@ -1452,48 +1417,42 @@ export default function DetalleEvento() {
                         </Modal>
                       </Form.Item>
                     </div>
-                    <div>
-                      <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
-                          maxLength={3}
-                        />
-                      </Form.Item>
-                      <Form.Item label="Cupos">
-                        <Slider min={20} max={100} />
-                      </Form.Item>
-                      <Form.Item label="Requisitos">
-                        <TextArea showCount></TextArea>
-                      </Form.Item>
-                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                        <Table
-                          //dataSource={horarios}
-                          pagination={false}
-                          locale={{
-                            emptyText: (
-                              <div
-                                style={{ padding: "30px", textAlign: "center" }}
-                              >
-                                No hay etapas
-                              </div>
-                            ),
-                          }}
-                        >
-                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                          <Column
-                            title="Ubicación"
-                            dataIndex="ubicacion"
-                            key="ubicacion"
-                          />
-                          <Column
-                            title="Horario"
-                            dataIndex="horario"
-                            key="horario"
-                          />
-                        </Table>
-                      </Form.Item>
-                    </div>
+                  </div>
+                  <Table
+                    className="tabla-etapas"
+                    scroll={{ y: 180 }}
+                    dataSource={listaEtapas}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div style={{ padding: "40px", textAlign: "center" }}>
+                          No hay actividades registrados
+                        </div>
+                      ),
+                    }}
+                  >
+                    <Column title="Título" dataIndex="nombre_etapa" />
+                    <Column
+                      title="Fecha inicio"
+                      dataIndex="fecha_hora_inicio"
+                    />
+                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Ubicación" dataIndex="id_ubicacion" />
+                  </Table>
+                  <div className="botones-detalle">
+                    <Button
+                      onClick={showCancelDetalle}
+                      className="boton-cancelar-detalle"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="boton-guardar-detalle"
+                    >
+                      Guardar
+                    </Button>
                   </div>
                 </Form>
               )}
@@ -1502,37 +1461,6 @@ export default function DetalleEvento() {
                   className="form-ICPC"
                   form={form}
                   onFinish={registrarDetalle}
-                  footer={[
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                        margin: "10px",
-                      }}
-                    >
-                      <Button
-                        onClick={showCancelDetalle}
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-cancelar-detalle"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={showConfirmDetalle}
-                        htmlType="submit"
-                        type="primary"
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-guardar-detalle"
-                      >
-                        Guardar
-                      </Button>
-                    </div>,
-                  ]}
                 >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
@@ -1552,6 +1480,15 @@ export default function DetalleEvento() {
                         >
                           <Radio value={1}>Grupal</Radio>
                           <Radio value={2}>Individual</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item label="Entrenador requerido" name="entrenador">
+                        <Radio.Group
+                          onChange={onChangeEntrenador}
+                          value={valueEntrenador}
+                        >
+                          <Radio value={1}>Si</Radio>
+                          <Radio value={2}>No</Radio>
                         </Radio.Group>
                       </Form.Item>
                       <Form.Item
@@ -1575,7 +1512,7 @@ export default function DetalleEvento() {
                       <Form.Item
                         label="Entrenador"
                         className="icpc-dirigido"
-                        name="entrenador"
+                        name="facilitador"
                         rules={[
                           {
                             required: true,
@@ -1585,22 +1522,14 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
-                          options={[
-                            {
-                              value: "1",
-                              label: "Santos",
-                            },
-                            {
-                              value: "2",
-                              label: "Simon",
-                            },
-                          ]}
+                          placeholder="Seleccione un entrenador"
+                          options={listaFacilitadores}
                         />
                       </Form.Item>
                       <Form.Item
                         label="Dirigido a"
                         className="icpc-dirigido"
-                        name="dirigido a"
+                        name="categoria"
                         rules={[
                           {
                             required: true,
@@ -1630,8 +1559,25 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-
-                      <Form.Item label="Contenido del entrenamiento">
+                    </div>
+                    <div>
+                      <Form.Item label="Costo" name="costo">
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Cupos" name="cupos">
+                        <Slider min={20} max={100} />
+                      </Form.Item>
+                      <Form.Item label="Requisitos" name="requisitos">
+                        <TextArea showCount></TextArea>
+                      </Form.Item>
+                      <Form.Item
+                        label="Contenido del entrenamiento"
+                        name="bases"
+                      >
                         <Upload
                           {...uploadProps}
                           customRequest={customRequest}
@@ -1660,48 +1606,42 @@ export default function DetalleEvento() {
                         </Modal>
                       </Form.Item>
                     </div>
-                    <div>
-                      <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
-                          maxLength={3}
-                        />
-                      </Form.Item>
-                      <Form.Item label="Cupos">
-                        <Slider min={20} max={100} />
-                      </Form.Item>
-                      <Form.Item label="Requisitos">
-                        <TextArea showCount></TextArea>
-                      </Form.Item>
-                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                        <Table
-                          //dataSource={horarios}
-                          pagination={false}
-                          locale={{
-                            emptyText: (
-                              <div
-                                style={{ padding: "30px", textAlign: "center" }}
-                              >
-                                No hay etapas
-                              </div>
-                            ),
-                          }}
-                        >
-                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                          <Column
-                            title="Ubicación"
-                            dataIndex="ubicacion"
-                            key="ubicacion"
-                          />
-                          <Column
-                            title="Horario"
-                            dataIndex="horario"
-                            key="horario"
-                          />
-                        </Table>
-                      </Form.Item>
-                    </div>
+                  </div>
+                  <Table
+                    className="tabla-etapas"
+                    scroll={{ y: 180 }}
+                    dataSource={listaEtapas}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div style={{ padding: "40px", textAlign: "center" }}>
+                          No hay actividades registrados
+                        </div>
+                      ),
+                    }}
+                  >
+                    <Column title="Título" dataIndex="nombre_etapa" />
+                    <Column
+                      title="Fecha inicio"
+                      dataIndex="fecha_hora_inicio"
+                    />
+                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Ubicación" dataIndex="id_ubicacion" />
+                  </Table>
+                  <div className="botones-detalle">
+                    <Button
+                      onClick={showCancelDetalle}
+                      className="boton-cancelar-detalle"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="boton-guardar-detalle"
+                    >
+                      Guardar
+                    </Button>
                   </div>
                 </Form>
               )}
@@ -1710,37 +1650,6 @@ export default function DetalleEvento() {
                   className="form-ICPC"
                   form={form}
                   onFinish={registrarDetalle}
-                  footer={[
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                        margin: "10px",
-                      }}
-                    >
-                      <Button
-                        onClick={showCancelDetalle}
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-cancelar-detalle"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={showConfirmDetalle}
-                        htmlType="submit"
-                        type="primary"
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-guardar-detalle"
-                      >
-                        Guardar
-                      </Button>
-                    </div>,
-                  ]}
                 >
                   <div className="form-reclutamiento">
                     <div className="columna1-reclutamiento">
@@ -1759,9 +1668,18 @@ export default function DetalleEvento() {
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
+                      <Form.Item label="Entrenador requerido" name="entrenador">
+                        <Radio.Group
+                          onChange={onChangeEntrenador}
+                          value={valueEntrenador}
+                        >
+                          <Radio value={1}>Si</Radio>
+                          <Radio value={2}>No</Radio>
+                        </Radio.Group>
+                      </Form.Item>
                       <Form.Item
                         label="Dirigido a"
-                        name="dirigido a"
+                        name="categoria"
                         rules={[
                           {
                             required: true,
@@ -1791,9 +1709,6 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
-                      <Form.Item label="Requisitos">
-                        <TextArea showCount></TextArea>
-                      </Form.Item>
                     </div>
                     <div>
                       <Form.Item
@@ -1808,54 +1723,50 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
-                          options={[
-                            {
-                              value: "1",
-                              label: "Universitarios",
-                            },
-                            {
-                              value: "2",
-                              label: "Colegio",
-                            },
-                            {
-                              value: "3",
-                              label: "Profesionales",
-                            },
-                            {
-                              value: "4",
-                              label: "Técnico",
-                            },
-                          ]}
+                          placeholder="Seleccione un facilitador"
+                          options={listaFacilitadores}
                         />
                       </Form.Item>
-                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                        <Table
-                          //dataSource={horarios}
-                          pagination={false}
-                          locale={{
-                            emptyText: (
-                              <div
-                                style={{ padding: "30px", textAlign: "center" }}
-                              >
-                                No hay etapas
-                              </div>
-                            ),
-                          }}
-                        >
-                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                          <Column
-                            title="Ubicación"
-                            dataIndex="ubicacion"
-                            key="ubicacion"
-                          />
-                          <Column
-                            title="Horario"
-                            dataIndex="horario"
-                            key="horario"
-                          />
-                        </Table>
+                      <Form.Item label="Requisitos" name="requisitos">
+                        <TextArea showCount></TextArea>
                       </Form.Item>
                     </div>
+                  </div>
+                  <Table
+                    className="tabla-etapas"
+                    scroll={{ y: 180 }}
+                    dataSource={listaEtapas}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div style={{ padding: "40px", textAlign: "center" }}>
+                          No hay actividades registrados
+                        </div>
+                      ),
+                    }}
+                  >
+                    <Column title="Título" dataIndex="nombre_etapa" />
+                    <Column
+                      title="Fecha inicio"
+                      dataIndex="fecha_hora_inicio"
+                    />
+                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Ubicación" dataIndex="id_ubicacion" />
+                  </Table>
+                  <div className="botones-detalle">
+                    <Button
+                      onClick={showCancelDetalle}
+                      className="boton-cancelar-detalle"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="boton-guardar-detalle"
+                    >
+                      Guardar
+                    </Button>
                   </div>
                 </Form>
               )}
@@ -1864,37 +1775,6 @@ export default function DetalleEvento() {
                   className="form-ICPC"
                   form={form}
                   onFinish={registrarDetalle}
-                  footer={[
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                        margin: "10px",
-                      }}
-                    >
-                      <Button
-                        onClick={showCancelDetalle}
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-cancelar-detalle"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={showConfirmDetalle}
-                        htmlType="submit"
-                        type="primary"
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-guardar-detalle"
-                      >
-                        Guardar
-                      </Button>
-                    </div>,
-                  ]}
                 >
                   <div className="modal-icpc">
                     <div className="columna1-icpc">
@@ -1916,6 +1796,15 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
+                      <Form.Item label="Entrenador requerido" name="entrenador">
+                        <Radio.Group
+                          onChange={onChangeEntrenador}
+                          value={valueEntrenador}
+                        >
+                          <Radio value={1}>Si</Radio>
+                          <Radio value={2}>No</Radio>
+                        </Radio.Group>
+                      </Form.Item>
                       <Form.Item
                         label="Modalidad"
                         name="modalidad"
@@ -1930,39 +1819,6 @@ export default function DetalleEvento() {
                           <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
-                      </Form.Item>
-                      <Form.Item
-                        label="Dirigido a"
-                        className="icpc-dirigido"
-                        name="dirigido a"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Por favor, seleccione una opcion",
-                          },
-                        ]}
-                      >
-                        <Select
-                          allowClear
-                          options={[
-                            {
-                              value: "1",
-                              label: "Universitarios",
-                            },
-                            {
-                              value: "2",
-                              label: "Colegio",
-                            },
-                            {
-                              value: "3",
-                              label: "Profesionales",
-                            },
-                            {
-                              value: "4",
-                              label: "Técnico",
-                            },
-                          ]}
-                        />
                       </Form.Item>
 
                       <Form.Item
@@ -1998,153 +1854,10 @@ export default function DetalleEvento() {
                       </Form.Item>
                     </div>
                     <div>
-                      <Form.Item label="Costo">
-                        <Input
-                          placeholder="Ingrese el costo"
-                          onKeyPress={onlyNumbers}
-                          maxLength={3}
-                        />
-                      </Form.Item>
-                      <Form.Item label="Cupos">
-                        <Slider min={20} max={100} />
-                      </Form.Item>
-                      <Form.Item label="Requisitos">
-                        <TextArea></TextArea>
-                      </Form.Item>
-                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                        <Table
-                          //dataSource={horarios}
-                          pagination={false}
-                          locale={{
-                            emptyText: (
-                              <div
-                                style={{ padding: "30px", textAlign: "center" }}
-                              >
-                                No hay etapas
-                              </div>
-                            ),
-                          }}
-                        >
-                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                          <Column
-                            title="Ubicación"
-                            dataIndex="ubicacion"
-                            key="ubicacion"
-                          />
-                          <Column
-                            title="Horario"
-                            dataIndex="horario"
-                            key="horario"
-                          />
-                        </Table>
-                      </Form.Item>
-                    </div>
-                  </div>
-                </Form>
-              )}
-              {mostrarFormOtro && (
-                <Form
-                  className="form-ICPC"
-                  form={form}
-                  onFinish={registrarDetalle}
-                  footer={[
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "flex-end",
-                        margin: "10px",
-                      }}
-                    >
-                      <Button
-                        onClick={showCancelDetalle}
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-cancelar-detalle"
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={showConfirmDetalle}
-                        htmlType="submit"
-                        type="primary"
-                        style={{
-                          margin: "10px",
-                        }}
-                        className="boton-guardar-detalle"
-                      >
-                        Guardar
-                      </Button>
-                    </div>,
-                  ]}
-                >
-                  <div className="modal-icpc">
-                    <div className="columna1-icpc">
-                      <Form.Item
-                        label="Participación"
-                        name="participacion"
-                        rules={[
-                          {
-                            required: true,
-                            message:
-                              "Por favor, seleccione un tipo de participacion",
-                          },
-                        ]}
-                      >
-                        <Radio.Group
-                          onChange={onChangeParticipacion}
-                          value={valueParticipacion}
-                        >
-                          <Radio value={1}>Grupal</Radio>
-                          <Radio value={2}>Individual</Radio>
-                        </Radio.Group>
-                      </Form.Item>
-                      <Form.Item
-                        label="Modalidad"
-                        name="modalidad"
-                        rules={[
-                          {
-                            required: true,
-                            message:
-                              "Por favor, seleccione un tipo de modalidad",
-                          },
-                        ]}
-                      >
-                        <Radio.Group onChange={onChangeOtros} value={value6}>
-                          <Radio value={1}>Cerrado</Radio>
-                          <Radio value={2}>Abierto</Radio>
-                        </Radio.Group>
-                      </Form.Item>
-                      <Form.Item
-                        label="Responsable"
-                        className="icpc-dirigido"
-                        name="responsable"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Porfavor, seleccione un responsable",
-                          },
-                        ]}
-                      >
-                        <Select
-                          allowClear
-                          options={[
-                            {
-                              value: "1",
-                              label: "Santos",
-                            },
-                            {
-                              value: "2",
-                              label: "Simon",
-                            },
-                          ]}
-                        />
-                      </Form.Item>
                       <Form.Item
                         label="Dirigido a"
                         className="icpc-dirigido"
-                        name="dirigido a"
+                        name="categoria"
                         rules={[
                           {
                             required: true,
@@ -2174,8 +1887,113 @@ export default function DetalleEvento() {
                           ]}
                         />
                       </Form.Item>
+                      <Form.Item label="Costo" name="costo">
+                        <Input
+                          placeholder="Ingrese el costo"
+                          onKeyPress={onlyNumbers}
+                          maxLength={3}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Cupos" name="cupos">
+                        <Slider min={20} max={100} />
+                      </Form.Item>
+                      <Form.Item label="Requisitos" name="requisitos">
+                        <TextArea></TextArea>
+                      </Form.Item>
+                    </div>
+                  </div>
+                  <Table
+                    className="tabla-etapas"
+                    scroll={{ y: 180 }}
+                    dataSource={listaEtapas}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div style={{ padding: "40px", textAlign: "center" }}>
+                          No hay actividades registrados
+                        </div>
+                      ),
+                    }}
+                  >
+                    <Column title="Título" dataIndex="nombre_etapa" />
+                    <Column
+                      title="Fecha inicio"
+                      dataIndex="fecha_hora_inicio"
+                    />
+                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Ubicación" dataIndex="id_ubicacion" />
+                  </Table>
+                  <div className="botones-detalle">
+                    <Button
+                      onClick={showCancelDetalle}
+                      className="boton-cancelar-detalle"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="boton-guardar-detalle"
+                    >
+                      Guardar
+                    </Button>
+                  </div>
+                </Form>
+              )}
+              {mostrarFormOtro && (
+                <Form
+                  className="form-ICPC"
+                  form={form}
+                  onFinish={registrarDetalle}
+                >
+                  <div className="modal-icpc">
+                    <div className="columna1-icpc">
+                      <Form.Item
+                        label="Participación"
+                        name="participacion"
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              "Por favor, seleccione un tipo de participacion",
+                          },
+                        ]}
+                      >
+                        <Radio.Group
+                          onChange={onChangeParticipacion}
+                          value={valueParticipacion}
+                        >
+                          <Radio value={1}>Grupal</Radio>
+                          <Radio value={2}>Individual</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item label="Entrenador requerido" name="entrenador">
+                        <Radio.Group
+                          onChange={onChangeEntrenador}
+                          value={valueEntrenador}
+                        >
+                          <Radio value={1}>Si</Radio>
+                          <Radio value={2}>No</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item
+                        label="Modalidad"
+                        name="modalidad"
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              "Por favor, seleccione un tipo de modalidad",
+                          },
+                        ]}
+                      >
+                        <Radio.Group onChange={onChangeOtros} value={value6}>
+                          <Radio value={1}>Cerrado</Radio>
+                          <Radio value={2}>Abierto</Radio>
+                        </Radio.Group>
+                      </Form.Item>
 
-                      <Form.Item label="Contenido del evento">
+                      <Form.Item label="Contenido del evento" name="contenido">
                         <Upload
                           {...uploadProps}
                           customRequest={customRequest}
@@ -2205,47 +2023,106 @@ export default function DetalleEvento() {
                       </Form.Item>
                     </div>
                     <div>
-                      <Form.Item label="Costo">
+                      <Form.Item
+                        label="Responsable"
+                        className="icpc-dirigido"
+                        name="facilitador"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Porfavor, seleccione un responsable",
+                          },
+                        ]}
+                      >
+                        <Select
+                          allowClear
+                          placeholder="Seleccione un facilitador"
+                          options={listaFacilitadores}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Dirigido a"
+                        className="icpc-dirigido"
+                        name="categoria"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Por favor, seleccione una opcion",
+                          },
+                        ]}
+                      >
+                        <Select
+                          allowClear
+                          options={[
+                            {
+                              value: "1",
+                              label: "Universitarios",
+                            },
+                            {
+                              value: "2",
+                              label: "Colegio",
+                            },
+                            {
+                              value: "3",
+                              label: "Profesionales",
+                            },
+                            {
+                              value: "4",
+                              label: "Técnico",
+                            },
+                          ]}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Costo" name="costo">
                         <Input
                           placeholder="Ingrese el costo"
                           onKeyPress={onlyNumbers}
                           maxLength={3}
                         />
                       </Form.Item>
-                      <Form.Item label="Cupos">
+                      <Form.Item label="Cupos" name="cupos">
                         <Slider min={20} max={100} />
                       </Form.Item>
-                      <Form.Item label="Requisitos">
+                      <Form.Item label="Requisitos" name="requisitos">
                         <TextArea showCount></TextArea>
                       </Form.Item>
-                      <Form.Item label="Cronograma" labelCol={{ span: 24 }}>
-                        <Table
-                          //dataSource={horarios}
-                          pagination={false}
-                          locale={{
-                            emptyText: (
-                              <div
-                                style={{ padding: "30px", textAlign: "center" }}
-                              >
-                                No hay etapas
-                              </div>
-                            ),
-                          }}
-                        >
-                          <Column title="Etapa" dataIndex="etapa" key="etapa" />
-                          <Column
-                            title="Ubicación"
-                            dataIndex="ubicacion"
-                            key="ubicacion"
-                          />
-                          <Column
-                            title="Horario"
-                            dataIndex="horario"
-                            key="horario"
-                          />
-                        </Table>
-                      </Form.Item>
                     </div>
+                  </div>
+                  <Table
+                    className="tabla-etapas"
+                    scroll={{ y: 180 }}
+                    dataSource={listaEtapas}
+                    pagination={false}
+                    locale={{
+                      emptyText: (
+                        <div style={{ padding: "40px", textAlign: "center" }}>
+                          No hay actividades registrados
+                        </div>
+                      ),
+                    }}
+                  >
+                    <Column title="Título" dataIndex="nombre_etapa" />
+                    <Column
+                      title="Fecha inicio"
+                      dataIndex="fecha_hora_inicio"
+                    />
+                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Ubicación" dataIndex="id_ubicacion" />
+                  </Table>
+                  <div className="botones-detalle">
+                    <Button
+                      onClick={showCancelDetalle}
+                      className="boton-cancelar-detalle"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="boton-guardar-detalle"
+                    >
+                      Guardar
+                    </Button>
                   </div>
                 </Form>
               )}
