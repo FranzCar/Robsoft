@@ -11,4 +11,9 @@ class TipoEvento extends Model
     protected $table = 'TIPO_EVENTO';
     protected $primaryKey = 'id_tipo_evento';
     use HasFactory;
+
+    public function caracteristicasTipoEvento()
+    {
+        return $this->hasMany(CaracteristicasTipoEvento::class, 'id_tipo_evento');
+    }
 }

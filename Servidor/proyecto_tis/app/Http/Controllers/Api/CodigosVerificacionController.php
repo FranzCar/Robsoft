@@ -20,7 +20,7 @@ class CodigosVerificacionController extends Controller
 
     $uuid = Str::uuid();
     $codigo = Str::random(3); // Generar un código aleatorio
-    $expiracion = Carbon::now()->addMinutes(5); // Tiempo de expiración del código
+    $expiracion = Carbon::now()->addMinutes(10); // Tiempo de expiración del código
 
     // Crear un nuevo registro de código de verificación
     $codigoVerificacion = CodigosVerificacion::create([
