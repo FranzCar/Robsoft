@@ -71,6 +71,7 @@ export default function EditarEvento() {
   const [patrocinadorRecuperados, setPatrocinadorRecuperados] = useState([]);
   const [fechaInicioBD, setFechaInicioBD] = useState(null);
   const [fechaFinBD, setFechaFinBD] = useState(null);
+  const [listaTipoEvento, setListaTipoEvento] = useState([]);
   const [estadoFormulario, setEstadoFormulario] = useState(true);
 
   //Obtener datos de la base de datos
@@ -79,6 +80,7 @@ export default function EditarEvento() {
     obtenerDatosEditar();
     obtenerListaOrganizadores();
     obtenerListaPatrocinadores();
+    obtenerListaTipoEventos();
   }, []);
 
   const obtenerDatos = () => {
@@ -138,6 +140,22 @@ export default function EditarEvento() {
         console.error(error);
       });
   };
+  const obtenerListaTipoEventos = () => {
+    axios
+    .get("http://localhost:8000/api/lista-tipo-eventos")
+    .then((response) => {
+      const listaConFormato = response.data.map((element) => ({
+        id: element.id_tipo_evento,
+        nombre: element.nombre_tipo_evento,
+        value: element.id_tipo_evento, // Aquí usamos el ID como valor
+        label: element.nombre_tipo_evento, // Y el nombre como etiqueta
+      }));
+      setListaTipoEvento(listaConFormato);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
   const uploadButton = (
     <div>
@@ -212,7 +230,7 @@ export default function EditarEvento() {
 
     setFechaInicioBD(record.FECHA_INICIO);
     setFechaFinBD(record.FECHA_FIN);
-    form.setFieldsValue({ TIPO_EVENTO: record.TIPO_EVENTO });
+    form.setFieldsValue({ TIPO_EVENTO: record.id_tipo_evento }); 
     form.setFieldsValue(datos);
     setActual(record.TITULO);
     setId(record.id_evento);
@@ -648,45 +666,11 @@ export default function EditarEvento() {
               label="Tipo"
               name="TIPO_EVENTO"
               className="titulo-info"
-              rules={[
-                {
-                  required: true,
-                  message: "Por favor, seleccione un tipo de evento",
-                },
-              ]}
+              rules={[{ required: true, message: "Por favor, seleccione un tipo de evento" }]}
             >
               <Select
                 allowClear
-                options={[
-                  {
-                    value: "1",
-                    label: "Competencia estilo ICPC",
-                  },
-                  {
-                    value: "2",
-                    label: "Competencia estilo libre",
-                  },
-                  {
-                    value: "3",
-                    label: "Taller de programación",
-                  },
-                  {
-                    value: "4",
-                    label: "Entrenamiento",
-                  },
-                  {
-                    value: "5",
-                    label: "Reclutamiento",
-                  },
-                  {
-                    value: "6",
-                    label: "Torneo",
-                  },
-                  {
-                    value: "7",
-                    label: "Otro",
-                  },
-                ]}
+                options={listaTipoEvento} // Usa la lista obtenida del backend aquí
               />
             </Form.Item>
             <div className="formato-fechas">
