@@ -43,7 +43,7 @@ class EventoController extends Controller
 public function listaEventoDetallado()
 {
     $eventos = Evento::with(['tipoEvento.caracteristicasTipoEvento.caracteristicaEvento'])
-        ->where('ESTADO', 'Listo')
+    ->whereIn('ESTADO', ['Listo', 'Inscrito'])
         ->get()
         ->map(function ($evento) {
             $caracteristicasPorNombre = [];
@@ -62,8 +62,15 @@ public function listaEventoDetallado()
             }
 
             return [
-                'id' => $evento->id_evento,
-                'titulo' => $evento->TITULO,
+                'id_evento' => $evento->id_evento,
+                'TITULO' => $evento->TITULO,
+                'ESTADO' => $evento->ESTADO,
+                'FECHA_INICIO' => $evento->FECHA_INICIO,
+                'FECHA_FIN' => $evento->FECHA_FIN,
+                'DESCRIPCION' => $evento->DESCRIPCION,
+                'AFICHE' => $evento->AFICHE,
+                'TIPO_EVENTO' => $evento->tipoEvento->nombre_tipo_evento,
+                
                 'caracteristicas' => $caracteristicasPorNombre,
             ];
         });
@@ -98,7 +105,6 @@ public function listaEventoDetallado()
                             ->first();
             return $caracteristica ? $caracteristica->valor_boolean_evento : null;
 
-        // Añade más casos si hay más tipos de datos
     }
 }
 
