@@ -3,9 +3,9 @@
 
 Tu código de verificación es: {{ $codigo }}
 
-Este código expirará en 2 minutos.
+Este código expirará en 10 minutos.
 
 Gracias,<br>
-{{ config('app.name') }}
+ICPC UMSS
 @endcomponent
 

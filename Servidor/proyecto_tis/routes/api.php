@@ -42,3 +42,4 @@ Route::get('lista-ubicaciones',[UbicacionController::class, 'listaUbicaciones'])
 Route::post('enviar-notificacion', [EventoController::class, 'enviarNotificacion']);
 Route::post('enviar-codigo-verificacion', [CodigosVerificacionController::class, 'generarYEnviarCodigo']);
 Route::post('confirmar-codigo-verificacion', [CodigosVerificacionController::class, 'confirmarCodigo']);
+Route::get('lista-evento-detallado',[EventoController::class, 'listaEventoDetallado']);
