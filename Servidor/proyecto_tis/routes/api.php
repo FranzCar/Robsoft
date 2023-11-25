@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DisponibilidadController;
 use App\Http\Controllers\Api\EtapaController;
 use App\Http\Controllers\Api\UbicacionController;
 use App\Http\Controllers\Api\CodigosVerificacionController;
+use App\Http\Controllers\Api\TipoEventoController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -43,3 +44,4 @@ Route::post('enviar-notificacion', [EventoController::class, 'enviarNotificacion
 Route::post('enviar-codigo-verificacion', [CodigosVerificacionController::class, 'generarYEnviarCodigo']);
 Route::post('confirmar-codigo-verificacion', [CodigosVerificacionController::class, 'confirmarCodigo']);
 Route::get('lista-evento-detallado',[EventoController::class, 'listaEventoDetallado']);
+Route::get('lista-tipo-eventos',[TipoEventoController::class, 'listaTipoEventos']);
