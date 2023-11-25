@@ -8,6 +8,7 @@ use App\Models\CaracteristicaLongtextEvento;
 use App\Models\CaracteristicaIntEvento;
 use App\Models\CaracteristicaFechaEvento;
 use App\Models\Etapa;
+use App\Models\Inscripcion;
 use Illuminate\Support\Facades\DB;
 
 class EstadoEventoService
@@ -34,5 +35,21 @@ class EstadoEventoService
         $tieneEtapa = Etapa::where('id_evento', $idEvento)->exists();
         
         return $caracteristicasCompletas && $tieneEtapa;
+    }
+
+    public function actualizarEstadoAInscrito($idEvento)
+    {
+        DB::transaction(function () use ($idEvento) {
+            $evento = Evento::findOrFail($idEvento);
+
+            // Verificar si ya hay inscripciones para este evento
+            $tieneInscripciones = Inscripcion::where('id_evento', $idEvento)->exists();
+
+            // Si el evento está en estado "Listo" y tiene inscripciones, actualizar a "Inscrito"
+            if ($evento->ESTADO == 'Listo' && $tieneInscripciones) {
+                $evento->ESTADO = 'Inscrito';
+                $evento->save();
+            }
+        });
     }
 }
