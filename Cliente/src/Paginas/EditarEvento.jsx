@@ -295,7 +295,7 @@ export default function EditarEvento() {
     }
   };
 
-  const datosEvento = (values) => {
+  const datosEvento = async (values) => {
     let organizadores = [];
     let patrocinadores = [];
     const TIPO = validarTipo(values.TIPO_EVENTO);
@@ -310,6 +310,14 @@ export default function EditarEvento() {
     } else {
       patrocinadores.push(...listaPatrocinador[listaPatrocinador.length - 1]);
     }
+    let base64Image;
+    if (fileList.length > 0) {
+      // Convertir el archivo a base64
+      base64Image = await getBase64(fileList[0].originFileObj);
+    } else {
+      base64Image = values.AFICHE; // Si no hay un archivo nuevo, usa el valor existente
+    }
+
     const datos = {
       TITULO: values.TITULO,
       id_tipo_evento: TIPO,
@@ -318,7 +326,7 @@ export default function EditarEvento() {
       DESCRIPCION: values.DESCRIPCION,
       organizadores: organizadores,
       auspiciadores: patrocinadores,
-      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : values.AFICHE,
+      AFICHE: base64Image,
     };
     return datos;
   };
@@ -344,33 +352,37 @@ export default function EditarEvento() {
     return resultado;
   };
 
-  function actualizar(values, id) {
-    const duplicado = validarDuplicado(values);
-    const datos = datosEvento(values);
-    console.log("Valores del formulario:", datos);
-    if (duplicado === true) {
-      console.log(
-        "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
-      );
+  async function actualizar(values, id) {
+    // Primero, verificamos si el título del evento está duplicado.
+    const duplicado = await validarDuplicado(values);
+  
+    if (duplicado) {
+      console.log("Existe un evento con el mismo título");
+      message.error("Existe un evento con el mismo título");
       setIsModalOpenEdit(true);
-      message.error("Exite un evento con el mismo título");
       setFileList([]);
     } else {
-      axios
-        .put(`http://localhost:8000/api/evento/${id}`, datos)
-        .then((response) => {
-          message.success("El evento se actualizó correctamente");
-          obtenerDatos();
-          setIsModalOpenEdit(false);
-          setFileList([]);
-          setListaPatrocinador([]);
-          setListaOrganizador([]);
-          obtenerDatos();
-          obtenerDatosEditar();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      try {
+        // Si no está duplicado, obtenemos los datos del evento, incluyendo la imagen en base64.
+        const datos = await datosEvento(values);
+  
+        // Luego, realizamos la solicitud PUT con los datos del evento.
+        const response = await axios.put(`http://localhost:8000/api/evento/${id}`, datos);
+  
+        console.log("El evento se actualizó correctamente");
+        message.success("El evento se actualizó correctamente");
+  
+        // Finalmente, actualizamos la UI según sea necesario.
+        setFileList([]);
+        setListaPatrocinador([]);
+        setListaOrganizador([]);
+        setIsModalOpenEdit(false);
+        obtenerDatos();
+        obtenerDatosEditar();
+      } catch (error) {
+        console.error(error);
+        message.error("Ocurrió un error al actualizar el evento");
+      }
     }
   }
 
