@@ -62,6 +62,8 @@ export default function Participante() {
   const [formCI] = Form.useForm();
   const [formCodigo] = Form.useForm();
 
+  const [data, setData] = useState([]);
+  const [indice, setIndice] = useState();
   const [visible, setVisible] = useState(false);
 
   const showModal = () => {
@@ -106,6 +108,7 @@ export default function Participante() {
   const [tituloEvento, setTituloEvento] = useState("");
   const [correoVerificacion, setCorreoVerificacion] = useState("");
   const [verificado, setVerificado] = useState(false);
+  const [ciEncontrado, setCiEncontrado] = useState(false);
   const [enviarCodigo, setEnviarCodigo] = useState(false);
   const datosUuid = (values) => {
     const datos = {
@@ -143,13 +146,10 @@ export default function Participante() {
     const datos = formatDatos(values);
     const duplicado = validarDuplicadoCI(values);
     const correoDuplicado = validarDuplicadoCorreo(values);
-    if (duplicado === true) {
-      if (correoDuplicado === true) {
-        message.error("El correo ya esta registrado.");
-      }
-      setVisible(true);
-      message.error("El carnet de identidad ya esta registrado.");
-    } else {
+    if (
+      (duplicado === false && correoDuplicado === false) ||
+      ciEncontrado === true
+    ) {
       axios
         .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
         .then((response) => {
@@ -159,6 +159,14 @@ export default function Participante() {
           message.error("Ocurrió un error al guardar el registro.");
         });
       setEnviarCodigo(true);
+    } else {
+      if (duplicado === true && ciEncontrado === false) {
+        message.error("El carnet de identidad ya esta registrado.");
+      }
+      if (correoDuplicado === true && ciEncontrado === false) {
+        message.error("El correo ya esta registrado.");
+      }
+      setVisible(true);
     }
   };
   const handleCancelCodigo = () => {
@@ -253,7 +261,6 @@ export default function Participante() {
         console.error(error);
       });
   };
-  const [data, setData] = useState([]);
 
   const validarDuplicadoCI = (values) => {
     const carnet = values.CI;
@@ -261,18 +268,16 @@ export default function Participante() {
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].ci === carnet) {
-        console.log(
-          `Se encontró un objeto con campo Objetivo igual a "${carnet}" en el índice ${i}.`
-        );
         resultado = true;
         break;
       }
     }
+
     return resultado;
   };
   const validarDuplicadoCorreo = (values) => {
     const correo = values.CORREO;
-    console.log("correo validarCORR ",correo);
+    console.log("correo validarCORR ", correo);
     let resultado = false;
 
     for (let i = 0; i < data.length; i++) {
@@ -479,15 +484,29 @@ export default function Participante() {
   const onFinishCodigo = (values) => {
     verificarCodigo(values);
   };
-
+  //BUscar al participante por el ci
   const buscarCi = (values) => {
-    const duplicado = validarDuplicadoCI(values);
-    if (duplicado === true) {
-      setTipoParticipante(false);
-      setVisible(true);
+    const carnet = values.CI;
+    const participanteEncontrado = data.find(
+      (participante) => participante.ci === carnet
+    );
+
+    if (participanteEncontrado) {
       message.success("El carnet de identidad ya esta registrado.");
-      console.log("El ci de participante encontrado: ", values.CI);
+
+      const datos = {
+        CI: values.CI,
+        NOMBRE: participanteEncontrado.nombre,
+        CORREO: participanteEncontrado.correo_electronico,
+        TELEFONO: participanteEncontrado.telefono,
+        GENERO: participanteEncontrado.genero,
+        FECHA: participanteEncontrado.fecha_nacimiento,
+      };
+      form.setFieldsValue(datos);
       formCI.resetFields();
+      setCiEncontrado(true);
+      setVisible(true);
+      setTipoParticipante(false);
     } else {
       message.error("El carnet de identidad no se encuentra registrado.");
     }
@@ -518,7 +537,6 @@ export default function Participante() {
 
   const confirmSave = (values) => {
     const datos = datosParticipante(values);
-
     console.log("Se guarda los datos en la BD");
     axios
       .post("http://localhost:8000/api/guardar-participante", datos)
@@ -1150,7 +1168,7 @@ export default function Participante() {
                   minLength={7}
                   placeholder="Ingrese su numero de carnet"
                   onKeyPress={onlyNumbers}
-                  readOnly={verificado}
+                  readOnly={verificado || ciEncontrado}
                 ></Input>
               </Form.Item>
               <Form.Item
@@ -1167,7 +1185,7 @@ export default function Participante() {
                   placeholder="Ingrese su nombre completo."
                   style={{ maxWidth: "100%" }}
                   onKeyPress={onlyLetters}
-                  readOnly={verificado}
+                  readOnly={verificado || ciEncontrado}
                 ></Input>
               </Form.Item>
               <Form.Item
@@ -1201,7 +1219,7 @@ export default function Participante() {
                   placeholder="Ingrese el celular"
                   maxLength={8}
                   minLength={8}
-                  readOnly={verificado}
+                  readOnly={verificado || ciEncontrado}
                   style={{ maxWidth: "100%" }}
                   onKeyPress={onlyNumbers}
                 ></Input>
@@ -1238,7 +1256,7 @@ export default function Participante() {
                   placeholder="Ingrese su correo electrónico"
                   maxLength={30}
                   minLength={5}
-                  readOnly={verificado}
+                  readOnly={verificado || ciEncontrado}
                 ></Input>
               </Form.Item>
               {/*
