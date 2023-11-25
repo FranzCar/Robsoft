@@ -45,6 +45,8 @@ export default function CrearEvento() {
   const [listaPatrocinador, setListaPatrocinador] = useState([]);
   const [obtenerOrganizadores, setObtenerOrganizadores] = useState([]);
   const [obtenerPatrocinadores, setObtenerPatrocinadores] = useState([]);
+  const [listaTipoEvento, setListaTipoEvento] = useState([]);
+
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -169,7 +171,25 @@ export default function CrearEvento() {
     obtenerDatos();
     obtenerListaOrganizadores();
     obtenerListaPatrocinadores();
+    obtenerListaTipoEventos();
   }, []);
+
+  const obtenerListaTipoEventos = () => {
+    axios
+      .get("http://localhost:8000/api/lista-tipo-eventos")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_tipo_evento,
+          nombre: element.nombre_tipo_evento,
+          value: element.id_tipo_evento, // Aquí usamos el ID como valor
+          label: element.nombre_tipo_evento, // Y el nombre como etiqueta
+        }));
+        setListaTipoEvento(listaConFormato);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   const obtenerDatos = () => {
     axios
@@ -188,15 +208,6 @@ export default function CrearEvento() {
     showConfirm(values);
   };
 
-  const validarTipo = (tipo) => {
-    if (tipo === "1") return "Estilo ICPC";
-    if (tipo === "2") return "Estilo Libre";
-    if (tipo === "3") return "Taller de programación";
-    if (tipo === "4") return "Sesión de reclutamiento";
-    if (tipo === "5") return "Torneos de programación";
-    if (tipo === "6") return "Entrenamientos";
-    if (tipo === "7") return "Otros";
-  };
 
   const datosEvento = async (values) => {
     const fecha = values.FECHA_INICIO;
@@ -572,54 +583,25 @@ export default function CrearEvento() {
         </div>
 
         <div className="crear-evento-columna2">
-          <Form.Item
-            label="Tipo"
-            name="TIPO_EVENTO"
-            rules={[
-              {
-                required: true,
-                message: "Por favor ingrese un tipo de evento",
-              },
-            ]}
-          >
-            <Select
-              className="select-tipo-evento"
-              style={{
-                width: 250,
-              }}
-              allowClear
-              options={[
-                {
-                  value: "1",
-                  label: "Competencia estilo ICPC",
-                },
-                {
-                  value: "2",
-                  label: "Competencia estilo libre",
-                },
-                {
-                  value: "3",
-                  label: "Taller de programación",
-                },
-                {
-                  value: "4",
-                  label: "Entrenamiento",
-                },
-                {
-                  value: "5",
-                  label: "Reclutamiento",
-                },
-                {
-                  value: "6",
-                  label: "Torneo",
-                },
-                {
-                  value: "7",
-                  label: "Otro",
-                },
-              ]}
-            />
-          </Form.Item>
+        <Form.Item
+          label="Tipo"
+          name="TIPO_EVENTO"
+          rules={[
+          {
+            required: true,
+            message: "Por favor ingrese un tipo de evento",
+          },
+        ]}
+      >
+        <Select
+          className="select-tipo-evento"
+          style={{
+          width: 250,
+        }}
+        allowClear
+        options={listaTipoEvento} // Usa la lista obtenida del backend
+        />
+      </Form.Item>
           <Form.Item
             label="Descripci&oacute;n"
             name="DESCRIPCION"

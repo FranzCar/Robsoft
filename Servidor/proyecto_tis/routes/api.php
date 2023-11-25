@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\InstitucionController;
 use App\Http\Controllers\Api\DisponibilidadController;
 use App\Http\Controllers\Api\EtapaController;
 use App\Http\Controllers\Api\UbicacionController;
+use App\Http\Controllers\Api\CodigosVerificacionController;
+use App\Http\Controllers\Api\TipoEventoController;
+use App\Http\Controllers\Api\InscripcionController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -38,4 +41,9 @@ Route::post('detallar-evento/{id}',[EventoController::class, 'guardarCaracterist
 Route::get('lista-facilitadores',[RolPersonaController::class, 'listaFacilitadores']);
 Route::post('guardar-etapa/{id}', [EtapaController::class, 'guardarEtapa']);
 Route::get('lista-ubicaciones',[UbicacionController::class, 'listaUbicaciones']);
-Route::post('/enviar-notificacion', [EventoController::class, 'enviarNotificacion']);
+Route::post('enviar-notificacion', [EventoController::class, 'enviarNotificacion']);
+Route::post('enviar-codigo-verificacion', [CodigosVerificacionController::class, 'generarYEnviarCodigo']);
+Route::post('confirmar-codigo-verificacion', [CodigosVerificacionController::class, 'confirmarCodigo']);
+Route::get('lista-evento-detallado',[EventoController::class, 'listaEventoDetallado']);
+Route::get('lista-tipo-eventos',[TipoEventoController::class, 'listaTipoEventos']);
+Route::post('inscribir-individual',[InscripcionController::class, 'inscribirEstudiante']);

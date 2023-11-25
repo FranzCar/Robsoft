@@ -8,9 +8,18 @@ use App\Models\Evento;
 use App\Models\Etapa;
 use App\Models\HorarioEtapa;
 use Illuminate\Support\Facades\DB;
+use App\Services\EstadoEventoService;
 
 class EtapaController extends Controller
 {
+    protected $estadoEventoService;
+
+    // Inyectar el servicio en el constructor
+    public function __construct(EstadoEventoService $estadoEventoService)
+    {
+        $this->estadoEventoService = $estadoEventoService;
+    }
+
     public function guardarEtapa(Request $request, $id)
     {
         DB::beginTransaction();
@@ -35,6 +44,9 @@ class EtapaController extends Controller
             ]);
 
             DB::commit();
+
+            // actualizar estado del evento
+            $this->estadoEventoService->actualizarEstadoAListo($id);
 
             return response()->json(['message' => 'Etapa guardada con éxito']);
         } catch (\Exception $e) {

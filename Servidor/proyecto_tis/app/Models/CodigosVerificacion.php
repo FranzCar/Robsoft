@@ -17,6 +17,7 @@ class CodigosVerificacion extends Model
         'codigo',
         'confirmado',
         'expiracion',
+        'uuid',
         'id_persona',
         'id_evento'
     ];

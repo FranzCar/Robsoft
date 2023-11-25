@@ -22,15 +22,86 @@ use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use App\Services\EstadoEventoService;
 
 class EventoController extends Controller
 {
-    //agregue esto
+    protected $estadoEventoService;
+
+    // Inyectar el servicio en el constructor
+    public function __construct(EstadoEventoService $estadoEventoService)
+    {
+        $this->estadoEventoService = $estadoEventoService;
+    }
+
     public function index()
 {
     $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])->get();
     return $this->transformarEventos($eventos);
 }
+
+public function listaEventoDetallado()
+{
+    $eventos = Evento::with(['tipoEvento.caracteristicasTipoEvento.caracteristicaEvento'])
+        ->where('ESTADO', 'Listo')
+        ->get()
+        ->map(function ($evento) {
+            $caracteristicasPorNombre = [];
+
+            foreach ($evento->tipoEvento->caracteristicasTipoEvento as $caracteristicaTipoEvento) {
+                $nombreCaracteristica = $caracteristicaTipoEvento->caracteristicaEvento->nombre_caracteristica_evento;
+                $tipoDato = $caracteristicaTipoEvento->caracteristicaEvento->tipo_dato_caracteristica_evento;
+
+                $valorCaracteristica = $this->obtenerValorCaracteristicaParaEvento(
+                    $evento->id_evento,
+                    $caracteristicaTipoEvento->id_caracteristica_evento,
+                    $tipoDato
+                );
+
+                $caracteristicasPorNombre[$nombreCaracteristica] = $valorCaracteristica;
+            }
+
+            return [
+                'id' => $evento->id_evento,
+                'titulo' => $evento->TITULO,
+                'caracteristicas' => $caracteristicasPorNombre,
+            ];
+        });
+
+    return response()->json($eventos);
+}
+
+    private function obtenerValorCaracteristicaParaEvento($idEvento, $idCaracteristicaEvento, $tipoDato)
+{
+    switch ($tipoDato) {
+        case 'varchar':
+            $caracteristica = CaracteristicaTextoEvento::where('id_evento', $idEvento)
+                            ->where('id_caracteristica_evento', $idCaracteristicaEvento)
+                            ->first();
+            return $caracteristica ? $caracteristica->valor_texto_evento : null;
+
+        case 'int':
+            $caracteristica = CaracteristicaIntEvento::where('id_evento', $idEvento)
+                            ->where('id_caracteristica_evento', $idCaracteristicaEvento)
+                            ->first();
+            return $caracteristica ? $caracteristica->valor_int_evento : null;
+
+        case 'decimal':
+            $caracteristica = CaracteristicaDecimalEvento::where('id_evento', $idEvento)
+                            ->where('id_caracteristica_evento', $idCaracteristicaEvento)
+                            ->first();
+            return $caracteristica ? $caracteristica->valor_decimal_evento : null;
+
+        case 'boolean':
+            $caracteristica = CaracteristicaBooleanEvento::where('id_evento', $idEvento)
+                            ->where('id_caracteristica_evento', $idCaracteristicaEvento)
+                            ->first();
+            return $caracteristica ? $caracteristica->valor_boolean_evento : null;
+
+        // Añade más casos si hay más tipos de datos
+    }
+}
+
 
 private function transformarEventos($eventos)
 {
@@ -462,6 +533,10 @@ private function eliminarInscripciones($evento)
     
             // Si todo ha ido bien, confirmamos los cambios
             DB::commit();
+            
+            // actualizar estado del evento
+            $this->estadoEventoService->actualizarEstadoAListo($id);
+            
             return response()->json(['message' => 'Características guardadas con éxito']);
         } catch (\Exception $e) {
             // Si algo sale mal, revertimos los cambios

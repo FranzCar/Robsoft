@@ -71,6 +71,7 @@ export default function EditarEvento() {
   const [patrocinadorRecuperados, setPatrocinadorRecuperados] = useState([]);
   const [fechaInicioBD, setFechaInicioBD] = useState(null);
   const [fechaFinBD, setFechaFinBD] = useState(null);
+  const [listaTipoEvento, setListaTipoEvento] = useState([]);
   const [estadoFormulario, setEstadoFormulario] = useState(true);
 
   //Obtener datos de la base de datos
@@ -79,6 +80,7 @@ export default function EditarEvento() {
     obtenerDatosEditar();
     obtenerListaOrganizadores();
     obtenerListaPatrocinadores();
+    obtenerListaTipoEventos();
   }, []);
 
   const obtenerDatos = () => {
@@ -138,6 +140,22 @@ export default function EditarEvento() {
         console.error(error);
       });
   };
+  const obtenerListaTipoEventos = () => {
+    axios
+    .get("http://localhost:8000/api/lista-tipo-eventos")
+    .then((response) => {
+      const listaConFormato = response.data.map((element) => ({
+        id: element.id_tipo_evento,
+        nombre: element.nombre_tipo_evento,
+        value: element.id_tipo_evento, // Aquí usamos el ID como valor
+        label: element.nombre_tipo_evento, // Y el nombre como etiqueta
+      }));
+      setListaTipoEvento(listaConFormato);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
   const uploadButton = (
     <div>
@@ -212,7 +230,7 @@ export default function EditarEvento() {
 
     setFechaInicioBD(record.FECHA_INICIO);
     setFechaFinBD(record.FECHA_FIN);
-    form.setFieldsValue({ TIPO_EVENTO: record.TIPO_EVENTO });
+    form.setFieldsValue({ TIPO_EVENTO: record.id_tipo_evento }); 
     form.setFieldsValue(datos);
     setActual(record.TITULO);
     setId(record.id_evento);
@@ -295,7 +313,7 @@ export default function EditarEvento() {
     }
   };
 
-  const datosEvento = (values) => {
+  const datosEvento = async (values) => {
     let organizadores = [];
     let patrocinadores = [];
     const TIPO = validarTipo(values.TIPO_EVENTO);
@@ -310,6 +328,14 @@ export default function EditarEvento() {
     } else {
       patrocinadores.push(...listaPatrocinador[listaPatrocinador.length - 1]);
     }
+    let base64Image;
+    if (fileList.length > 0) {
+      // Convertir el archivo a base64
+      base64Image = await getBase64(fileList[0].originFileObj);
+    } else {
+      base64Image = values.AFICHE; // Si no hay un archivo nuevo, usa el valor existente
+    }
+
     const datos = {
       TITULO: values.TITULO,
       id_tipo_evento: TIPO,
@@ -318,7 +344,7 @@ export default function EditarEvento() {
       DESCRIPCION: values.DESCRIPCION,
       organizadores: organizadores,
       auspiciadores: patrocinadores,
-      AFICHE: fileList.length > 0 ? fileList[0].thumbUrl : values.AFICHE,
+      AFICHE: base64Image,
     };
     return datos;
   };
@@ -344,33 +370,37 @@ export default function EditarEvento() {
     return resultado;
   };
 
-  function actualizar(values, id) {
-    const duplicado = validarDuplicado(values);
-    const datos = datosEvento(values);
-    console.log("Valores del formulario:", datos);
-    if (duplicado === true) {
-      console.log(
-        "No se cierra el formul ario y no se guarda, se mustra un mensaje de q existe evento duplicado"
-      );
+  async function actualizar(values, id) {
+    // Primero, verificamos si el título del evento está duplicado.
+    const duplicado = await validarDuplicado(values);
+  
+    if (duplicado) {
+      console.log("Existe un evento con el mismo título");
+      message.error("Existe un evento con el mismo título");
       setIsModalOpenEdit(true);
-      message.error("Exite un evento con el mismo título");
       setFileList([]);
     } else {
-      axios
-        .put(`http://localhost:8000/api/evento/${id}`, datos)
-        .then((response) => {
-          message.success("El evento se actualizó correctamente");
-          obtenerDatos();
-          setIsModalOpenEdit(false);
-          setFileList([]);
-          setListaPatrocinador([]);
-          setListaOrganizador([]);
-          obtenerDatos();
-          obtenerDatosEditar();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      try {
+        // Si no está duplicado, obtenemos los datos del evento, incluyendo la imagen en base64.
+        const datos = await datosEvento(values);
+  
+        // Luego, realizamos la solicitud PUT con los datos del evento.
+        const response = await axios.put(`http://localhost:8000/api/evento/${id}`, datos);
+  
+        console.log("El evento se actualizó correctamente");
+        message.success("El evento se actualizó correctamente");
+  
+        // Finalmente, actualizamos la UI según sea necesario.
+        setFileList([]);
+        setListaPatrocinador([]);
+        setListaOrganizador([]);
+        setIsModalOpenEdit(false);
+        obtenerDatos();
+        obtenerDatosEditar();
+      } catch (error) {
+        console.error(error);
+        message.error("Ocurrió un error al actualizar el evento");
+      }
     }
   }
 
@@ -636,45 +666,11 @@ export default function EditarEvento() {
               label="Tipo"
               name="TIPO_EVENTO"
               className="titulo-info"
-              rules={[
-                {
-                  required: true,
-                  message: "Por favor, seleccione un tipo de evento",
-                },
-              ]}
+              rules={[{ required: true, message: "Por favor, seleccione un tipo de evento" }]}
             >
               <Select
                 allowClear
-                options={[
-                  {
-                    value: "1",
-                    label: "Competencia estilo ICPC",
-                  },
-                  {
-                    value: "2",
-                    label: "Competencia estilo libre",
-                  },
-                  {
-                    value: "3",
-                    label: "Taller de programación",
-                  },
-                  {
-                    value: "4",
-                    label: "Entrenamiento",
-                  },
-                  {
-                    value: "5",
-                    label: "Reclutamiento",
-                  },
-                  {
-                    value: "6",
-                    label: "Torneo",
-                  },
-                  {
-                    value: "7",
-                    label: "Otro",
-                  },
-                ]}
+                options={listaTipoEvento} // Usa la lista obtenida del backend aquí
               />
             </Form.Item>
             <div className="formato-fechas">
