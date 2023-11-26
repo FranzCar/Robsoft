@@ -233,6 +233,12 @@ export default function Participante() {
         console.error(err);
       });
   };
+
+  const generos = [
+    { value: "Femenino", label: "Femenino" },
+    { value: "Masculino", label: "Masculino" },
+  ];
+
   const optionsTallas = [
     { value: "S", label: "S" },
     { value: "M", label: "M" },
@@ -464,6 +470,7 @@ export default function Participante() {
       centered: "true",
 
       onOk() {
+        formCI.resetFields();
         setVisible(false);
         setIsInstitucionDisabled(true);
         setFileList([]);
@@ -545,6 +552,33 @@ export default function Participante() {
       .post("http://localhost:8000/api/guardar-participante", datos)
       .then((response) => {
         console.log("Datos guardados con éxito", response.data);
+        const datosPer = {
+          id_evento: idEVENTO,
+          id_persona: response.data.id,
+        };
+        console.log("datos per . ", datosPer);
+        axios
+          .post("http://localhost:8000/api/inscribir-individual", datosPer)
+          .then((response) => {
+            console.log("Datos guardados con éxito Evento", response.data);
+            message.success(
+              "El participante se registró correctamente al evento"
+            );
+          })
+          .catch((error) => {
+            if (error.response) {
+              // El servidor respondió con un código de estado fuera del rango 2xx
+              const errores = error.response.data.errors;
+              for (let campo in errores) {
+                message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+              }
+            } else {
+              // Otros errores (problemas de red, etc.)
+              message.error(
+                "Ocurrió un error al guardar el registro al EVENTO."
+              );
+            }
+          });
         message.success("El participante se registró correctamente");
         obtenerParticipantesCI();
         obtenerParticipantes();
@@ -1198,6 +1232,7 @@ export default function Participante() {
         </Form>
       </Modal>
       {/*Ventana emergente para el formulario de crear participante Individual */}
+
       <Modal
         title="Formulario de registro Individual"
         open={visible}
@@ -1206,7 +1241,7 @@ export default function Participante() {
         keyboard={false}
         closable={false}
         style={{
-          top: 20,
+          top: 10,
         }}
         width={1000}
         footer={[
@@ -1234,7 +1269,7 @@ export default function Participante() {
             width: "95%",
             paddingLeft: "3%",
             backgroundColor: "#ffff",
-            margin: "0% 5% 5% 5%",
+            margin: "0% 5% 0% 5%",
             paddingRight: "3%",
             borderRadius: "15px",
             display: "grid",
@@ -1296,12 +1331,15 @@ export default function Participante() {
                 ]}
               >
                 <DatePicker
-                  style={{ width: "200px", maxWidth: "100%" }}
+                  style={{
+                    width: "200px",
+                    maxWidth:
+                      "100%" /*pointerEvents: verificado || ciEncontrado ? "none" : "auto",*/,
+                  }}
                   placeholder="Selecciona una fecha"
                   disabledDate={disabledDate}
                 />
               </Form.Item>
-
               <Form.Item
                 label="Celular"
                 name="TELEFONO"
@@ -1324,7 +1362,6 @@ export default function Participante() {
                   onKeyPress={onlyNumbers}
                 ></Input>
               </Form.Item>
-
               <Form.Item
                 label="Genéro"
                 name="GENERO"
@@ -1336,10 +1373,13 @@ export default function Participante() {
                   },
                 ]}
               >
-                <Select placeholder="Seleccione un género.">
-                  <Select.Option value="Femenino">Femenino</Select.Option>
-                  <Select.Option value="Masculino">Masculino</Select.Option>
-                </Select>
+                <Select
+                  placeholder="Seleccione un género."
+                  options={generos}
+                  style={{
+                    pointerEvents: verificado || ciEncontrado ? "none" : "auto",
+                  }}
+                />
               </Form.Item>
               <Form.Item
                 label="Correo electrónico"
@@ -1402,11 +1442,23 @@ export default function Participante() {
               >
                 <h4>Datos especificos al evento:</h4>
               </div>
-              <Form.Item label="Institución" name="INSTITUCION">
+              <Form.Item
+                label="Institución"
+                name="INSTITUCION"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor seleccione una institución",
+                  },
+                ]}
+              >
                 <Select
                   placeholder="Seleccione una institución."
                   options={instituciones}
                   onChange={onInstitutionChange}
+                  /*style={{
+                    pointerEvents: verificado || ciEncontrado ? "none" : "auto",
+                  }}*/
                 />
               </Form.Item>
               <Form.Item label="Semestre" name="SEMESTRE">
@@ -1437,7 +1489,6 @@ export default function Participante() {
                   options={optionsTallas}
                 />
               </Form.Item>
-
               <Form.Item
                 label="Certificacion del estudiante"
                 name="CERTIFICADO"
@@ -1473,6 +1524,7 @@ export default function Participante() {
           </Row>
         </Form>
       </Modal>
+
       {/*Modal para la parte de registrar equipo grupal */}
       <Modal
         title="Formulario de registro grupal"
@@ -1715,12 +1767,15 @@ export default function Participante() {
                 required: true,
                 message: "Por favor, ingrese el CI del participante",
               },
-              {validator : validarMinimoCI}
+              { validator: validarMinimoCI },
             ]}
           >
-            <Input minLength={8} maxLength={8} 
-            placeholder="Por favor, ingrese el CI" 
-            onKeyPress={onlyNumbers}/>
+            <Input
+              minLength={8}
+              maxLength={8}
+              placeholder="Por favor, ingrese el CI"
+              onKeyPress={onlyNumbers}
+            />
           </Form.Item>
           <Form.Item
             label="Nombre completo"
@@ -1730,7 +1785,7 @@ export default function Participante() {
                 required: true,
                 message: "Por favor, ingrese el nombre del participante",
               },
-              {validator : validarMinimo},
+              { validator: validarMinimo },
             ]}
           >
             <Input
@@ -1744,8 +1799,7 @@ export default function Participante() {
             label="Fecha de nacimiento"
             name="FECHA"
             rules={[
-              { required: true, 
-                message: "Ingrese una fecha, por favor." },
+              { required: true, message: "Ingrese una fecha, por favor." },
             ]}
           >
             <DatePicker
@@ -1795,7 +1849,7 @@ export default function Participante() {
                 required: true,
                 message: "Por favor ingrese un celular",
               },
-              {validator: validarTelefono},
+              { validator: validarTelefono },
             ]}
           >
             <Input
