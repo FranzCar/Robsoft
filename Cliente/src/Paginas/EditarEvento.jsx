@@ -73,6 +73,7 @@ export default function EditarEvento() {
   const [fechaFinBD, setFechaFinBD] = useState(null);
   const [listaTipoEvento, setListaTipoEvento] = useState([]);
   const [estadoFormulario, setEstadoFormulario] = useState(true);
+  const [tipoEventoOriginal, setTipoEventoOriginal] = useState(null);
 
   //Obtener datos de la base de datos
   useEffect(() => {
@@ -172,6 +173,7 @@ export default function EditarEvento() {
   const handleCancelEdit = () => {
     setIsModalOpenEdit(false);
     form.resetFields();
+    setTipoEventoOriginal(null);
   };
 
   //Validacion de los tipos de imagenes
@@ -230,6 +232,7 @@ export default function EditarEvento() {
 
     setFechaInicioBD(record.FECHA_INICIO);
     setFechaFinBD(record.FECHA_FIN);
+    setTipoEventoOriginal(record.id_tipo_evento);
     form.setFieldsValue({ TIPO_EVENTO: record.id_tipo_evento });
     form.setFieldsValue(datos);
     setActual(record.TITULO);
@@ -284,6 +287,7 @@ export default function EditarEvento() {
         setFechaInicioBD("");
         setFechaFinBD("");
         setIsModalOpenEdit(false);
+        setTipoEventoOriginal(null);
       },
       onCancel() {},
     });
@@ -311,7 +315,14 @@ export default function EditarEvento() {
     } else {
       base64Image = values.AFICHE; // Si no hay un archivo nuevo, usa el valor existente
     }
-    const tipoEventoID = listaTipoEvento.find(tipo => tipo.nombre === values.TIPO_EVENTO)?.id || 'Valor por defecto si no se encuentra';
+    let tipoEventoID;
+    if (!isNaN(values.TIPO_EVENTO)) {
+        // Si TIPO_EVENTO es un número, asume que es un ID y úsalo directamente
+        tipoEventoID = values.TIPO_EVENTO;
+    } else {
+        // De lo contrario, busca el ID correspondiente en la listaTipoEvento
+        tipoEventoID = listaTipoEvento.find(tipo => tipo.nombre === values.TIPO_EVENTO)?.id || tipoEventoOriginal;
+    }
 
     const datos = {
       TITULO: values.TITULO,
@@ -647,8 +658,11 @@ export default function EditarEvento() {
             >
               <Select
                 allowClear
-                options={listaTipoEvento} // Usa la lista obtenida del backend aquí
-              />
+                options={listaTipoEvento.map(tipo => ({
+                label: tipo.nombre,
+                value: tipo.id
+              }))}
+            />
             </Form.Item>
             <div className="formato-fechas">
               <div className="formato-fechas-columna1">
