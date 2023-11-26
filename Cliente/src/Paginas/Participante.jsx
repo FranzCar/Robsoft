@@ -1715,9 +1715,12 @@ export default function Participante() {
                 required: true,
                 message: "Por favor, ingrese el CI del participante",
               },
+              {validator : validarMinimoCI}
             ]}
           >
-            <Input minLength={5} maxLength={25} placeholder="Ingrese el CI" />
+            <Input minLength={8} maxLength={8} 
+            placeholder="Por favor, ingrese el CI" 
+            onKeyPress={onlyNumbers}/>
           </Form.Item>
           <Form.Item
             label="Nombre completo"
@@ -1727,25 +1730,28 @@ export default function Participante() {
                 required: true,
                 message: "Por favor, ingrese el nombre del participante",
               },
+              {validator : validarMinimo},
             ]}
           >
             <Input
-              minLength={10}
-              maxLength={30}
+              minLength={5}
+              maxLength={50}
               placeholder="Ingrese un nombre"
+              onKeyPress={onlyLetters}
             />
           </Form.Item>
           <Form.Item
             label="Fecha de nacimiento"
             name="FECHA"
             rules={[
-              { required: true, message: "Ingrese una fecha, por favor." },
+              { required: true, 
+                message: "Ingrese una fecha, por favor." },
             ]}
           >
             <DatePicker
               style={{ width: "200px", maxWidth: "100%" }}
               placeholder="Selecciona una fecha"
-              //disabledDate={disabledDate}
+              disabledDate={disabledDate}
             />
           </Form.Item>
           <Form.Item
@@ -1776,7 +1782,7 @@ export default function Participante() {
             ]}
           >
             <Input
-              placeholder="Ingrese su correo electrónico"
+              placeholder="Ingrese el correo electrónico"
               maxLength={30}
               minLength={5}
             ></Input>
@@ -1789,9 +1795,7 @@ export default function Participante() {
                 required: true,
                 message: "Por favor ingrese un celular",
               },
-              {
-                validator: validarTelefono,
-              },
+              {validator: validarTelefono},
             ]}
           >
             <Input
