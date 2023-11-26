@@ -73,6 +73,7 @@ export default function EditarEvento() {
   const [fechaFinBD, setFechaFinBD] = useState(null);
   const [listaTipoEvento, setListaTipoEvento] = useState([]);
   const [estadoFormulario, setEstadoFormulario] = useState(true);
+  const [tipoEventoOriginal, setTipoEventoOriginal] = useState(null);
 
   //Obtener datos de la base de datos
   useEffect(() => {
@@ -172,6 +173,7 @@ export default function EditarEvento() {
   const handleCancelEdit = () => {
     setIsModalOpenEdit(false);
     form.resetFields();
+    setTipoEventoOriginal(null);
   };
 
   //Validacion de los tipos de imagenes
@@ -230,7 +232,8 @@ export default function EditarEvento() {
 
     setFechaInicioBD(record.FECHA_INICIO);
     setFechaFinBD(record.FECHA_FIN);
-    form.setFieldsValue({ TIPO_EVENTO: record.id_tipo_evento }); 
+    setTipoEventoOriginal(record.id_tipo_evento);
+    form.setFieldsValue({ TIPO_EVENTO: record.id_tipo_evento });
     form.setFieldsValue(datos);
     setActual(record.TITULO);
     setId(record.id_evento);
@@ -284,39 +287,16 @@ export default function EditarEvento() {
         setFechaInicioBD("");
         setFechaFinBD("");
         setIsModalOpenEdit(false);
+        setTipoEventoOriginal(null);
       },
       onCancel() {},
     });
   };
 
-  const validarTipo = (tipo) => {
-    if (tipo >= 1 && tipo <= 7) {
-      return tipo;
-    } else {
-      if (tipo === "Competencia estilo ICPC") {
-        return "1";
-      } else if (tipo === "Competencia estilo libre") {
-        return "2";
-      } else if (tipo === "Taller de Programacion") {
-        return "3";
-      } else if (tipo === "Entrenamiento") {
-        return "4";
-      } else if (tipo === "Reclutamiento") {
-        return "5";
-      } else if (tipo === "Torneo") {
-        return "6";
-      } else if (tipo === "Otro") {
-        return "7";
-      } else {
-        return "Tipo desconocido";
-      }
-    }
-  };
 
   const datosEvento = async (values) => {
     let organizadores = [];
     let patrocinadores = [];
-    const TIPO = validarTipo(values.TIPO_EVENTO);
     if (listaOrganizador.length === 0) {
       organizadores = organizadoresRecuperados;
     } else {
@@ -335,10 +315,18 @@ export default function EditarEvento() {
     } else {
       base64Image = values.AFICHE; // Si no hay un archivo nuevo, usa el valor existente
     }
+    let tipoEventoID;
+    if (!isNaN(values.TIPO_EVENTO)) {
+        // Si TIPO_EVENTO es un número, asume que es un ID y úsalo directamente
+        tipoEventoID = values.TIPO_EVENTO;
+    } else {
+        // De lo contrario, busca el ID correspondiente en la listaTipoEvento
+        tipoEventoID = listaTipoEvento.find(tipo => tipo.nombre === values.TIPO_EVENTO)?.id || tipoEventoOriginal;
+    }
 
     const datos = {
       TITULO: values.TITULO,
-      id_tipo_evento: TIPO,
+      id_tipo_evento: tipoEventoID,
       FECHA_INICIO: values.fecha,
       FECHA_FIN: values.fechafin,
       DESCRIPCION: values.DESCRIPCION,
@@ -670,8 +658,11 @@ export default function EditarEvento() {
             >
               <Select
                 allowClear
-                options={listaTipoEvento} // Usa la lista obtenida del backend aquí
-              />
+                options={listaTipoEvento.map(tipo => ({
+                label: tipo.nombre,
+                value: tipo.id
+              }))}
+            />
             </Form.Item>
             <div className="formato-fechas">
               <div className="formato-fechas-columna1">
