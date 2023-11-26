@@ -50,12 +50,31 @@ class PersonaController extends Controller
     }
 
     public function listParticipantes(Request $request) {
-        $participantes = Persona::whereHas('RolPersona', function($query) {
-                            $query->where('id_roles', 6);
-                        })
-                        ->get();
+        $participantes = Persona::with(['caracteristicasTexto', 'caracteristicasFecha'])
+                            ->whereHas('RolPersona', function($query) {
+                                $query->where('id_roles', 6);
+                            })
+                            ->get()
+                            ->map(function ($persona) {
+                                // Buscar las características específicas
+                                $codigoSIS = $persona->caracteristicasTexto->firstWhere('id_caract_per', 3)->valor_texto_persona ?? null;
+                                $fechaNacimiento = $persona->caracteristicasFecha->firstWhere('id_caract_per', 4)->valor_fecha_persona ?? null;
+    
+                                return [
+                                    'id_persona' => $persona->id_persona,
+                                    'nombre' => $persona->nombre,
+                                    'correo_electronico' => $persona->correo_electronico,
+                                    'telefono' => $persona->telefono,
+                                    'ci' => $persona->ci,
+                                    'genero' => $persona->genero,
+                                    'id_institucion' => $persona->id_institucion,
+                                    'codigoSIS' => $codigoSIS,
+                                    'fecha_nacimiento' => $fechaNacimiento,
+                                ];
+                            });
     
         return $participantes;           
     }
+    
 }
 

@@ -23,4 +23,13 @@ class Persona extends Model
     {
         return $this->correo_electronico; 
     }
+    public function caracteristicasTexto()
+    {
+        return $this->hasMany(CaracteristicaTextoPersona::class, 'id_persona');
+    }
+
+    public function caracteristicasFecha()
+    {
+        return $this->hasMany(CaracteristicaFechaPersona::class, 'id_persona');
+    }
 }
