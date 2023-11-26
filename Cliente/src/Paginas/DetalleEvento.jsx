@@ -229,6 +229,7 @@ export default function DetalleEvento() {
         .post(`http://localhost:8000/api/detallar-evento/${id}`, datos)
         .then((response) => {
           message.success("Los detalles del evento se guardo correctamente");
+          obtenerDatos()
           setMostrarPestanias(false);
           setMostrarFormEntrenamiento(false);
           setMostrarFormICPC(false);
