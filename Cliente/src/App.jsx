@@ -3,12 +3,13 @@ import './App.css';
 import BotonesHeader from './Componentes/BotonesHeader';
 import Logos from './Componentes/Logos';
 import Menu from './Componentes/Menu';
-import Evento from './Paginas/Evento'
-import Inicio from './Paginas/Inicio'
-import CrearEvento from './Paginas/CrearEvento'
-import EliminarEvento from './Paginas/EliminarEvento'
-import EditarEvento from './Paginas/EditarEvento'
-import Participante from './Paginas/Participante'
+import Evento from './Paginas/Evento';
+import Inicio from './Paginas/Inicio';
+import Reporte from './Paginas/Reporte';
+import CrearEvento from './Paginas/CrearEvento';
+import EliminarEvento from './Paginas/EliminarEvento';
+import EditarEvento from './Paginas/EditarEvento';
+import Participante from './Paginas/Participante';
 import DetalleEvento from './Paginas/DetalleEvento';
 import { Route, Routes } from 'react-router-dom';
 import React from 'react';
@@ -39,7 +40,7 @@ function App() {
           <Route path='/eliminarEvento' element= {<EliminarEvento/>}/>
           <Route path='/editarEvento' element= {<EditarEvento/>}/>
           <Route path='/detalleEvento' element= {<DetalleEvento/>}/>
-
+          <Route path='/Reporte' element= {<Reporte/>}/>
         </Routes>
       </Content>
       <Footer className='footer'>Universidad Mayor de San Simon</Footer>
