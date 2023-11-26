@@ -230,7 +230,7 @@ export default function EditarEvento() {
 
     setFechaInicioBD(record.FECHA_INICIO);
     setFechaFinBD(record.FECHA_FIN);
-    form.setFieldsValue({ TIPO_EVENTO: record.id_tipo_evento }); 
+    form.setFieldsValue({ TIPO_EVENTO: record.id_tipo_evento });
     form.setFieldsValue(datos);
     setActual(record.TITULO);
     setId(record.id_evento);
@@ -289,34 +289,10 @@ export default function EditarEvento() {
     });
   };
 
-  const validarTipo = (tipo) => {
-    if (tipo >= 1 && tipo <= 7) {
-      return tipo;
-    } else {
-      if (tipo === "Competencia estilo ICPC") {
-        return "1";
-      } else if (tipo === "Competencia estilo libre") {
-        return "2";
-      } else if (tipo === "Taller de programación") {
-        return "3";
-      } else if (tipo === "Entrenamiento") {
-        return "4";
-      } else if (tipo === "Reclutamiento") {
-        return "5";
-      } else if (tipo === "Torneo") {
-        return "6";
-      } else if (tipo === "Otro") {
-        return "7";
-      } else {
-        return "Tipo desconocido";
-      }
-    }
-  };
 
   const datosEvento = async (values) => {
     let organizadores = [];
     let patrocinadores = [];
-    const TIPO = validarTipo(values.TIPO_EVENTO);
     if (listaOrganizador.length === 0) {
       organizadores = organizadoresRecuperados;
     } else {
@@ -335,10 +311,11 @@ export default function EditarEvento() {
     } else {
       base64Image = values.AFICHE; // Si no hay un archivo nuevo, usa el valor existente
     }
+    const tipoEventoID = listaTipoEvento.find(tipo => tipo.nombre === values.TIPO_EVENTO)?.id || 'Valor por defecto si no se encuentra';
 
     const datos = {
       TITULO: values.TITULO,
-      id_tipo_evento: TIPO,
+      id_tipo_evento: tipoEventoID,
       FECHA_INICIO: values.fecha,
       FECHA_FIN: values.fechafin,
       DESCRIPCION: values.DESCRIPCION,
