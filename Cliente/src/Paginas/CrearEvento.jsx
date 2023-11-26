@@ -15,7 +15,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 
-
 const { TextArea } = Input;
 const { confirm } = Modal;
 
@@ -126,20 +125,19 @@ export default function CrearEvento() {
 
   const disabledDateFin = (current) => {
     // Obtenemos la fecha seleccionada en "Fecha inicio"
-    const fechaInicioValue = form.getFieldValue('FECHA_INICIO');
-    
+    const fechaInicioValue = form.getFieldValue("FECHA_INICIO");
+
     // Si no hay fecha seleccionada en "Fecha inicio" o la fecha actual es anterior, deshabilitar
     if (!fechaInicioValue || current < fechaInicioValue) {
       return true;
     }
-  
+
     // Calculamos la fecha máxima permitida (180 días desde la fecha actual)
-    const fechaMaxima = moment().add(180, 'days');
-  
+    const fechaMaxima = moment().add(180, "days");
+
     // Si la fecha actual es posterior a la fecha máxima permitida, deshabilitar
     return current > fechaMaxima;
   };
-  
 
   //Restringir las horas
   const disabledHours = () => {
@@ -208,7 +206,6 @@ export default function CrearEvento() {
     showConfirm(values);
   };
 
-
   const datosEvento = async (values) => {
     const fecha = values.FECHA_INICIO;
     const NUEVAFECHA_INICIO = fecha.format("YYYY-MM-DD");
@@ -216,13 +213,13 @@ export default function CrearEvento() {
     const NUEVAFECHA_FIN = fecha_fin.format("YYYY-MM-DD");
     const organizadores = listaOrganizador[listaOrganizador.length - 1];
     const patrocinadores = listaPatrocinador[listaPatrocinador.length - 1];
-  
+
     let base64Image = null;
     if (fileList.length > 0) {
       const file = fileList[0].originFileObj;
       base64Image = await getBase64(file); // Convertir el archivo a Base64
     }
-  
+
     const datos = {
       TITULO: values.TITULO,
       id_tipo_evento: values.TIPO_EVENTO,
@@ -231,12 +228,12 @@ export default function CrearEvento() {
       DESCRIPCION: values.DESCRIPCION,
       auspiciadores: patrocinadores,
       organizadores: organizadores,
-      AFICHE: base64Image // Usar la imagen en Base64
+      AFICHE: base64Image, // Usar la imagen en Base64
     };
-  
+
     return datos;
   };
-  
+
   const validarDuplicado = (values) => {
     const titulo = values.TITULO;
     let resultado = false;
@@ -583,25 +580,25 @@ export default function CrearEvento() {
         </div>
 
         <div className="crear-evento-columna2">
-        <Form.Item
-          label="Tipo"
-          name="TIPO_EVENTO"
-          rules={[
-          {
-            required: true,
-            message: "Por favor ingrese un tipo de evento",
-          },
-        ]}
-      >
-        <Select
-          className="select-tipo-evento"
-          style={{
-          width: 250,
-        }}
-        allowClear
-        options={listaTipoEvento} // Usa la lista obtenida del backend
-        />
-      </Form.Item>
+          <Form.Item
+            label="Tipo"
+            name="TIPO_EVENTO"
+            rules={[
+              {
+                required: true,
+                message: "Por favor ingrese un tipo de evento",
+              },
+            ]}
+          >
+            <Select
+              className="select-tipo-evento"
+              style={{
+                width: 250,
+              }}
+              allowClear
+              options={listaTipoEvento} // Usa la lista obtenida del backend
+            />
+          </Form.Item>
           <Form.Item
             label="Descripci&oacute;n"
             name="DESCRIPCION"
@@ -638,12 +635,15 @@ export default function CrearEvento() {
               title={previewTitle}
               footer={null}
               onCancel={handleCancelIMG}
+              style={{ width: "800px" }} 
             >
               <img
                 alt="example"
                 style={{
-                  width: "auto",
-                  height: "300px",
+                  width: "100%", 
+                  height: "auto", 
+                  maxHeight: "500px", 
+                  objectFit: "contain", 
                 }}
                 src={previewImage}
               />

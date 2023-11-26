@@ -132,7 +132,7 @@ export default function Evento() {
             <p>{info.TITULO}</p>
             <br />
             <h3>Tipo :</h3>
-            <p>{info.TIPO_EVENTO }</p>
+            <p>{info.TIPO_EVENTO}</p>
             <br />
             <h3>Fecha inicio:</h3>
             <p>{info.FECHA_INICIO}</p>
@@ -166,8 +166,12 @@ export default function Evento() {
             <h3>Afiche del evento :</h3>
             <Form.Item className="info-afiche" name="AFICHE">
               <Image
-                width={160}
-                height={160}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: "270px",
+                  objectFit: "contain",
+                }}
                 src={verImagen}
                 fallback="info."
               />

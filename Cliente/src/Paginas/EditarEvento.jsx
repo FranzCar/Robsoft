@@ -297,7 +297,7 @@ export default function EditarEvento() {
         return "1";
       } else if (tipo === "Competencia estilo libre") {
         return "2";
-      } else if (tipo === "Taller de programación") {
+      } else if (tipo === "Taller de Programacion") {
         return "3";
       } else if (tipo === "Entrenamiento") {
         return "4";

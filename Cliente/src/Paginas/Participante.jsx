@@ -20,7 +20,9 @@ import {
   PlusOutlined,
   ExclamationCircleFilled,
   DeleteOutlined,
-  FormOutlined,
+  DownloadOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import Column from "antd/es/table/Column";
@@ -29,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 
 const { confirm } = Modal;
 const { Search } = Input;
+const { Option } = Select;
 
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -94,7 +97,7 @@ export default function Participante() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-mostrar")
+      .get("http://localhost:8000/api/lista-evento-detallado")
       .then((response) => {
         setDatosEventos(response.data);
         console.log("Los datos ", response.data);
@@ -606,8 +609,8 @@ export default function Participante() {
   //Mensaje al dar al boton cancelar del formulario de registrar equipo
   const showCancelGrupal = () => {
     confirm({
-      title:
-        "¿Estás seguro de que desea cancelar su registro? Se perdera el progreso realizado. ",
+      title: "¿Estás seguro de que desea cancelar su registro? ",
+      content: " Se perderá el progreso realizado",
       icon: <ExclamationCircleFilled />,
       okText: "Si",
       cancelText: "No",
@@ -827,17 +830,15 @@ export default function Participante() {
   // Buscar entreandor
   const onSearchEntrenador = (value) => {
     setSearchEntrenador(value);
-    filtrarDatosEntrenador(value, ["nombre", "ci"]);
+    filtrarDatosEntrenador(value, "ci");
   };
 
-  const filtrarDatosEntrenador = (searchText, fieldNames) => {
-    const filtered = entrenador.filter((item) =>
-      fieldNames.some((fieldName) =>
-        String(item[fieldName])
-          .toString()
-          .toLowerCase()
-          .includes(searchText.toLowerCase())
-      )
+  const filtrarDatosEntrenador = (searchText, fieldName) => {
+    const filtered = data.filter((item) =>
+      String(item[fieldName])
+        .toString()
+        .toLowerCase()
+        .includes(searchText.toLowerCase())
     );
     setDatoFiltradoEntrenador(filtered);
   };
@@ -851,7 +852,7 @@ export default function Participante() {
     } else if (!regex.test(searchEntrenador)) {
       message.error("El CI del entrenador debe contener solo números");
     } else {
-      setNombreEntrenador(datoFiltradoEntrenador[0].nombre);
+      setNombreEntrenador(datoFiltradoEntrenador[0].correo_electronico);
       console.log(
         "el id del entrenador ",
         datoFiltradoEntrenador[0].id_persona
@@ -924,6 +925,37 @@ export default function Participante() {
     });
   };
 
+  const showModalidadEvento = (tipo) => {
+    console.log("El tipo es ", tipo);
+    if (tipo === "Individual") {
+      showModalTipoParticipante();
+    } else {
+      showModalGrupal();
+    }
+  };
+
+  const onDownload = (afiche, nombreArchivo) => {
+    fetch(afiche)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = nombreArchivo || "imagen.png";
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(url);
+        link.remove();
+      })
+      .catch((error) => console.error("Error durante la descarga:", error));
+  };
+
+  const [selectedCi, setSelectedCi] = useState(null);
+
+  const handleCiChange = (value) => {
+    setSelectedCi(value);
+  };
+
   return (
     <div>
       <div className="tabla-descripcion-editarEv">
@@ -935,34 +967,102 @@ export default function Participante() {
           {datosEventos.map((item, index) => (
             <Col key={index} xs={24} sm={12} md={12}>
               <Card
-                title={item.TITULO}
-                style={{ marginBottom: 16 }}
+                title={<h3>{item.TITULO}</h3>}
+                style={{ marginBottom: 16, height: "auto" }}
                 hoverable
                 bordered={false}
                 actions={[
                   <Button
                     key="inscripcion"
+                    size="large"
+                    type="link"
+                    block
                     onClick={() => {
-                      showModalTipoParticipante();
+                      showModalidadEvento(
+                        item.caracteristicas.tipo_participacion
+                      );
                       setTituloEvento(item.TITULO);
                       setIdEVENTO(item.id_evento);
                       console.log("EVENTO ID    + = ", item.id_evento);
                       console.log("EVENTO TITULO = ", item.TITULO);
                     }}
                   >
-                    Inscribirse
+                    Inscribirse &#62;
                   </Button>,
                 ]}
               >
                 <div className="cards-informacion">
                   <div className="cards-columna1">
-                    <p>{item.DESCRIPCION}</p>
+                    <p>
+                      <h3>Descripcion:</h3>
+                      {item.DESCRIPCION}
+                    </p>
+                    <br />
+                    <p>
+                      <h3>Fecha de inicio:</h3>
+                      {item.FECHA_INICIO}
+                    </p>
+                    <br />
+                    <p>
+                      <h3>Fecha de finalización:</h3>
+                      {item.FECHA_FIN}
+                    </p>
+                    <br />
+                    <p>
+                      <h3>Categoria:</h3>
+                      {item.caracteristicas.categoria_evento}
+                    </p>
+                    <br />
+                    <p>
+                      <h3>Costo:</h3>
+                      {item.caracteristicas.costo_evento}
+                    </p>
+                    <br />
+                    <p>
+                      <h3>Cupos:</h3>
+                      {item.caracteristicas.cupos}
+                    </p>
+                    <br />
+                    <p>
+                      <h3>Modalidad</h3>
+                      {item.caracteristicas.tipo_participacion}
+                    </p>
+                    <br />
                   </div>
                   <div className="cards-columna2">
                     <Image
-                      width={160}
-                      height={160}
                       src={item.AFICHE}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        maxHeight: "270px",
+                        objectFit: "contain",
+                      }}
+                      preview={{
+                        toolbarRender: (
+                          _,
+                          {
+                            transform: { scale },
+                            actions: { onZoomOut, onZoomIn },
+                          }
+                        ) => (
+                          <Space size={12} className="toolbar-wrapper">
+                            <DownloadOutlined
+                              onClick={() =>
+                                onDownload(item.AFICHE, "Afiche del evento.png")
+                              }
+                            />
+                            <ZoomOutOutlined
+                              disabled={scale === 1}
+                              onClick={onZoomOut}
+                            />
+                            <ZoomInOutlined
+                              disabled={scale === 50}
+                              onClick={onZoomIn}
+                            />
+                          </Space>
+                        ),
+                      }}
                       fallback="data:image/png;base64,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"
                     />
                   </div>
@@ -1377,10 +1477,9 @@ export default function Participante() {
       <Modal
         title="Formulario de registro grupal"
         open={verModalGrupal}
-        onCancel={handleCancelGrupal}
-        style={{
-          top: 20,
-        }}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
         width={600}
         footer={[
           <Form form={form} onFinish={registrarGrupo}>
@@ -1419,9 +1518,6 @@ export default function Participante() {
           >
             <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
           </Form.Item>
-          {/*<Form.Item label="Institución" name="INSTITUCION">
-              <Input placeholder="Ingrese el nombre de la institución" />
-            </Form.Item>*/}
           <Form.Item label="Entrenador" name="ENTRENADOR">
             <div className="botones-entrenador">
               <label>Añadir</label>
@@ -1438,6 +1534,30 @@ export default function Participante() {
               value={nombreEntrenador}
               readOnly={estadoFormulario}
               placeholder="Ingrese el nombre del entrenador"
+            />
+          </Form.Item>
+          <Select
+            placeholder="Selecciona CI"
+            onChange={handleCiChange}
+            style={{ width: "100%" }}
+            allowClear
+            showSearch
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            }
+          >
+            {data.map((option) => (
+              <Option key={option.ci} value={option.ci} title={option.correo}>
+                {option.ci}
+              </Option>
+            ))}
+          </Select>
+          <Form.Item label="Institución" name="INSTITUCION">
+            <Select
+              placeholder="Seleccione una institución."
+              options={instituciones}
+              onChange={onInstitutionChange}
             />
           </Form.Item>
 
@@ -1551,9 +1671,9 @@ export default function Participante() {
         </div>
         <Form layout="vertical">
           <Form.Item label="Nombre del Entrenador">
-            {datoFiltradoEntrenador.map((item) => (
+            {datoFiltradoEntrenador.slice(0, 3).map((item) => (
               <div key={item}>
-                <p> {item.nombre}</p>
+                <p>{item.correo_electronico}</p>
               </div>
             ))}
           </Form.Item>
