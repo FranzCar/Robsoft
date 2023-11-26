@@ -44,6 +44,7 @@ public function listaEventoDetallado()
 {
     $eventos = Evento::with(['tipoEvento.caracteristicasTipoEvento.caracteristicaEvento'])
     ->whereIn('ESTADO', ['Listo', 'Inscrito'])
+        ->orderBy('id_evento', 'desc')
         ->get()
         ->map(function ($evento) {
             $caracteristicasPorNombre = [];
