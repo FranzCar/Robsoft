@@ -62,8 +62,11 @@ const rowSelection = {
 
 export default function Participante() {
   const [form] = Form.useForm();
+  const [formNuevoEntrenador] = Form.useForm();
+  const [formCodigoEntrenador] = Form.useForm();
   const [formCI] = Form.useForm();
   const [formCodigo] = Form.useForm();
+  const [formGrupal] = Form.useForm();
 
   const [data, setData] = useState([]);
   const [indice, setIndice] = useState();
@@ -87,9 +90,11 @@ export default function Participante() {
   const handleCancelIMG = () => setPreviewOpen(false);
   const [datosEventos, setDatosEventos] = useState([]);
   const [verImagen, setVerImagen] = React.useState("");
+  const [estadoEntrenador, setEstadoEntrenador] = useState(false);
 
   useEffect(() => {
     obtenerParticipantes();
+    obtenerEntrenadores();
     obtenerParticipantesCI();
     obtenerInstituciones();
     obtenerDatos();
@@ -129,6 +134,32 @@ export default function Participante() {
         setEnviarCodigo(false);
         setVerificado(true);
         formCodigo.resetFields();
+        message.success("Se verifico correctamente");
+      })
+      .catch((error) => {
+        message.error("El codigo ingresado es incorrecto.");
+      });
+  };
+
+  const [uuidEntrenador, setUuidEntrenador] = useState();
+
+  const datosUuidEntrenador = (values) => {
+    const datos = {
+      uuid: uuidEntrenador,
+      codigo: values.CODIGOVERIFICACION,
+    };
+    return datos;
+  };
+
+  const verificarCodigoEntrenador = (values) => {
+    const datos = datosUuidEntrenador(values);
+    axios
+      .post("http://localhost:8000/api/confirmar-codigo-verificacion", datos)
+      .then((response) => {
+        setModalVerificarCodigoEntrenador(false);
+        setEstadoRegistroEntrenador(true);
+        setVerificadoEntrenador(true);
+        formCodigoEntrenador.resetFields();
         message.success("Se verifico correctamente");
       })
       .catch((error) => {
@@ -175,6 +206,10 @@ export default function Participante() {
   const handleCancelCodigo = () => {
     setEnviarCodigo(false);
     setVerificado(false);
+  };
+
+  const handleCancelCodigoEntrenador = () => {
+    setModalVerificarCodigoEntrenador(false);
   };
   const [tipoParticipante, setTipoParticipante] = useState(false);
 
@@ -494,6 +529,9 @@ export default function Participante() {
   const onFinishCodigo = (values) => {
     verificarCodigo(values);
   };
+  const onFinishCodigoEntrenador = (values) => {
+    verificarCodigoEntrenador(values);
+  };
   //BUscar al participante por el ci
   const buscarCi = (values) => {
     const carnet = values.CI;
@@ -616,7 +654,9 @@ export default function Participante() {
   const [nombreEntrenador, setNombreEntrenador] = useState("");
   const [estadoFormulario, setEstadoFormulario] = useState(false);
   const [listaID_Persona, setListaID_Persona] = useState([]);
-
+  const [verModalEntrenadorNuevo, setVerModalEntrenadorNuevo] = useState(false);
+  const [estadoRegistroEntrenador, setEstadoRegistroEntrenador] =
+    useState(false);
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
       // Actualiza el estado con las filas seleccionadas
@@ -669,7 +709,12 @@ export default function Participante() {
     setVerModalGrupal(false);
   };
 
-  const showModalGrupal = () => {
+  const showModalGrupal = (data) => {
+    if (data.caracteristicas.Coach_obligatorio === 1) {
+      setEstadoEntrenador(true);
+    } else {
+      setEstadoEntrenador(false);
+    }
     setVerModalGrupal(true);
   };
 
@@ -819,6 +864,7 @@ export default function Participante() {
             nuevoParticipante,
           ]);
           setSearchText("");
+          setBuscarParticipante(false);
           message.success("Se añadió al participante");
           aniadorIDPersona(datoFiltrado[0].id_persona);
           setNextID(nextID + 1);
@@ -852,9 +898,10 @@ export default function Participante() {
   //Obtener informacion de los entrenadores
   const obtenerEntrenadores = () => {
     axios
-      .get("http://localhost:8000/api/lista-coachs")
+      .get("http://localhost:8000/api/lista-coach")
       .then((response) => {
         setEntrenador(response.data);
+        console.log("los entreandores son ", response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -868,7 +915,7 @@ export default function Participante() {
   };
 
   const filtrarDatosEntrenador = (searchText, fieldName) => {
-    const filtered = data.filter((item) =>
+    const filtered = entrenador.filter((item) =>
       String(item[fieldName])
         .toString()
         .toLowerCase()
@@ -886,7 +933,7 @@ export default function Participante() {
     } else if (!regex.test(searchEntrenador)) {
       message.error("El CI del entrenador debe contener solo números");
     } else {
-      setNombreEntrenador(datoFiltradoEntrenador[0].correo_electronico);
+      setNombreEntrenador(datoFiltradoEntrenador[0].nombre);
       console.log(
         "el id del entrenador ",
         datoFiltradoEntrenador[0].id_persona
@@ -910,6 +957,11 @@ export default function Participante() {
   const [verModalParticipanteNuevo, setVerModalParticipanteNuevo] =
     useState(false);
   const [formNuevoParticipante] = Form.useForm();
+  const [verificadoEntrenador, setVerificadoEntrenador] = useState(false);
+  const [correoVerificacionEntrenador, setCorreoVerificacionEntrenador] =
+    useState("");
+  const [modalVerificarCodigoEntrenador, setModalVerificarCodigoEntrenador] =
+    useState(false);
 
   const datosParticipanteRegistro = (values) => {
     const datos = {
@@ -932,6 +984,22 @@ export default function Participante() {
       onOk() {
         formNuevoParticipante.resetFields();
         setVerModalParticipanteNuevo(false);
+      },
+    });
+  };
+
+  const handleCancelNuevoEntrenador = () => {
+    confirm({
+      title: "¿Estas seguro de cancelar el registro?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        setVerificadoEntrenador(false);
+        setEstadoRegistroEntrenador(false);
+        formNuevoEntrenador.resetFields();
+        cerrarModalNuevoEntrenador(false);
       },
     });
   };
@@ -959,12 +1027,107 @@ export default function Participante() {
     });
   };
 
-  const showModalidadEvento = (tipo) => {
-    console.log("El tipo es ", tipo);
+  const showConfirmEntrenador = (values) => {
+    setCorreoVerificacionEntrenador(values.CORREO_ENTRENADOR);
+    if (verificadoEntrenador) {
+      confirm({
+        title: "¿Está seguro de registrar este entrenador?",
+        icon: <ExclamationCircleFilled />,
+        content: "",
+        okText: "Si",
+        cancelText: "No",
+        centered: "true",
+
+        onOk() {
+          guardarEntrenador(values);
+        },
+        onCancel() {},
+      });
+    } else {
+      showModalCodigoEntrenador(values);
+    }
+  };
+
+  const guardarEntrenador = (values) => {
+    console.log("Los datos de dentrenador son ", values);
+    const datosGuardar = {
+      nombre: values.NOMBRE_ENTRENADOR,
+      correo_electronico: values.CORREO_ENTRENADOR,
+      telefono: values.TELEFONO_ENTRENADOR,
+      ci: values.CI_ENTRENADOR,
+      genero: values.GENERO_ENTRENADOR,
+      id_tipo_per: 2,
+    };
+    axios
+      .post("http://localhost:8000/api/guardar-coach", datosGuardar)
+      .then((response) => {
+        message.success("El entrenador se registró correctamente");
+        setNombreEntrenador(values.NOMBRE_ENTRENADOR);
+        setVerificadoEntrenador(false);
+        setEstadoRegistroEntrenador(false);
+        formNuevoEntrenador.resetFields();
+        cerrarModalNuevoEntrenador(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const formatoDatos = (values) => {
+    const datos = {
+      correo_electronico: values.CORREO_ENTRENADOR,
+      idEvento: idEVENTO,
+    };
+    return datos;
+  };
+
+  const validarDuplicadoCIEntreandor = (values) => {
+    const carnet = values.CI_ENTRENADOR;
+    let resultado = false;
+    for (let i = 0; i < entrenador.length; i++) {
+      if (entrenador[i].ci === carnet) {
+        resultado = true;
+        break;
+      }
+    }
+    return resultado;
+  };
+
+  const validarDuplicadoCorreoEntrenador = (values) => {
+    const carnet = values.CORREO_ENTRENADOR;
+    let resultado = false;
+    for (let i = 0; i < entrenador.length; i++) {
+      if (entrenador[i].correo_electronico === carnet) {
+        resultado = true;
+        break;
+      }
+    }
+    return resultado;
+  };
+
+  const showModalCodigoEntrenador = (values) => {
+    const datos = formatoDatos(values);
+    const duplicado = validarDuplicadoCIEntreandor(values);
+    if (duplicado === false) {
+      axios
+        .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
+        .then((response) => {
+          setUuidEntrenador(response.data);
+        })
+        .catch((error) => {
+          message.error("Ocurrió un error al guardar el registro.");
+        });
+      setModalVerificarCodigoEntrenador(true);
+    } else {
+      message.error("El CI ya se encuentra registrado");
+    }
+  };
+  const showModalidadEvento = (tipo, data) => {
+    console.log("El tipo es ", data);
     if (tipo === "Individual") {
       showModalTipoParticipante();
     } else {
-      showModalGrupal();
+      showModalGrupal(data);
     }
   };
 
@@ -990,6 +1153,18 @@ export default function Participante() {
     setSelectedCi(value);
   };
 
+  const modalNuevoEntrenador = () => {
+    setVerModalEntrenadorNuevo(true);
+  };
+
+  const cerrarModalNuevoEntrenador = () => {
+    setVerModalEntrenadorNuevo(false);
+  };
+
+  const registrarNuevoEntrenador = (values) => {
+    showConfirmEntrenador(values);
+  };
+
   return (
     <div>
       <div className="tabla-descripcion-editarEv">
@@ -1013,7 +1188,8 @@ export default function Participante() {
                     block
                     onClick={() => {
                       showModalidadEvento(
-                        item.caracteristicas.tipo_participacion
+                        item.caracteristicas.tipo_participacion,
+                        item
                       );
                       setTituloEvento(item.TITULO);
                       setIdEVENTO(item.id_evento);
@@ -1532,9 +1708,12 @@ export default function Participante() {
         maskClosable={false}
         keyboard={false}
         closable={false}
+        style={{
+          top: 40,
+        }}
         width={600}
         footer={[
-          <Form form={form} onFinish={registrarGrupo}>
+          <Form form={formGrupal} onFinish={registrarGrupo}>
             <Button
               onClick={showCancelGrupal}
               className="boton-cancelar-registro"
@@ -1553,7 +1732,7 @@ export default function Participante() {
       >
         <Form
           onFinishFailed={onFinishFailed}
-          form={form}
+          form={formGrupal}
           initialValues={nombreEntrenador}
           onFinish={registrarGrupo}
           layout="vertical"
@@ -1570,15 +1749,23 @@ export default function Participante() {
           >
             <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
           </Form.Item>
-          <Form.Item label="Entrenador" name="ENTRENADOR">
+          <Form.Item
+            label="Entrenador"
+            name="ENTRENADOR"
+            rules={[
+              {
+                required: estadoEntrenador,
+                message: "Por favor, añada a un entrenador",
+              },
+            ]}
+          >
             <div className="botones-entrenador">
-              <label>Añadir</label>
               <Button
                 type="link"
                 onClick={showModalEntrenador}
                 className="icono-aniadir"
               >
-                <PlusOutlined />
+                Buscar Entrenador
               </Button>
             </div>
 
@@ -1587,25 +1774,21 @@ export default function Participante() {
               readOnly={estadoFormulario}
               placeholder="Ingrese el nombre del entrenador"
             />
+
+            <Button
+              className="boton-registrar-entrenador"
+              type="link"
+              onClick={modalNuevoEntrenador}
+            >
+              Registrar entrenador
+            </Button>
           </Form.Item>
-          <Select
-            placeholder="Selecciona CI"
-            onChange={handleCiChange}
-            style={{ width: "100%" }}
-            allowClear
-            showSearch
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
+
+          <Form.Item
+            className="grupal-input-institucion"
+            label="Institución"
+            name="INSTITUCION"
           >
-            {data.map((option) => (
-              <Option key={option.ci} value={option.ci} title={option.correo}>
-                {option.ci}
-              </Option>
-            ))}
-          </Select>
-          <Form.Item label="Institución" name="INSTITUCION">
             <Select
               placeholder="Seleccione una institución."
               options={instituciones}
@@ -1722,12 +1905,17 @@ export default function Participante() {
           />
         </div>
         <Form layout="vertical">
+          <Form.Input name="resultadoBusquedaEntrenador">
+            <Input />
+          </Form.Input>
+          <Button onClick={onSearchEntrenador}>Buscar</Button>
           <Form.Item label="Nombre del Entrenador">
             {datoFiltradoEntrenador.slice(0, 3).map((item) => (
               <div key={item}>
-                <p>{item.correo_electronico}</p>
+                <p>{item.nombre}</p>
               </div>
             ))}
+            {nombreEntrenador}
           </Form.Item>
         </Form>
       </Modal>
@@ -1854,6 +2042,198 @@ export default function Participante() {
           >
             <Input
               placeholder="Ingrese el celular"
+              maxLength={8}
+              minLength={8}
+              style={{ maxWidth: "100%" }}
+              onKeyPress={onlyNumbers}
+            ></Input>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/*Modal para enviar codigo de verificacion al entrenador */}
+      <Modal
+        title="Confirmar acción"
+        open={modalVerificarCodigoEntrenador}
+        onCancel={handleCancelCodigoEntrenador}
+        centered={true}
+        maskClosable={false}
+        keyboard={false}
+        footer={[
+          <Form form={formCodigoEntrenador} onFinish={onFinishCodigoEntrenador}>
+            <Button type="primary" htmlType="submit">
+              Verificar
+            </Button>
+          </Form>,
+        ]}
+      >
+        <p>Deberías haber recibido un correo electrónico con un código.</p>
+        <p>
+          A su correo registrado :{" "}
+          <strong>{correoVerificacionEntrenador}</strong>
+        </p>
+        <br />
+        <Form
+          layout="vertical"
+          form={formCodigoEntrenador}
+          onFinish={onFinishCodigoEntrenador}
+        >
+          <Form.Item
+            label="Código de Verificación:"
+            name="CODIGOVERIFICACION"
+            style={{ paddingTop: "3%" }}
+            rules={[
+              {
+                required: true,
+                message: "Por favor, ingrese su codigo de verificacion",
+              },
+            ]}
+          >
+            <Input
+              placeholder="Por favor, ingrese el codigo"
+              maxLength={8}
+              minLength={8}
+              style={{ maxWidth: "50%", centered: "true" }}
+            ></Input>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/*Modal para registrar nuevo entrenador */}
+      <Modal
+        title="Registrar entrenador"
+        open={verModalEntrenadorNuevo}
+        onCancel={handleCancelNuevoEntrenador}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
+        footer={[
+          <Form form={formNuevoEntrenador} onFinish={registrarNuevoEntrenador}>
+            <Button
+              onClick={handleCancelNuevoEntrenador}
+              className="boton-cancelar-registro"
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="boton-guardar-registro"
+            >
+              {verificadoEntrenador ? "Registar" : "Enviar código"}
+            </Button>
+          </Form>,
+        ]}
+      >
+        <Form
+          form={formNuevoEntrenador}
+          onFinish={registrarNuevoEntrenador}
+          layout="horizontal"
+        >
+          <Form.Item
+            label="Carnet de identidad"
+            name="CI_ENTRENADOR"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, ingrese el CI del participante",
+              },
+              { validator: validarMinimoCI },
+            ]}
+          >
+            <Input
+              minLength={8}
+              maxLength={8}
+              readOnly={estadoRegistroEntrenador}
+              placeholder="Por favor, ingrese el CI"
+              onKeyPress={onlyNumbers}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Nombre completo"
+            name="NOMBRE_ENTRENADOR"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, ingrese el nombre del participante",
+              },
+              { validator: validarMinimo },
+            ]}
+          >
+            <Input
+              minLength={5}
+              maxLength={50}
+              readOnly={estadoRegistroEntrenador}
+              placeholder="Ingrese un nombre"
+              onKeyPress={onlyLetters}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Fecha de nacimiento"
+            name="FECHA_NACIMIENTO_ENTRENADOR"
+            rules={[
+              { required: true, message: "Ingrese una fecha, por favor." },
+            ]}
+          >
+            <DatePicker
+              style={{ width: "200px", maxWidth: "100%" }}
+              placeholder="Selecciona una fecha"
+              disabledDate={disabledDate}
+              disabled={estadoRegistroEntrenador}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Genéro"
+            name="GENERO_ENTRENADOR"
+            style={{ maxWidth: "100%" }}
+            rules={[
+              {
+                required: true,
+                message: "Por favor seleccione un género ",
+              },
+            ]}
+          >
+            <Select
+              placeholder="Seleccione un género."
+              disabled={estadoRegistroEntrenador}
+            >
+              <Select.Option value="Femenino">Femenino</Select.Option>
+              <Select.Option value="Masculino">Masculino</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            label="Correo electrónico"
+            name="CORREO_ENTRENADOR"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "El correo electrónico no es válido.",
+              },
+            ]}
+          >
+            <Input
+              readOnly={estadoRegistroEntrenador}
+              placeholder="Ingrese el correo electrónico"
+              maxLength={30}
+              minLength={5}
+            ></Input>
+          </Form.Item>
+          <Form.Item
+            label="Celular"
+            name="TELEFONO_ENTRENADOR"
+            rules={[
+              {
+                required: true,
+                message: "Por favor ingrese un celular",
+              },
+              { validator: validarTelefono },
+            ]}
+          >
+            <Input
+              placeholder="Ingrese el celular"
+              readOnly={estadoRegistroEntrenador}
               maxLength={8}
               minLength={8}
               style={{ maxWidth: "100%" }}

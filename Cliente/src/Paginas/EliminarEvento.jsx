@@ -1,14 +1,7 @@
 import "../App.css";
-import {
-  Button,
-  Table,
-  Space,
-  Form,
-  message,
-  Modal,
-} from "antd";
+import { Button, Table, Space, Form, message, Modal } from "antd";
 import React, { useState, useEffect } from "react";
-import { DeleteOutlined, ExclamationCircleFilled, } from "@ant-design/icons";
+import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import axios from "axios";
 
 const { Column } = Table;
@@ -37,7 +30,7 @@ export default function EliminarEvento() {
       .get("http://localhost:8000/api/eventos-eliminables")
       .then((response) => {
         setData(response.data);
-        console.log("los datos de la base de daatos son ", response)
+        console.log("los datos de la base de daatos son ", response);
       })
       .catch((error) => {
         console.error(error);
@@ -45,11 +38,17 @@ export default function EliminarEvento() {
   };
 
   //Eliminar evento
-  function eliminarEvento(key) {
+  function eliminarEvento(key, record) {
     axios
       .delete(`http://localhost:8000/api/quitar-evento/${key}`)
       .then((response) => {
-        message.success("El evento se eliminó correctamente");
+        if (record.ESTADO === "Inscrito") {
+          message.success(
+            "Se eliminó el evento y se enviaron los correos a los participantes"
+          );
+        } else {
+          message.success("El evento se eliminó correctamente");
+        }
         obtenerDatos();
         setImageData(response.data);
       })
@@ -62,18 +61,23 @@ export default function EliminarEvento() {
   }
 
   const showDelete = (record) => {
+    console.log("el estado", record);
+    let mensaje = "Se eliminará el evento";
+    if (record.ESTADO === "Inscrito") {
+      mensaje =
+        "El evento tiene inscritos ";
+    }
     confirm({
       title: "¿Desea eliminar el evento?",
       icon: <ExclamationCircleFilled />,
-      content: "Se eliminará el evento",
+      content: mensaje,
       okText: "Si",
       cancelText: "No",
       centered: "true",
 
       onOk() {
-        console.log("el estado", record.id_evento)
         handleOk();
-        eliminarEvento(record.id_evento);
+        eliminarEvento(record.id_evento, record);
       },
       onCancel() {},
     });
@@ -82,8 +86,8 @@ export default function EliminarEvento() {
   return (
     <div>
       <div className="tabla-descripcion-eliminarEv">
-      <p>ELIMINAR EVENTOS REGISTRADOS</p>
-       </div>
+        <p>ELIMINAR EVENTOS REGISTRADOS</p>
+      </div>
       {/*Apartado de la tabla de los eventos creados */}
       <Table
         className="tabla-eventos"
