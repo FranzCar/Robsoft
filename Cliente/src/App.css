@@ -339,15 +339,12 @@ h3 {
 
 /**/
 .main-content {
-    border: 2px solid #003873;
-    border-radius: 4%;
-    margin-left: 10%;
-    margin-right: 4%;
+    border-radius: 2%;
+    margin-left: 3%;
+    margin-right: 3%;
     flex: content;
     margin-top: 2%;
-    height: 400px;
-    font-size: 14px;
-    line-height: 700px;
+    height: 450px;
     background: #ffffff;
   }
   :root {
@@ -488,3 +485,12 @@ h3 {
   .toolbar-wrapper .anticon:hover {
     opacity: 0.3;
   }
+  /*Tabla Reporte participante*/
+  .tabla-reporte-participante{
+    border-radius: 2%;
+    background-color: #ffffff;
+    height: 400px;
+    max-width: 98%;
+    margin-left: 2%;
+    margin-top: 2%;
+}
