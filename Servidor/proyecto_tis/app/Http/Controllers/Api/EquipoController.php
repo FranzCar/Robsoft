@@ -13,7 +13,6 @@ class EquipoController extends Controller {
                 try {
                     $equipo = new Equipo();
                     $equipo->nombre_equipo = $request->nombre_equipo;
-                    $equipo->cantidad_integrantes = $request->cantidad_integrantes;
                     $equipo->id_coach_persona = $request->id_coach_persona;
         
                     $equipo->save();

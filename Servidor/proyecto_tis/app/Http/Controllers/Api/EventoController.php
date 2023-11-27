@@ -122,7 +122,7 @@ private function transformarEventos($eventos)
             'DESCRIPCION' => $evento->DESCRIPCION,
             'MOSTRAR' => $evento->MOSTRAR,
             'AFICHE' => $evento->AFICHE,
-            'TIPO_EVENTO' => $evento->tipoEvento->nombre_tipo_evento,
+            'TIPO_EVENTO' => $evento->tipoEvento->id_tipo_evento,
             'AUSPICIADORES' => $evento->auspiciadores->map(function ($auspiciador) {
                 return [
                     'id' => $auspiciador->id_auspiciador,

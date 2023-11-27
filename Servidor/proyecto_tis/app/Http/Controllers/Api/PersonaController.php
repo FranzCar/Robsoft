@@ -31,6 +31,28 @@ class PersonaController extends Controller
         }
     }
 
+    public function guardarCoach(Request $request) {
+        DB::beginTransaction();
+        try {
+            // Aquí asumimos que el tipo de persona es '2' para Coach
+            $persona = $this->crearPersona($request, 2);
+            $handler = PersonaCaracteristicasFactory::getHandler('coach');
+            $handler->guardarCaracteristicas($persona, $request);
+
+            //aqui registramos en ROL_PERSONA
+            DB::table('ROL_PERSONA')->insert([
+                'id_persona' => $persona->id_persona,
+                'id_roles' => 4, //4 es de coach
+            ]);
+
+            DB::commit();
+            return response()->json(['message' => 'Coach guardado con éxito', 'id' => $persona->id_persona]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error al guardar el Coach', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     private function crearPersona($request, $tipoPersona = null) {
         $persona = new Persona();
 
@@ -50,12 +72,44 @@ class PersonaController extends Controller
     }
 
     public function listParticipantes(Request $request) {
-        $participantes = Persona::whereHas('RolPersona', function($query) {
-                            $query->where('id_roles', 6);
-                        })
-                        ->get();
+        $participantes = Persona::with(['caracteristicasTexto', 'caracteristicasFecha'])
+                            ->whereHas('RolPersona', function($query) {
+                                $query->where('id_roles', 6);
+                            })
+                            ->get()
+                            ->map(function ($persona) {
+                                // Buscar las características específicas
+                                $codigoSIS = $persona->caracteristicasTexto->firstWhere('id_caract_per', 3)->valor_texto_persona ?? null;
+                                $fechaNacimiento = $persona->caracteristicasFecha->firstWhere('id_caract_per', 4)->valor_fecha_persona ?? null;
+    
+                                return [
+                                    'id_persona' => $persona->id_persona,
+                                    'nombre' => $persona->nombre,
+                                    'correo_electronico' => $persona->correo_electronico,
+                                    'telefono' => $persona->telefono,
+                                    'ci' => $persona->ci,
+                                    'genero' => $persona->genero,
+                                    'id_institucion' => $persona->id_institucion,
+                                    'codigoSIS' => $codigoSIS,
+                                    'fecha_nacimiento' => $fechaNacimiento,
+                                ];
+                            });
     
         return $participantes;           
+    }
+    public function actualizarCaracteristicas(Request $request, $id) {
+        $persona = Persona::findOrFail($id); // Obtiene la persona o falla si no existe
+        DB::beginTransaction();
+        try {
+            $handler = PersonaCaracteristicasFactory::getHandler('estudiante');
+            $handler->actualizarCaracteristicas($persona, $request);
+    
+            DB::commit();
+            return response()->json(['message' => 'Características actualizadas con éxito']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error al actualizar las características', 'error' => $e->getMessage()], 500);
+        }
     }
 }
 

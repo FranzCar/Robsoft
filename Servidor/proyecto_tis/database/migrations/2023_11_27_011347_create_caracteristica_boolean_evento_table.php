@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('caracteristica_decimal_evento', function (Blueprint $table) {
-            $table->decimal('valor_decimal_evento', 10)->nullable();
+        Schema::create('caracteristica_boolean_evento', function (Blueprint $table) {
+            $table->integer('id_cb_e', true);
+            $table->boolean('valor_boolean_evento')->nullable();
             $table->integer('id_caracteristica_evento')->nullable()->index('id_caracteristica_evento');
             $table->integer('id_evento')->nullable()->index('id_evento');
         });
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('caracteristica_decimal_evento');
+        Schema::dropIfExists('caracteristica_boolean_evento');
     }
 };

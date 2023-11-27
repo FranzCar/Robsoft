@@ -67,7 +67,7 @@ export default function Menu() {
           >
             <Link className="boton-administracion">ADMINISTRACIÓN</Link>
           </Dropdown>
-          <Link className="boton-inicio">CONTACTO</Link>
+          <Link to="/Reporte" className="boton-inicio">REPORTES</Link>
         </div>
       </div>
     </div>
