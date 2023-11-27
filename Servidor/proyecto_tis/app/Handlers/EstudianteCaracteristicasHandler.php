@@ -117,12 +117,3 @@ class EstudianteCaracteristicasHandler implements PersonaCaracteristicasHandler 
         }
     }
 }
-    
-
-//ejemplo
-class ProfesorCaracteristicasHandler implements PersonaCaracteristicasHandler {
-    public function guardarCaracteristicas($persona, $request) {
-        // Lógica para guardar las características de un profesor
-    }
-    
-}

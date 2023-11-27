@@ -31,6 +31,28 @@ class PersonaController extends Controller
         }
     }
 
+    public function guardarCoach(Request $request) {
+        DB::beginTransaction();
+        try {
+            // Aquí asumimos que el tipo de persona es '2' para Coach
+            $persona = $this->crearPersona($request, 2);
+            $handler = PersonaCaracteristicasFactory::getHandler('coach');
+            $handler->guardarCaracteristicas($persona, $request);
+
+            //aqui registramos en ROL_PERSONA
+            DB::table('ROL_PERSONA')->insert([
+                'id_persona' => $persona->id_persona,
+                'id_roles' => 4, //4 es de coach
+            ]);
+
+            DB::commit();
+            return response()->json(['message' => 'Coach guardado con éxito', 'id' => $persona->id_persona]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error al guardar el Coach', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     private function crearPersona($request, $tipoPersona = null) {
         $persona = new Persona();
 
