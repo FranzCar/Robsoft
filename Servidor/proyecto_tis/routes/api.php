@@ -50,3 +50,4 @@ Route::post('inscribir-individual',[InscripcionController::class, 'inscribirEstu
 Route::put('actualizar-participante/{id}',[PersonaController::class, 'actualizarCaracteristicas']);
 Route::post('guardar-coach',[PersonaController::class, 'guardarCoach']);
 Route::get('eventos-eliminables', [EventoController::class, 'listaEliminables']);
+Route::post('inscribir-equipo',[InscripcionController::class, 'inscribirEquipo']);
