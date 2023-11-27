@@ -16,4 +16,8 @@ class RolPersona extends Model
     {
         return $this->belongsTo(Persona::class, 'id_persona');
     }
+    public function rolPersonaEquipo()
+    {
+        return $this->hasMany(RolPersonaEquipo::class, 'id_rol_persona', 'id_rol_persona');
+    }
 }
