@@ -32,7 +32,7 @@ Route::post('guardar-participante',[PersonaController::class, 'guardarEstudiante
 Route::get('lista-participantes',[PersonaController::class, 'listParticipantes']);
 //Route::post('guardar-equipo',[EquipoController::class, 'store']);
 Route::get('eventos-modificables', [EventoController::class, 'getEventosEnEspera']);
-//Route::get('lista-equipos',[EquipoController::class, 'listaEquipos']);
+Route::get('lista-equipos',[EquipoController::class, 'listaEquipos']);
 Route::get('lista-organizadores',[RolPersonaController::class, 'listaOrganizadores']);
 Route::get('lista-coach',[RolPersonaController::class, 'listaCoach']);
 Route::get('lista-auspiciadores',[AuspiciadorController::class, 'listaAuspiciadores']);
