@@ -64,7 +64,7 @@ export default function Participante() {
   const [form] = Form.useForm();
   const [formCI] = Form.useForm();
   const [formCodigo] = Form.useForm();
-
+  const [formNuevo] = Form.useForm();
   const [data, setData] = useState([]);
   const [indice, setIndice] = useState();
   const [visible, setVisible] = useState(false);
@@ -909,7 +909,6 @@ export default function Participante() {
   //Registro nuevo participante
   const [verModalParticipanteNuevo, setVerModalParticipanteNuevo] =
     useState(false);
-  const [formNuevoParticipante] = Form.useForm();
 
   const datosParticipanteRegistro = (values) => {
     const datos = {
@@ -930,17 +929,41 @@ export default function Participante() {
       cancelText: "No",
       centered: "true",
       onOk() {
-        formNuevoParticipante.resetFields();
         setVerModalParticipanteNuevo(false);
+        formNuevo.resetFields();
       },
     });
   };
 
-  const registrarNuevoParticipante = (values) => {
-    console.log("Formulario enviado:", values);
+//guardar nuevo participante 
+const confirmSaveNuevo = (values) => {
+  const datos = datosParticipante(values);
+    const duplicado = validarDuplicadoCI(values);
+    const correoDuplicado = validarDuplicadoCorreo(values);
+    if (
+      (duplicado === false && correoDuplicado === false) ||
+      ciEncontrado === true
+    ) {
+      axios
+        .post("http://localhost:8000/api/guardar-participante", datos)
+        .then((response) => {
+          message.success("Se guardo correctamente");obtenerParticipantes();
+        setVerModalParticipanteNuevo(false);
+        })
+        .catch((error) => {
+          message.error("Ocurrió un error al guardar el registro.");
+        });
+    } else {
+      if (duplicado === true && ciEncontrado === false) {
+        message.error("El carnet de identidad ya esta registrado.");
+      }
+      if (correoDuplicado === true && ciEncontrado === false) {
+        message.error("El correo ya esta registrado.");
+      }
+    }
+  
+};
 
-    setVerModalParticipanteNuevo(false);
-  };
 
   const showConfirmParticipante = (values) => {
     confirm({
@@ -952,8 +975,8 @@ export default function Participante() {
       centered: "true",
 
       onOk() {
-        confirmSave(values);
-        obtenerParticipantesCI();
+        confirmSaveNuevo(values);
+        formNuevo.resetFields();
       },
       onCancel() {},
     });
@@ -1682,7 +1705,7 @@ export default function Participante() {
             placeholder="Buscar participante"
             onSearch={onSearch}
             onChange={(e) => onSearch(e.target.value)}
-            maxLength={30}
+            maxLength={8}
             allowClear
           />
         </div>
@@ -1738,25 +1761,28 @@ export default function Participante() {
         open={verModalParticipanteNuevo}
         onCancel={handleCancelNuevoParticipante}
         footer={[
-          <Button
+          <Form form={formNuevo} onFinish={showConfirmParticipante}>
+            <Button
             onClick={handleCancelNuevoParticipante}
             className="boton-cancelar-registro"
           >
             Cancelar
           </Button>,
           <Button
-            onClick={showConfirmParticipante}
             type="primary"
             htmlType="submit"
             className="boton-guardar-registro"
           >
             Añadir
-          </Button>,
+          </Button>
+          </Form>
+          ,
         ]}
       >
         <Form
-          form={formNuevoParticipante}
-          onFinish={registrarNuevoParticipante}
+          form={formNuevo}
+          onFinish={showConfirmParticipante}
+          onFinishFailed={onFinishFailed}
           layout="horizontal"
         >
           <Form.Item
@@ -1779,7 +1805,7 @@ export default function Participante() {
           </Form.Item>
           <Form.Item
             label="Nombre completo"
-            name="nombre"
+            name="NOMBRE"
             rules={[
               {
                 required: true,
