@@ -11,15 +11,7 @@ import axios from "axios";
 
 const { Column } = Table;
 
-type MenuItem = Required<MenuProps>["items"][number];
-
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  children?: MenuItem[],
-  type?: "group"
-): MenuItem {
+function getItem(label, key, icon, children, type) {
   return {
     key,
     icon,
@@ -29,7 +21,7 @@ function getItem(
   };
 }
 
-const items: MenuItem[] = [
+const items= [
   getItem("Reportes Generales", "sub1", <MailOutlined />, [
     getItem("Option 1", "1"),
     getItem("Option 2", "2"),
@@ -54,6 +46,7 @@ const items: MenuItem[] = [
 
 // submenu keys of first level
 const rootSubmenuKeys = ["sub1", "sub2", "sub4"];
+
 export default function Reporte() {
   const [data, setData] = useState([]);
   useEffect(() => {
@@ -70,9 +63,8 @@ export default function Reporte() {
       });
   };
 
-  const [openKeys, setOpenKeys] = useState(["sub1"]);
-
-  const onOpenChange: MenuProps["onOpenChange"] = (keys) => {
+  const [openKeys, setOpenKeys] = useState(['sub1']);
+  const onOpenChange = (keys) => {
     const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
     if (latestOpenKey && rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
       setOpenKeys(keys);
@@ -85,22 +77,22 @@ export default function Reporte() {
     <div className="tabla-descripcion-editarEv">
       <p>REPORTES DE EVENTOS</p>
       <div style={{ flex: "center" }}>
-        <Row gutter={[16,1]}>
+        <Row gutter={[16, 1]}>
           <Col className="main-content" span={5}>
-            <>
-              <Menu
-                mode="inline"
-                openKeys={openKeys}
-                onOpenChange={onOpenChange}
-                style={{ width: "95%" }}
-                items={items}
-              />
-            </>
+            <Menu
+              mode="inline"
+              openKeys={openKeys}
+              onOpenChange={onOpenChange}
+              style={{
+                width: "95%",
+              }}
+              items={items}
+            />
           </Col>
           <Col className="main-content" span={16}>
             <Table
               className="tabla-reporte-participante"
-              scroll={{ y: 340}}
+              scroll={{ y: 340 }}
               dataSource={data}
               pagination={false}
               locale={{
@@ -112,9 +104,13 @@ export default function Reporte() {
               }}
             >
               <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
-              <Column title="Correo electronico" dataIndex="correo_electronico" key="correo" />
+              <Column
+                title="Correo electronico"
+                dataIndex="correo_electronico"
+                key="correo"
+              />
               <Column title="Carnet de identidad" dataIndex="ci" key="ci" />
-              <Column title="Genero" dataIndex="genero" key="genero"/>
+              <Column title="Genero" dataIndex="genero" key="genero" />
             </Table>
           </Col>
         </Row>
