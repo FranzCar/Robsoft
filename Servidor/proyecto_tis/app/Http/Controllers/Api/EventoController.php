@@ -462,6 +462,16 @@ private function eliminarInscripciones($evento)
 
         return $this->transformarEventos($eventos);
     }
+    public function listaEliminables() {
+        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
+                    ->where('MOSTRAR', 1)
+                    ->where('ESTADO', ['En espera', 'Listo', 'Inscrito'])
+                    ->orderBy('id_evento', 'desc')
+                    ->get();
+
+        return $this->transformarEventos($eventos);
+    }
+
     public function guardarCaracteristicasEvento(Request $request, $id) {
         // Encuentra el evento y su tipo
         $evento = Evento::with('tipoEvento')->findOrFail($id);
