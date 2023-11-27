@@ -68,6 +68,7 @@ export default function Participante() {
   const [formCodigo] = Form.useForm();
   const [formGrupal] = Form.useForm();
 
+  const [formNuevo] = Form.useForm();
   const [data, setData] = useState([]);
   const [indice, setIndice] = useState();
   const [visible, setVisible] = useState(false);
@@ -982,8 +983,8 @@ export default function Participante() {
       cancelText: "No",
       centered: "true",
       onOk() {
-        formNuevoParticipante.resetFields();
         setVerModalParticipanteNuevo(false);
+        formNuevo.resetFields();
       },
     });
   };
@@ -1006,32 +1007,38 @@ export default function Participante() {
 
   const registrarNuevoParticipante = (values) => {
     console.log("Formulario enviado:", values);
+    //guardar nuevo participante
+    const confirmSaveNuevo = (values) => {
+      const datos = datosParticipante(values);
+      const duplicado = validarDuplicadoCI(values);
+      const correoDuplicado = validarDuplicadoCorreo(values);
+      if (
+        (duplicado === false && correoDuplicado === false) ||
+        ciEncontrado === true
+      ) {
+        axios
+          .post("http://localhost:8000/api/guardar-participante", datos)
+          .then((response) => {
+            message.success("Se guardo correctamente");
+            obtenerParticipantes();
+            setVerModalParticipanteNuevo(false);
+          })
+          .catch((error) => {
+            message.error("Ocurrió un error al guardar el registro.");
+          });
+      } else {
+        if (duplicado === true && ciEncontrado === false) {
+          message.error("El carnet de identidad ya esta registrado.");
+        }
+        if (correoDuplicado === true && ciEncontrado === false) {
+          message.error("El correo ya esta registrado.");
+        }
+      }
+    };
 
-    setVerModalParticipanteNuevo(false);
-  };
-
-  const showConfirmParticipante = (values) => {
-    confirm({
-      title: "¿Está seguro de registrar este participante?",
-      icon: <ExclamationCircleFilled />,
-      content: "",
-      okText: "Si",
-      cancelText: "No",
-      centered: "true",
-
-      onOk() {
-        confirmSave(values);
-        obtenerParticipantesCI();
-      },
-      onCancel() {},
-    });
-  };
-
-  const showConfirmEntrenador = (values) => {
-    setCorreoVerificacionEntrenador(values.CORREO_ENTRENADOR);
-    if (verificadoEntrenador) {
+    const showConfirmParticipante = (values) => {
       confirm({
-        title: "¿Está seguro de registrar este entrenador?",
+        title: "¿Está seguro de registrar este participante?",
         icon: <ExclamationCircleFilled />,
         content: "",
         okText: "Si",
@@ -1039,251 +1046,273 @@ export default function Participante() {
         centered: "true",
 
         onOk() {
-          guardarEntrenador(values);
+          confirmSaveNuevo(values);
+          formNuevo.resetFields();
         },
         onCancel() {},
       });
-    } else {
-      showModalCodigoEntrenador(values);
-    }
-  };
-
-  const guardarEntrenador = (values) => {
-    console.log("Los datos de dentrenador son ", values);
-    const datosGuardar = {
-      nombre: values.NOMBRE_ENTRENADOR,
-      correo_electronico: values.CORREO_ENTRENADOR,
-      telefono: values.TELEFONO_ENTRENADOR,
-      ci: values.CI_ENTRENADOR,
-      genero: values.GENERO_ENTRENADOR,
-      id_tipo_per: 2,
     };
-    axios
-      .post("http://localhost:8000/api/guardar-coach", datosGuardar)
-      .then((response) => {
-        message.success("El entrenador se registró correctamente");
-        setNombreEntrenador(values.NOMBRE_ENTRENADOR);
-        setVerificadoEntrenador(false);
-        setEstadoRegistroEntrenador(false);
-        formNuevoEntrenador.resetFields();
-        cerrarModalNuevoEntrenador(false);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
 
-  const formatoDatos = (values) => {
-    const datos = {
-      correo_electronico: values.CORREO_ENTRENADOR,
-      idEvento: idEVENTO,
+    const showConfirmEntrenador = (values) => {
+      setCorreoVerificacionEntrenador(values.CORREO_ENTRENADOR);
+      if (verificadoEntrenador) {
+        confirm({
+          title: "¿Está seguro de registrar este entrenador?",
+          icon: <ExclamationCircleFilled />,
+          content: "",
+          okText: "Si",
+          cancelText: "No",
+          centered: "true",
+
+          onOk() {
+            guardarEntrenador(values);
+          },
+          onCancel() {},
+        });
+      } else {
+        showModalCodigoEntrenador(values);
+      }
     };
-    return datos;
-  };
 
-  const validarDuplicadoCIEntreandor = (values) => {
-    const carnet = values.CI_ENTRENADOR;
-    let resultado = false;
-    for (let i = 0; i < entrenador.length; i++) {
-      if (entrenador[i].ci === carnet) {
-        resultado = true;
-        break;
-      }
-    }
-    return resultado;
-  };
-
-  const validarDuplicadoCorreoEntrenador = (values) => {
-    const carnet = values.CORREO_ENTRENADOR;
-    let resultado = false;
-    for (let i = 0; i < entrenador.length; i++) {
-      if (entrenador[i].correo_electronico === carnet) {
-        resultado = true;
-        break;
-      }
-    }
-    return resultado;
-  };
-
-  const showModalCodigoEntrenador = (values) => {
-    const datos = formatoDatos(values);
-    const duplicado = validarDuplicadoCIEntreandor(values);
-    if (duplicado === false) {
+    const guardarEntrenador = (values) => {
+      console.log("Los datos de dentrenador son ", values);
+      const datosGuardar = {
+        nombre: values.NOMBRE_ENTRENADOR,
+        correo_electronico: values.CORREO_ENTRENADOR,
+        telefono: values.TELEFONO_ENTRENADOR,
+        ci: values.CI_ENTRENADOR,
+        genero: values.GENERO_ENTRENADOR,
+        id_tipo_per: 2,
+      };
       axios
-        .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
+        .post("http://localhost:8000/api/guardar-coach", datosGuardar)
         .then((response) => {
-          setUuidEntrenador(response.data);
+          message.success("El entrenador se registró correctamente");
+          setNombreEntrenador(values.NOMBRE_ENTRENADOR);
+          setVerificadoEntrenador(false);
+          setEstadoRegistroEntrenador(false);
+          formNuevoEntrenador.resetFields();
+          cerrarModalNuevoEntrenador(false);
         })
         .catch((error) => {
-          message.error("Ocurrió un error al guardar el registro.");
+          console.error(error);
         });
-      setModalVerificarCodigoEntrenador(true);
-    } else {
-      message.error("El CI ya se encuentra registrado");
-    }
-  };
-  const showModalidadEvento = (tipo, data) => {
-    console.log("El tipo es ", data);
-    if (tipo === "Individual") {
-      showModalTipoParticipante();
-    } else {
-      showModalGrupal(data);
-    }
-  };
+    };
 
-  const onDownload = (afiche, nombreArchivo) => {
-    fetch(afiche)
-      .then((response) => response.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = nombreArchivo || "imagen.png";
-        document.body.appendChild(link);
-        link.click();
-        URL.revokeObjectURL(url);
-        link.remove();
-      })
-      .catch((error) => console.error("Error durante la descarga:", error));
-  };
+    const formatoDatos = (values) => {
+      const datos = {
+        correo_electronico: values.CORREO_ENTRENADOR,
+        idEvento: idEVENTO,
+      };
+      return datos;
+    };
 
-  const [selectedCi, setSelectedCi] = useState(null);
+    const validarDuplicadoCIEntreandor = (values) => {
+      const carnet = values.CI_ENTRENADOR;
+      let resultado = false;
+      for (let i = 0; i < entrenador.length; i++) {
+        if (entrenador[i].ci === carnet) {
+          resultado = true;
+          break;
+        }
+      }
+      return resultado;
+    };
 
-  const handleCiChange = (value) => {
-    setSelectedCi(value);
-  };
+    const validarDuplicadoCorreoEntrenador = (values) => {
+      const carnet = values.CORREO_ENTRENADOR;
+      let resultado = false;
+      for (let i = 0; i < entrenador.length; i++) {
+        if (entrenador[i].correo_electronico === carnet) {
+          resultado = true;
+          break;
+        }
+      }
+      return resultado;
+    };
 
-  const modalNuevoEntrenador = () => {
-    setVerModalEntrenadorNuevo(true);
-  };
+    const showModalCodigoEntrenador = (values) => {
+      const datos = formatoDatos(values);
+      const duplicado = validarDuplicadoCIEntreandor(values);
+      if (duplicado === false) {
+        axios
+          .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
+          .then((response) => {
+            setUuidEntrenador(response.data);
+          })
+          .catch((error) => {
+            message.error("Ocurrió un error al guardar el registro.");
+          });
+        setModalVerificarCodigoEntrenador(true);
+      } else {
+        message.error("El CI ya se encuentra registrado");
+      }
+    };
+    const showModalidadEvento = (tipo, data) => {
+      console.log("El tipo es ", data);
+      if (tipo === "Individual") {
+        showModalTipoParticipante();
+      } else {
+        showModalGrupal(data);
+      }
+    };
 
-  const cerrarModalNuevoEntrenador = () => {
-    setVerModalEntrenadorNuevo(false);
-  };
+    const onDownload = (afiche, nombreArchivo) => {
+      fetch(afiche)
+        .then((response) => response.blob())
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = nombreArchivo || "imagen.png";
+          document.body.appendChild(link);
+          link.click();
+          URL.revokeObjectURL(url);
+          link.remove();
+        })
+        .catch((error) => console.error("Error durante la descarga:", error));
+    };
 
-  const registrarNuevoEntrenador = (values) => {
-    showConfirmEntrenador(values);
-  };
+    const [selectedCi, setSelectedCi] = useState(null);
 
-  return (
-    <div>
-      <div className="tabla-descripcion-editarEv">
-        <p>EVENTOS DISPONIBLES</p>
-      </div>
-      {/*Cards*/}
-      <div className="cards">
-        <Row gutter={[16, 16]}>
-          {datosEventos.map((item, index) => (
-            <Col key={index} xs={24} sm={12} md={12}>
-              <Card
-                title={<h3>{item.TITULO}</h3>}
-                style={{ marginBottom: 16, height: "auto" }}
-                hoverable
-                bordered={false}
-                actions={[
-                  <Button
-                    key="inscripcion"
-                    size="large"
-                    type="link"
-                    block
-                    onClick={() => {
-                      showModalidadEvento(
-                        item.caracteristicas.tipo_participacion,
-                        item
-                      );
-                      setTituloEvento(item.TITULO);
-                      setIdEVENTO(item.id_evento);
-                      console.log("EVENTO ID    + = ", item.id_evento);
-                      console.log("EVENTO TITULO = ", item.TITULO);
-                    }}
-                  >
-                    Inscribirse &#62;
-                  </Button>,
-                ]}
-              >
-                <div className="cards-informacion">
-                  <div className="cards-columna1">
-                    <p>
-                      <h3>Descripcion:</h3>
-                      {item.DESCRIPCION}
-                    </p>
-                    <br />
-                    <p>
-                      <h3>Fecha de inicio:</h3>
-                      {item.FECHA_INICIO}
-                    </p>
-                    <br />
-                    <p>
-                      <h3>Fecha de finalización:</h3>
-                      {item.FECHA_FIN}
-                    </p>
-                    <br />
-                    <p>
-                      <h3>Categoria:</h3>
-                      {item.caracteristicas.categoria_evento}
-                    </p>
-                    <br />
-                    <p>
-                      <h3>Costo:</h3>
-                      {item.caracteristicas.costo_evento}
-                    </p>
-                    <br />
-                    <p>
-                      <h3>Cupos:</h3>
-                      {item.caracteristicas.cupos}
-                    </p>
-                    <br />
-                    <p>
-                      <h3>Modalidad</h3>
-                      {item.caracteristicas.tipo_participacion}
-                    </p>
-                    <br />
-                  </div>
-                  <div className="cards-columna2">
-                    <Image
-                      src={item.AFICHE}
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        maxHeight: "270px",
-                        objectFit: "contain",
+    const handleCiChange = (value) => {
+      setSelectedCi(value);
+    };
+
+    const modalNuevoEntrenador = () => {
+      setVerModalEntrenadorNuevo(true);
+    };
+
+    const cerrarModalNuevoEntrenador = () => {
+      setVerModalEntrenadorNuevo(false);
+    };
+
+    const registrarNuevoEntrenador = (values) => {
+      showConfirmEntrenador(values);
+    };
+
+    return (
+      <div>
+        <div className="tabla-descripcion-editarEv">
+          <p>EVENTOS DISPONIBLES</p>
+        </div>
+        {/*Cards*/}
+        <div className="cards">
+          <Row gutter={[16, 16]}>
+            {datosEventos.map((item, index) => (
+              <Col key={index} xs={24} sm={12} md={12}>
+                <Card
+                  title={<h3>{item.TITULO}</h3>}
+                  style={{ marginBottom: 16, height: "auto" }}
+                  hoverable
+                  bordered={false}
+                  actions={[
+                    <Button
+                      key="inscripcion"
+                      size="large"
+                      type="link"
+                      block
+                      onClick={() => {
+                        showModalidadEvento(
+                          item.caracteristicas.tipo_participacion,
+                          item
+                        );
+                        setTituloEvento(item.TITULO);
+                        setIdEVENTO(item.id_evento);
+                        console.log("EVENTO ID    + = ", item.id_evento);
+                        console.log("EVENTO TITULO = ", item.TITULO);
                       }}
-                      preview={{
-                        toolbarRender: (
-                          _,
-                          {
-                            transform: { scale },
-                            actions: { onZoomOut, onZoomIn },
-                          }
-                        ) => (
-                          <Space size={12} className="toolbar-wrapper">
-                            <DownloadOutlined
-                              onClick={() =>
-                                onDownload(item.AFICHE, "Afiche del evento.png")
-                              }
-                            />
-                            <ZoomOutOutlined
-                              disabled={scale === 1}
-                              onClick={onZoomOut}
-                            />
-                            <ZoomInOutlined
-                              disabled={scale === 50}
-                              onClick={onZoomIn}
-                            />
-                          </Space>
-                        ),
-                      }}
-                      fallback="data:image/png;base64,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"
-                    />
+                    >
+                      Inscribirse &#62;
+                    </Button>,
+                  ]}
+                >
+                  <div className="cards-informacion">
+                    <div className="cards-columna1">
+                      <p>
+                        <h3>Descripcion:</h3>
+                        {item.DESCRIPCION}
+                      </p>
+                      <br />
+                      <p>
+                        <h3>Fecha de inicio:</h3>
+                        {item.FECHA_INICIO}
+                      </p>
+                      <br />
+                      <p>
+                        <h3>Fecha de finalización:</h3>
+                        {item.FECHA_FIN}
+                      </p>
+                      <br />
+                      <p>
+                        <h3>Categoria:</h3>
+                        {item.caracteristicas.categoria_evento}
+                      </p>
+                      <br />
+                      <p>
+                        <h3>Costo:</h3>
+                        {item.caracteristicas.costo_evento}
+                      </p>
+                      <br />
+                      <p>
+                        <h3>Cupos:</h3>
+                        {item.caracteristicas.cupos}
+                      </p>
+                      <br />
+                      <p>
+                        <h3>Modalidad</h3>
+                        {item.caracteristicas.tipo_participacion}
+                      </p>
+                      <br />
+                    </div>
+                    <div className="cards-columna2">
+                      <Image
+                        src={item.AFICHE}
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          maxHeight: "270px",
+                          objectFit: "contain",
+                        }}
+                        preview={{
+                          toolbarRender: (
+                            _,
+                            {
+                              transform: { scale },
+                              actions: { onZoomOut, onZoomIn },
+                            }
+                          ) => (
+                            <Space size={12} className="toolbar-wrapper">
+                              <DownloadOutlined
+                                onClick={() =>
+                                  onDownload(
+                                    item.AFICHE,
+                                    "Afiche del evento.png"
+                                  )
+                                }
+                              />
+                              <ZoomOutOutlined
+                                disabled={scale === 1}
+                                onClick={onZoomOut}
+                              />
+                              <ZoomInOutlined
+                                disabled={scale === 50}
+                                onClick={onZoomIn}
+                              />
+                            </Space>
+                          ),
+                        }}
+                        fallback="data:image/png;base64,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"
+                      />
+                    </div>
                   </div>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
 
-      {/*
+        {/*
         <Row gutter={[16, 8]}>
           <Col className="main-content" span={12}>
             <Space direction="vertical" style={{ width: "80%" }}>
@@ -1311,271 +1340,278 @@ export default function Participante() {
           </Col>
         </Row>
       */}
-      {/*Modal Elegir tipo*/}
-      <Modal
-        title={`Inscribirme al evento: ${tituloEvento}`}
-        open={tipoParticipante}
-        onCancel={handleCancelTipoParticipante}
-        centered={true}
-        maskClosable={false}
-        keyboard={false}
-        footer={[
-          <Form form={formCI} onFinish={onFinishCI}>
-            <Button
-              style={{ centered: "true", float: "rigth" }}
-              onClick={showModal}
-            >
-              Nuevo Participante
-            </Button>
-            <Button
-              style={{ centered: "true", float: "left" }}
-              type="primary"
-              htmlType="submit"
-            >
-              Buscar Participante
-            </Button>
-          </Form>,
-        ]}
-      >
-        <Form
-          layout="vertical"
-          onFinishFailed={onFinishFailed}
-          form={formCI}
-          onFinish={onFinishCI}
+        {/*Modal Elegir tipo*/}
+        <Modal
+          title={`Inscribirme al evento: ${tituloEvento}`}
+          open={tipoParticipante}
+          onCancel={handleCancelTipoParticipante}
+          centered={true}
+          maskClosable={false}
+          keyboard={false}
+          footer={[
+            <Form form={formCI} onFinish={onFinishCI}>
+              <Button
+                style={{ centered: "true", float: "rigth" }}
+                onClick={showModal}
+              >
+                Nuevo Participante
+              </Button>
+              <Button
+                style={{ centered: "true", float: "left" }}
+                type="primary"
+                htmlType="submit"
+              >
+                Buscar Participante
+              </Button>
+            </Form>,
+          ]}
         >
-          <Form.Item
-            label="Ingrese su carnet de identidad:"
-            name="CI"
-            style={{ paddingTop: "3%", centered: "true" }}
-            rules={[
-              {
-                required: true,
-                message: "Por favor ingrese su numero de carnet",
-              },
-              { validator: validarMinimoCI },
-            ]}
+          <Form
+            layout="vertical"
+            onFinishFailed={onFinishFailed}
+            form={formCI}
+            onFinish={onFinishCI}
           >
-            <Input
-              placeholder="Por favor, ingrese el ci"
-              maxLength={8}
-              minLength={8}
-              style={{ maxWidth: "50%", centered: "true" }}
-              onKeyPress={onlyNumbers}
-            ></Input>
-          </Form.Item>
-        </Form>
-      </Modal>
-      {/*Modal para enviar Codigo*/}
-      <Modal
-        title="Confirmar acción"
-        open={enviarCodigo}
-        onCancel={handleCancelCodigo}
-        centered={true}
-        maskClosable={false}
-        keyboard={false}
-        footer={[
-          <Form form={formCodigo} onFinish={onFinishCodigo}>
-            <Button type="primary" htmlType="submit">
-              Verificar
-            </Button>
-          </Form>,
-        ]}
-      >
-        <p>Deberías haber recibido un correo electrónico con un código.</p>
-        <p>
-          A su correo registrado : <strong>{correoVerificacion}</strong>
-        </p>
-        <br />
-        <Form layout="vertical" form={formCodigo} onFinish={onFinishCodigo}>
-          <Form.Item
-            label="Código de Verificación:"
-            name="CODIGOVERIFICACION"
-            style={{ paddingTop: "3%" }}
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese su codigo de verificacion",
-              },
-            ]}
-          >
-            <Input
-              placeholder="Por favor, ingrese el codigo"
-              maxLength={8}
-              minLength={8}
-              style={{ maxWidth: "50%", centered: "true" }}
-            ></Input>
-          </Form.Item>
-        </Form>
-      </Modal>
-      {/*Ventana emergente para el formulario de crear participante Individual */}
+            <Form.Item
+              label="Ingrese su carnet de identidad:"
+              name="CI"
+              style={{ paddingTop: "3%", centered: "true" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese su numero de carnet",
+                },
+                { validator: validarMinimoCI },
+              ]}
+            >
+              <Input
+                placeholder="Por favor, ingrese el ci"
+                maxLength={8}
+                minLength={8}
+                style={{ maxWidth: "50%", centered: "true" }}
+                onKeyPress={onlyNumbers}
+              ></Input>
+            </Form.Item>
+          </Form>
+        </Modal>
+        {/*Modal para enviar Codigo*/}
+        <Modal
+          title="Confirmar acción"
+          open={enviarCodigo}
+          onCancel={handleCancelCodigo}
+          centered={true}
+          maskClosable={false}
+          keyboard={false}
+          footer={[
+            <Form form={formCodigo} onFinish={onFinishCodigo}>
+              <Button type="primary" htmlType="submit">
+                Verificar
+              </Button>
+            </Form>,
+          ]}
+        >
+          <p>Deberías haber recibido un correo electrónico con un código.</p>
+          <p>
+            A su correo registrado : <strong>{correoVerificacion}</strong>
+          </p>
+          <br />
+          <Form layout="vertical" form={formCodigo} onFinish={onFinishCodigo}>
+            <Form.Item
+              label="Código de Verificación:"
+              name="CODIGOVERIFICACION"
+              style={{ paddingTop: "3%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese su codigo de verificacion",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Por favor, ingrese el codigo"
+                maxLength={8}
+                minLength={8}
+                style={{ maxWidth: "50%", centered: "true" }}
+              ></Input>
+            </Form.Item>
+          </Form>
+        </Modal>
+        {/*Ventana emergente para el formulario de crear participante Individual */}
 
-      <Modal
-        title="Formulario de registro Individual"
-        open={visible}
-        onCancel={handleCancel}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        style={{
-          top: 10,
-        }}
-        width={1000}
-        footer={[
-          <Form form={form} onFinish={onFinish}>
-            <Button onClick={showCancel} className="boton-cancelar-registro">
-              Cancelar
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="boton-guardar-registro"
-            >
-              {verificado ? "Registrarme" : "Enviar Codigo"}
-            </Button>
-          </Form>,
-        ]}
-      >
-        <Form
-          onFinishFailed={onFinishFailed}
-          form={form}
-          onFinish={onFinish}
-          layout="vertical"
-          autoComplete="on"
+        <Modal
+          title="Formulario de registro Individual"
+          open={visible}
+          onCancel={handleCancel}
+          maskClosable={false}
+          keyboard={false}
+          closable={false}
           style={{
-            width: "95%",
-            paddingLeft: "3%",
-            backgroundColor: "#ffff",
-            margin: "0% 5% 0% 5%",
-            paddingRight: "3%",
-            borderRadius: "15px",
-            display: "grid",
+            top: 10,
           }}
+          width={1000}
+          footer={[
+            <Form form={form} onFinish={onFinish}>
+              <Button onClick={showCancel} className="boton-cancelar-registro">
+                Cancelar
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="boton-guardar-registro"
+              >
+                {verificado ? "Registrarme" : "Enviar Codigo"}
+              </Button>
+            </Form>,
+          ]}
         >
-          <Row gutter={[16, 8]}>
-            <Col span={12}>
-              <div
-                style={{
-                  color: "black",
-                  weight: "bold",
-                  size: "18px",
-                  bottom: "20px",
-                }}
-              >
-                <h4>Datos Personales:</h4>
-              </div>
-              <Form.Item
-                label="Carnet de identidad"
-                name="CI"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingrese su numero de carnet",
-                  },
-                  { validator: validarMinimoCI },
-                ]}
-              >
-                <Input
-                  maxLength={8}
-                  minLength={7}
-                  placeholder="Ingrese su numero de carnet"
-                  onKeyPress={onlyNumbers}
-                  readOnly={verificado || ciEncontrado}
-                ></Input>
-              </Form.Item>
-              <Form.Item
-                label="Nombre completo"
-                name="NOMBRE"
-                rules={[
-                  { required: true, message: "Ingrese un nombre, por favor." },
-                  { validator: validarMinimo },
-                ]}
-              >
-                <Input
-                  maxLength={50}
-                  minLength={5}
-                  placeholder="Ingrese su nombre completo."
-                  style={{ maxWidth: "100%" }}
-                  onKeyPress={onlyLetters}
-                  readOnly={verificado || ciEncontrado}
-                ></Input>
-              </Form.Item>
-              <Form.Item
-                label="Fecha de nacimiento"
-                name="FECHA"
-                rules={[
-                  { required: true, message: "Ingrese una fecha, por favor." },
-                ]}
-              >
-                <DatePicker
+          <Form
+            onFinishFailed={onFinishFailed}
+            form={form}
+            onFinish={onFinish}
+            layout="vertical"
+            autoComplete="on"
+            style={{
+              width: "95%",
+              paddingLeft: "3%",
+              backgroundColor: "#ffff",
+              margin: "0% 5% 0% 5%",
+              paddingRight: "3%",
+              borderRadius: "15px",
+              display: "grid",
+            }}
+          >
+            <Row gutter={[16, 8]}>
+              <Col span={12}>
+                <div
                   style={{
-                    width: "200px",
-                    maxWidth:
-                      "100%" /*pointerEvents: verificado || ciEncontrado ? "none" : "auto",*/,
+                    color: "black",
+                    weight: "bold",
+                    size: "18px",
+                    bottom: "20px",
                   }}
-                  placeholder="Selecciona una fecha"
-                  disabledDate={disabledDate}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Celular"
-                name="TELEFONO"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingrese un celular",
-                  },
-                  {
-                    validator: validarTelefono,
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Ingrese el celular"
-                  maxLength={8}
-                  minLength={8}
-                  readOnly={verificado || ciEncontrado}
+                >
+                  <h4>Datos Personales:</h4>
+                </div>
+                <Form.Item
+                  label="Carnet de identidad"
+                  name="CI"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingrese su numero de carnet",
+                    },
+                    { validator: validarMinimoCI },
+                  ]}
+                >
+                  <Input
+                    maxLength={8}
+                    minLength={7}
+                    placeholder="Ingrese su numero de carnet"
+                    onKeyPress={onlyNumbers}
+                    readOnly={verificado || ciEncontrado}
+                  ></Input>
+                </Form.Item>
+                <Form.Item
+                  label="Nombre completo"
+                  name="NOMBRE"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Ingrese un nombre, por favor.",
+                    },
+                    { validator: validarMinimo },
+                  ]}
+                >
+                  <Input
+                    maxLength={50}
+                    minLength={5}
+                    placeholder="Ingrese su nombre completo."
+                    style={{ maxWidth: "100%" }}
+                    onKeyPress={onlyLetters}
+                    readOnly={verificado || ciEncontrado}
+                  ></Input>
+                </Form.Item>
+                <Form.Item
+                  label="Fecha de nacimiento"
+                  name="FECHA"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Ingrese una fecha, por favor.",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    style={{
+                      width: "200px",
+                      maxWidth:
+                        "100%" /*pointerEvents: verificado || ciEncontrado ? "none" : "auto",*/,
+                    }}
+                    placeholder="Selecciona una fecha"
+                    disabledDate={disabledDate}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Celular"
+                  name="TELEFONO"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingrese un celular",
+                    },
+                    {
+                      validator: validarTelefono,
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Ingrese el celular"
+                    maxLength={8}
+                    minLength={8}
+                    readOnly={verificado || ciEncontrado}
+                    style={{ maxWidth: "100%" }}
+                    onKeyPress={onlyNumbers}
+                  ></Input>
+                </Form.Item>
+                <Form.Item
+                  label="Genéro"
+                  name="GENERO"
                   style={{ maxWidth: "100%" }}
-                  onKeyPress={onlyNumbers}
-                ></Input>
-              </Form.Item>
-              <Form.Item
-                label="Genéro"
-                name="GENERO"
-                style={{ maxWidth: "100%" }}
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor seleccione un género ",
-                  },
-                ]}
-              >
-                <Select
-                  placeholder="Seleccione un género."
-                  options={generos}
-                  style={{
-                    pointerEvents: verificado || ciEncontrado ? "none" : "auto",
-                  }}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Correo electrónico"
-                name="CORREO"
-                rules={[
-                  {
-                    type: "email",
-                    required: true,
-                    message: "El correo electrónico no es válido.",
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Ingrese su correo electrónico"
-                  maxLength={30}
-                  minLength={5}
-                  readOnly={verificado || ciEncontrado}
-                ></Input>
-              </Form.Item>
-              {/*
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor seleccione un género ",
+                    },
+                  ]}
+                >
+                  <Select
+                    placeholder="Seleccione un género."
+                    options={generos}
+                    style={{
+                      pointerEvents:
+                        verificado || ciEncontrado ? "none" : "auto",
+                    }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Correo electrónico"
+                  name="CORREO"
+                  rules={[
+                    {
+                      type: "email",
+                      required: true,
+                      message: "El correo electrónico no es válido.",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Ingrese su correo electrónico"
+                    maxLength={30}
+                    minLength={5}
+                    readOnly={verificado || ciEncontrado}
+                  ></Input>
+                </Form.Item>
+                {/*
               <Form.Item label="Foto" name="FOTO">
                 <Upload
                   {...uploadProps}
@@ -1606,642 +1642,655 @@ export default function Participante() {
                 </Modal>
               </Form.Item>
               */}
-            </Col>
-            <Col span={12}>
-              <div
-                style={{
-                  color: "black",
-                  weight: "bold",
-                  size: "18px",
-                  bottom: "20px",
-                }}
-              >
-                <h4>Datos especificos al evento:</h4>
-              </div>
-              <Form.Item
-                label="Institución"
-                name="INSTITUCION"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor seleccione una institución",
-                  },
-                ]}
-              >
-                <Select
-                  placeholder="Seleccione una institución."
-                  options={instituciones}
-                  onChange={onInstitutionChange}
-                  /*style={{
+              </Col>
+              <Col span={12}>
+                <div
+                  style={{
+                    color: "black",
+                    weight: "bold",
+                    size: "18px",
+                    bottom: "20px",
+                  }}
+                >
+                  <h4>Datos especificos al evento:</h4>
+                </div>
+                <Form.Item
+                  label="Institución"
+                  name="INSTITUCION"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor seleccione una institución",
+                    },
+                  ]}
+                >
+                  <Select
+                    placeholder="Seleccione una institución."
+                    options={instituciones}
+                    onChange={onInstitutionChange}
+                    /*style={{
                     pointerEvents: verificado || ciEncontrado ? "none" : "auto",
                   }}*/
-                />
-              </Form.Item>
-              <Form.Item label="Semestre" name="SEMESTRE">
-                <Select placeholder="Ingrese el semestre" options={options} />
-              </Form.Item>
-              <Form.Item
-                label="Código SIS"
-                name="CODIGOSIS"
-                style={{ maxWidth: "100%" }}
-                rules={[
-                  {
-                    requires: false,
-                    validator: validarCodigoSis,
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Ingrese su código sis"
-                  maxLength={9}
-                  minLength={9}
-                  onKeyPress={onlyNumbers}
-                  disabled={isInstitucionDisabled}
-                ></Input>
-              </Form.Item>
-              <Form.Item label="Talla de polera" name="TALLA_POLERA">
-                <Select
-                  placeholder="Seleccione una talla de polera"
-                  options={optionsTallas}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Certificacion del estudiante"
-                name="CERTIFICADO"
-              >
-                <Upload
-                  name="CERTIFICADO"
-                  customRequest={customRequest}
-                  listType="picture-card"
-                  onPreview={handlePreview}
-                  onChange={handleChange}
-                  fileList={fileList}
-                  maxCount={1}
-                >
-                  {fileList.length >= 1 ? null : uploadButton}
-                </Upload>
-                <Modal
-                  open={previewOpen}
-                  title={previewTitle}
-                  footer={null}
-                  onCancel={handleCancelIMG}
-                >
-                  <img
-                    alt="example"
-                    style={{
-                      width: "auto",
-                      height: "300px",
-                    }}
-                    src={previewImage}
                   />
-                </Modal>
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Modal>
+                </Form.Item>
+                <Form.Item label="Semestre" name="SEMESTRE">
+                  <Select placeholder="Ingrese el semestre" options={options} />
+                </Form.Item>
+                <Form.Item
+                  label="Código SIS"
+                  name="CODIGOSIS"
+                  style={{ maxWidth: "100%" }}
+                  rules={[
+                    {
+                      requires: false,
+                      validator: validarCodigoSis,
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Ingrese su código sis"
+                    maxLength={9}
+                    minLength={9}
+                    onKeyPress={onlyNumbers}
+                    disabled={isInstitucionDisabled}
+                  ></Input>
+                </Form.Item>
+                <Form.Item label="Talla de polera" name="TALLA_POLERA">
+                  <Select
+                    placeholder="Seleccione una talla de polera"
+                    options={optionsTallas}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Certificacion del estudiante"
+                  name="CERTIFICADO"
+                >
+                  <Upload
+                    name="CERTIFICADO"
+                    customRequest={customRequest}
+                    listType="picture-card"
+                    onPreview={handlePreview}
+                    onChange={handleChange}
+                    fileList={fileList}
+                    maxCount={1}
+                  >
+                    {fileList.length >= 1 ? null : uploadButton}
+                  </Upload>
+                  <Modal
+                    open={previewOpen}
+                    title={previewTitle}
+                    footer={null}
+                    onCancel={handleCancelIMG}
+                  >
+                    <img
+                      alt="example"
+                      style={{
+                        width: "auto",
+                        height: "300px",
+                      }}
+                      src={previewImage}
+                    />
+                  </Modal>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Modal>
 
-      {/*Modal para la parte de registrar equipo grupal */}
-      <Modal
-        title="Formulario de registro grupal"
-        open={verModalGrupal}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        style={{
-          top: 40,
-        }}
-        width={600}
-        footer={[
-          <Form form={formGrupal} onFinish={registrarGrupo}>
-            <Button
-              onClick={showCancelGrupal}
-              className="boton-cancelar-registro"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="boton-guardar-registro"
-            >
-              Guardar
-            </Button>
-          </Form>,
-        ]}
-      >
-        <Form
-          onFinishFailed={onFinishFailed}
-          form={formGrupal}
-          initialValues={nombreEntrenador}
-          onFinish={registrarGrupo}
-          layout="vertical"
+        {/*Modal para la parte de registrar equipo grupal */}
+        <Modal
+          title="Formulario de registro grupal"
+          open={verModalGrupal}
+          maskClosable={false}
+          keyboard={false}
+          closable={false}
+          style={{
+            top: 40,
+          }}
+          width={600}
+          footer={[
+            <Form form={formGrupal} onFinish={registrarGrupo}>
+              <Button
+                onClick={showCancelGrupal}
+                className="boton-cancelar-registro"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="boton-guardar-registro"
+              >
+                Guardar
+              </Button>
+            </Form>,
+          ]}
         >
-          <Form.Item
-            label="Nombre del equipo"
-            name="EQUIPO"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese el nombre del equipo",
-              },
-            ]}
+          <Form
+            onFinishFailed={onFinishFailed}
+            form={formGrupal}
+            initialValues={nombreEntrenador}
+            onFinish={registrarGrupo}
+            layout="vertical"
           >
-            <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
-          </Form.Item>
-          <Form.Item
-            label="Entrenador"
-            name="ENTRENADOR"
-            rules={[
-              {
-                required: estadoEntrenador,
-                message: "Por favor, añada a un entrenador",
-              },
-            ]}
-          >
-            <div className="botones-entrenador">
-              <Button
-                type="link"
-                onClick={showModalEntrenador}
-                className="icono-aniadir"
-              >
-                Buscar Entrenador
-              </Button>
-            </div>
-
-            <Input
-              value={nombreEntrenador}
-              readOnly={estadoFormulario}
-              placeholder="Ingrese el nombre del entrenador"
-            />
-
-            <Button
-              className="boton-registrar-entrenador"
-              type="link"
-              onClick={modalNuevoEntrenador}
+            <Form.Item
+              label="Nombre del equipo"
+              name="EQUIPO"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese el nombre del equipo",
+                },
+              ]}
             >
-              Registrar entrenador
-            </Button>
-          </Form.Item>
+              <Input
+                placeholder="Ingrese el nombre del equipo"
+                maxLength={50}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Entrenador"
+              name="ENTRENADOR"
+              rules={[
+                {
+                  required: estadoEntrenador,
+                  message: "Por favor, añada a un entrenador",
+                },
+              ]}
+            >
+              <div className="botones-entrenador">
+                <Button
+                  type="link"
+                  onClick={showModalEntrenador}
+                  className="icono-aniadir"
+                >
+                  Buscar Entrenador
+                </Button>
+              </div>
 
-          <Form.Item
-            className="grupal-input-institucion"
-            label="Institución"
-            name="INSTITUCION"
-          >
-            <Select
-              placeholder="Seleccione una institución."
-              options={instituciones}
-              onChange={onInstitutionChange}
+              <Input
+                value={nombreEntrenador}
+                readOnly={estadoFormulario}
+                placeholder="Ingrese el nombre del entrenador"
+              />
+
+              <Button
+                className="boton-registrar-entrenador"
+                type="link"
+                onClick={modalNuevoEntrenador}
+              >
+                Registrar entrenador
+              </Button>
+            </Form.Item>
+
+            <Form.Item
+              className="grupal-input-institucion"
+              label="Institución"
+              name="INSTITUCION"
+            >
+              <Select
+                placeholder="Seleccione una institución."
+                options={instituciones}
+                onChange={onInstitutionChange}
+              />
+            </Form.Item>
+
+            <div className="aniadir-participante">
+              <div>
+                <label>Participantes</label>
+              </div>
+              <div className="boton-aniadir-participante">
+                <label>Eliminar</label>
+                <Button
+                  type="link"
+                  onClick={eliminarParticipante}
+                  className="icono-eliminar"
+                >
+                  <DeleteOutlined />
+                </Button>
+
+                <label>Añadir</label>
+                <Button
+                  type="link"
+                  onClick={aniadirPArticipante}
+                  className="icono-aniadir"
+                >
+                  <PlusOutlined />
+                </Button>
+                <Button type="text" onClick={handleAbrirModalParticipanteNuevo}>
+                  Registrar Nuevo Participante
+                </Button>
+              </div>
+            </div>
+            <Table
+              className="tabla-participantes"
+              dataSource={listaParticipante}
+              rowSelection={{
+                type: selectionType,
+                ...rowSelection,
+              }}
+              pagination={false}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: "30px", textAlign: "center" }}>
+                    No hay participantes añadidos.
+                  </div>
+                ),
+              }}
+            >
+              <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
+            </Table>
+          </Form>
+        </Modal>
+
+        {/*Modal para buscar un participante*/}
+        <Modal
+          title="Buscar participante"
+          open={buscarParticipante}
+          onCancel={handleCancelBuscador}
+          footer={[
+            <Form onFinish={aniadirEntrenador}>
+              <Button type="primary" onClick={aniadirParticipante}>
+                Añadir
+              </Button>
+            </Form>,
+          ]}
+        >
+          <label>CI del participante</label>
+          <div>
+            <Search
+              className="buscador-participante"
+              value={searchText}
+              placeholder="Buscar participante"
+              onSearch={onSearch}
+              onChange={(e) => onSearch(e.target.value)}
+              maxLength={8}
+              allowClear
             />
-          </Form.Item>
-
-          <div className="aniadir-participante">
-            <div>
-              <label>Participantes</label>
-            </div>
-            <div className="boton-aniadir-participante">
-              <label>Eliminar</label>
-              <Button
-                type="link"
-                onClick={eliminarParticipante}
-                className="icono-eliminar"
-              >
-                <DeleteOutlined />
-              </Button>
-
-              <label>Añadir</label>
-              <Button
-                type="link"
-                onClick={aniadirPArticipante}
-                className="icono-aniadir"
-              >
-                <PlusOutlined />
-              </Button>
-              <Button type="text" onClick={handleAbrirModalParticipanteNuevo}>
-                Registrar Nuevo Participante
-              </Button>
-            </div>
           </div>
-          <Table
-            className="tabla-participantes"
-            dataSource={listaParticipante}
-            rowSelection={{
-              type: selectionType,
-              ...rowSelection,
-            }}
-            pagination={false}
-            locale={{
-              emptyText: (
-                <div style={{ padding: "30px", textAlign: "center" }}>
-                  No hay participantes añadidos.
+          <Form layout="vertical">
+            <Form.Item label="Nombre del participante">
+              {datoFiltrado.map((item) => (
+                <div key={item}>
+                  <p> {item.nombre}</p>
                 </div>
-              ),
-            }}
-          >
-            <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
-          </Table>
-        </Form>
-      </Modal>
+              ))}
+            </Form.Item>
+          </Form>
+        </Modal>
 
-      {/*Modal para buscar un participante*/}
-      <Modal
-        title="Buscar participante"
-        open={buscarParticipante}
-        onCancel={handleCancelBuscador}
-        footer={[
-          <Form onFinish={aniadirEntrenador}>
-            <Button type="primary" onClick={aniadirParticipante}>
-              Añadir
-            </Button>
-          </Form>,
-        ]}
-      >
-        <label>CI del participante</label>
-        <div>
-          <Search
-            className="buscador-participante"
-            value={searchText}
-            placeholder="Buscar participante"
-            onSearch={onSearch}
-            onChange={(e) => onSearch(e.target.value)}
-            maxLength={30}
-            allowClear
-          />
-        </div>
-        <Form layout="vertical">
-          <Form.Item label="Nombre del participante">
-            {datoFiltrado.map((item) => (
-              <div key={item}>
-                <p> {item.nombre}</p>
-              </div>
-            ))}
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/*Modal para buscar un entrenador*/}
-      <Modal
-        title="Selecionar un entrenador"
-        open={buscarEntrenador}
-        onCancel={handleCancelEntrenador}
-        footer={[
-          <Form>
-            <Button type="primary" onClick={aniadirEntrenador}>
-              Añadir
-            </Button>
-          </Form>,
-        ]}
-      >
-        <label>CI del entrenador</label>
-        <div>
-          <Search
-            placeholder="Buscar entrenador"
-            value={searchEntrenador}
-            onSearch={onSearchEntrenador}
-            onChange={(e) => onSearchEntrenador(e.target.value)}
-            maxLength={30}
-            allowClear
-          />
-        </div>
-        <Form layout="vertical">
-          <Form.Input name="resultadoBusquedaEntrenador">
-            <Input />
-          </Form.Input>
-          <Button onClick={onSearchEntrenador}>Buscar</Button>
-          <Form.Item label="Nombre del Entrenador">
-            {datoFiltradoEntrenador.slice(0, 3).map((item) => (
-              <div key={item}>
-                <p>{item.nombre}</p>
-              </div>
-            ))}
-            {nombreEntrenador}
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/*modal para registrar nuevo participante*/}
-      <Modal
-        title="Registrar nuevo participante"
-        open={verModalParticipanteNuevo}
-        onCancel={handleCancelNuevoParticipante}
-        footer={[
-          <Button
-            onClick={handleCancelNuevoParticipante}
-            className="boton-cancelar-registro"
-          >
-            Cancelar
-          </Button>,
-          <Button
-            onClick={showConfirmParticipante}
-            type="primary"
-            htmlType="submit"
-            className="boton-guardar-registro"
-          >
-            Añadir
-          </Button>,
-        ]}
-      >
-        <Form
-          form={formNuevoParticipante}
-          onFinish={registrarNuevoParticipante}
-          layout="horizontal"
+        {/*Modal para buscar un entrenador*/}
+        <Modal
+          title="Selecionar un entrenador"
+          open={buscarEntrenador}
+          onCancel={handleCancelEntrenador}
+          footer={[
+            <Form>
+              <Button type="primary" onClick={aniadirEntrenador}>
+                Añadir
+              </Button>
+            </Form>,
+          ]}
         >
-          <Form.Item
-            label="Carnet de identidad"
-            name="CI"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese el CI del participante",
-              },
-              { validator: validarMinimoCI },
-            ]}
-          >
-            <Input
-              minLength={8}
-              maxLength={8}
-              placeholder="Por favor, ingrese el CI"
-              onKeyPress={onlyNumbers}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Nombre completo"
-            name="nombre"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese el nombre del participante",
-              },
-              { validator: validarMinimo },
-            ]}
-          >
-            <Input
-              minLength={5}
-              maxLength={50}
-              placeholder="Ingrese un nombre"
-              onKeyPress={onlyLetters}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Fecha de nacimiento"
-            name="FECHA"
-            rules={[
-              { required: true, message: "Ingrese una fecha, por favor." },
-            ]}
-          >
-            <DatePicker
-              style={{ width: "200px", maxWidth: "100%" }}
-              placeholder="Selecciona una fecha"
-              disabledDate={disabledDate}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Genéro"
-            name="GENERO"
-            style={{ maxWidth: "100%" }}
-            rules={[
-              {
-                required: true,
-                message: "Por favor seleccione un género ",
-              },
-            ]}
-          >
-            <Select placeholder="Seleccione un género.">
-              <Select.Option value="Femenino">Femenino</Select.Option>
-              <Select.Option value="Masculino">Masculino</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="Correo electrónico"
-            name="CORREO"
-            rules={[
-              {
-                required: true,
-                type: "email",
-                message: "El correo electrónico no es válido.",
-              },
-            ]}
-          >
-            <Input
-              placeholder="Ingrese el correo electrónico"
+          <label>CI del entrenador</label>
+          <div>
+            <Search
+              placeholder="Buscar entrenador"
+              value={searchEntrenador}
+              onSearch={onSearchEntrenador}
+              onChange={(e) => onSearchEntrenador(e.target.value)}
               maxLength={30}
-              minLength={5}
-            ></Input>
-          </Form.Item>
-          <Form.Item
-            label="Celular"
-            name="TELEFONO"
-            rules={[
-              {
-                required: true,
-                message: "Por favor ingrese un celular",
-              },
-              { validator: validarTelefono },
-            ]}
-          >
-            <Input
-              placeholder="Ingrese el celular"
-              maxLength={8}
-              minLength={8}
-              style={{ maxWidth: "100%" }}
-              onKeyPress={onlyNumbers}
-            ></Input>
-          </Form.Item>
-        </Form>
-      </Modal>
+              allowClear
+            />
+          </div>
+          <Form layout="vertical">
+            <Form.Input name="resultadoBusquedaEntrenador">
+              <Input />
+            </Form.Input>
+            <Button onClick={onSearchEntrenador}>Buscar</Button>
+            <Form.Item label="Nombre del Entrenador">
+              {datoFiltradoEntrenador.slice(0, 3).map((item) => (
+                <div key={item}>
+                  <p>{item.nombre}</p>
+                </div>
+              ))}
+              {nombreEntrenador}
+            </Form.Item>
+          </Form>
+        </Modal>
 
-      {/*Modal para enviar codigo de verificacion al entrenador */}
-      <Modal
-        title="Confirmar acción"
-        open={modalVerificarCodigoEntrenador}
-        onCancel={handleCancelCodigoEntrenador}
-        centered={true}
-        maskClosable={false}
-        keyboard={false}
-        footer={[
-          <Form form={formCodigoEntrenador} onFinish={onFinishCodigoEntrenador}>
-            <Button type="primary" htmlType="submit">
-              Verificar
-            </Button>
-          </Form>,
-        ]}
-      >
-        <p>Deberías haber recibido un correo electrónico con un código.</p>
-        <p>
-          A su correo registrado :{" "}
-          <strong>{correoVerificacionEntrenador}</strong>
-        </p>
-        <br />
-        <Form
-          layout="vertical"
-          form={formCodigoEntrenador}
-          onFinish={onFinishCodigoEntrenador}
+        {/*modal para registrar nuevo participante*/}
+        <Modal
+          title="Registrar nuevo participante"
+          open={verModalParticipanteNuevo}
+          onCancel={handleCancelNuevoParticipante}
+          footer={[
+            <Form form={formNuevo} onFinish={showConfirmParticipante}>
+              <Button
+                onClick={handleCancelNuevoParticipante}
+                className="boton-cancelar-registro"
+              >
+                Cancelar
+              </Button>
+              ,
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="boton-guardar-registro"
+              >
+                Añadir
+              </Button>
+            </Form>,
+          ]}
         >
-          <Form.Item
-            label="Código de Verificación:"
-            name="CODIGOVERIFICACION"
-            style={{ paddingTop: "3%" }}
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese su codigo de verificacion",
-              },
-            ]}
+          <Form
+            form={formNuevo}
+            onFinish={showConfirmParticipante}
+            onFinishFailed={onFinishFailed}
+            layout="horizontal"
           >
-            <Input
-              placeholder="Por favor, ingrese el codigo"
-              maxLength={8}
-              minLength={8}
-              style={{ maxWidth: "50%", centered: "true" }}
-            ></Input>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/*Modal para registrar nuevo entrenador */}
-      <Modal
-        title="Registrar entrenador"
-        open={verModalEntrenadorNuevo}
-        onCancel={handleCancelNuevoEntrenador}
-        maskClosable={false}
-        keyboard={false}
-        closable={false}
-        footer={[
-          <Form form={formNuevoEntrenador} onFinish={registrarNuevoEntrenador}>
-            <Button
-              onClick={handleCancelNuevoEntrenador}
-              className="boton-cancelar-registro"
+            <Form.Item
+              label="Carnet de identidad"
+              name="CI"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese el CI del participante",
+                },
+                { validator: validarMinimoCI },
+              ]}
             >
-              Cancelar
-            </Button>
-
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="boton-guardar-registro"
+              <Input
+                minLength={8}
+                maxLength={8}
+                placeholder="Por favor, ingrese el CI"
+                onKeyPress={onlyNumbers}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Nombre completo"
+              name="NOMBRE"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese el nombre del participante",
+                },
+                { validator: validarMinimo },
+              ]}
             >
-              {verificadoEntrenador ? "Registar" : "Enviar código"}
-            </Button>
-          </Form>,
-        ]}
-      >
-        <Form
-          form={formNuevoEntrenador}
-          onFinish={registrarNuevoEntrenador}
-          layout="horizontal"
-        >
-          <Form.Item
-            label="Carnet de identidad"
-            name="CI_ENTRENADOR"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese el CI del participante",
-              },
-              { validator: validarMinimoCI },
-            ]}
-          >
-            <Input
-              minLength={8}
-              maxLength={8}
-              readOnly={estadoRegistroEntrenador}
-              placeholder="Por favor, ingrese el CI"
-              onKeyPress={onlyNumbers}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Nombre completo"
-            name="NOMBRE_ENTRENADOR"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese el nombre del participante",
-              },
-              { validator: validarMinimo },
-            ]}
-          >
-            <Input
-              minLength={5}
-              maxLength={50}
-              readOnly={estadoRegistroEntrenador}
-              placeholder="Ingrese un nombre"
-              onKeyPress={onlyLetters}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Fecha de nacimiento"
-            name="FECHA_NACIMIENTO_ENTRENADOR"
-            rules={[
-              { required: true, message: "Ingrese una fecha, por favor." },
-            ]}
-          >
-            <DatePicker
-              style={{ width: "200px", maxWidth: "100%" }}
-              placeholder="Selecciona una fecha"
-              disabledDate={disabledDate}
-              disabled={estadoRegistroEntrenador}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Genéro"
-            name="GENERO_ENTRENADOR"
-            style={{ maxWidth: "100%" }}
-            rules={[
-              {
-                required: true,
-                message: "Por favor seleccione un género ",
-              },
-            ]}
-          >
-            <Select
-              placeholder="Seleccione un género."
-              disabled={estadoRegistroEntrenador}
+              <Input
+                minLength={5}
+                maxLength={50}
+                placeholder="Ingrese un nombre"
+                onKeyPress={onlyLetters}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Fecha de nacimiento"
+              name="FECHA"
+              rules={[
+                { required: true, message: "Ingrese una fecha, por favor." },
+              ]}
             >
-              <Select.Option value="Femenino">Femenino</Select.Option>
-              <Select.Option value="Masculino">Masculino</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="Correo electrónico"
-            name="CORREO_ENTRENADOR"
-            rules={[
-              {
-                required: true,
-                type: "email",
-                message: "El correo electrónico no es válido.",
-              },
-            ]}
-          >
-            <Input
-              readOnly={estadoRegistroEntrenador}
-              placeholder="Ingrese el correo electrónico"
-              maxLength={30}
-              minLength={5}
-            ></Input>
-          </Form.Item>
-          <Form.Item
-            label="Celular"
-            name="TELEFONO_ENTRENADOR"
-            rules={[
-              {
-                required: true,
-                message: "Por favor ingrese un celular",
-              },
-              { validator: validarTelefono },
-            ]}
-          >
-            <Input
-              placeholder="Ingrese el celular"
-              readOnly={estadoRegistroEntrenador}
-              maxLength={8}
-              minLength={8}
+              <DatePicker
+                style={{ width: "200px", maxWidth: "100%" }}
+                placeholder="Selecciona una fecha"
+                disabledDate={disabledDate}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Genéro"
+              name="GENERO"
               style={{ maxWidth: "100%" }}
-              onKeyPress={onlyNumbers}
-            ></Input>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
-  );
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor seleccione un género ",
+                },
+              ]}
+            >
+              <Select placeholder="Seleccione un género.">
+                <Select.Option value="Femenino">Femenino</Select.Option>
+                <Select.Option value="Masculino">Masculino</Select.Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="Correo electrónico"
+              name="CORREO"
+              rules={[
+                {
+                  required: true,
+                  type: "email",
+                  message: "El correo electrónico no es válido.",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Ingrese el correo electrónico"
+                maxLength={30}
+                minLength={5}
+              ></Input>
+            </Form.Item>
+            <Form.Item
+              label="Celular"
+              name="TELEFONO"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese un celular",
+                },
+                { validator: validarTelefono },
+              ]}
+            >
+              <Input
+                placeholder="Ingrese el celular"
+                maxLength={8}
+                minLength={8}
+                style={{ maxWidth: "100%" }}
+                onKeyPress={onlyNumbers}
+              ></Input>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/*Modal para enviar codigo de verificacion al entrenador */}
+        <Modal
+          title="Confirmar acción"
+          open={modalVerificarCodigoEntrenador}
+          onCancel={handleCancelCodigoEntrenador}
+          centered={true}
+          maskClosable={false}
+          keyboard={false}
+          footer={[
+            <Form
+              form={formCodigoEntrenador}
+              onFinish={onFinishCodigoEntrenador}
+            >
+              <Button type="primary" htmlType="submit">
+                Verificar
+              </Button>
+            </Form>,
+          ]}
+        >
+          <p>Deberías haber recibido un correo electrónico con un código.</p>
+          <p>
+            A su correo registrado :{" "}
+            <strong>{correoVerificacionEntrenador}</strong>
+          </p>
+          <br />
+          <Form
+            layout="vertical"
+            form={formCodigoEntrenador}
+            onFinish={onFinishCodigoEntrenador}
+          >
+            <Form.Item
+              label="Código de Verificación:"
+              name="CODIGOVERIFICACION"
+              style={{ paddingTop: "3%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese su codigo de verificacion",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Por favor, ingrese el codigo"
+                maxLength={8}
+                minLength={8}
+                style={{ maxWidth: "50%", centered: "true" }}
+              ></Input>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/*Modal para registrar nuevo entrenador */}
+        <Modal
+          title="Registrar entrenador"
+          open={verModalEntrenadorNuevo}
+          onCancel={handleCancelNuevoEntrenador}
+          maskClosable={false}
+          keyboard={false}
+          closable={false}
+          footer={[
+            <Form
+              form={formNuevoEntrenador}
+              onFinish={registrarNuevoEntrenador}
+            >
+              <Button
+                onClick={handleCancelNuevoEntrenador}
+                className="boton-cancelar-registro"
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="boton-guardar-registro"
+              >
+                {verificadoEntrenador ? "Registar" : "Enviar código"}
+              </Button>
+            </Form>,
+          ]}
+        >
+          <Form
+            form={formNuevoEntrenador}
+            onFinish={registrarNuevoEntrenador}
+            layout="horizontal"
+          >
+            <Form.Item
+              label="Carnet de identidad"
+              name="CI_ENTRENADOR"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese el CI del participante",
+                },
+                { validator: validarMinimoCI },
+              ]}
+            >
+              <Input
+                minLength={8}
+                maxLength={8}
+                readOnly={estadoRegistroEntrenador}
+                placeholder="Por favor, ingrese el CI"
+                onKeyPress={onlyNumbers}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Nombre completo"
+              name="NOMBRE_ENTRENADOR"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor, ingrese el nombre del participante",
+                },
+                { validator: validarMinimo },
+              ]}
+            >
+              <Input
+                minLength={5}
+                maxLength={50}
+                readOnly={estadoRegistroEntrenador}
+                placeholder="Ingrese un nombre"
+                onKeyPress={onlyLetters}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Fecha de nacimiento"
+              name="FECHA_NACIMIENTO_ENTRENADOR"
+              rules={[
+                { required: true, message: "Ingrese una fecha, por favor." },
+              ]}
+            >
+              <DatePicker
+                style={{ width: "200px", maxWidth: "100%" }}
+                placeholder="Selecciona una fecha"
+                disabledDate={disabledDate}
+                disabled={estadoRegistroEntrenador}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Genéro"
+              name="GENERO_ENTRENADOR"
+              style={{ maxWidth: "100%" }}
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor seleccione un género ",
+                },
+              ]}
+            >
+              <Select
+                placeholder="Seleccione un género."
+                disabled={estadoRegistroEntrenador}
+              >
+                <Select.Option value="Femenino">Femenino</Select.Option>
+                <Select.Option value="Masculino">Masculino</Select.Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="Correo electrónico"
+              name="CORREO_ENTRENADOR"
+              rules={[
+                {
+                  required: true,
+                  type: "email",
+                  message: "El correo electrónico no es válido.",
+                },
+              ]}
+            >
+              <Input
+                readOnly={estadoRegistroEntrenador}
+                placeholder="Ingrese el correo electrónico"
+                maxLength={30}
+                minLength={5}
+              ></Input>
+            </Form.Item>
+            <Form.Item
+              label="Celular"
+              name="TELEFONO_ENTRENADOR"
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingrese un celular",
+                },
+                { validator: validarTelefono },
+              ]}
+            >
+              <Input
+                placeholder="Ingrese el celular"
+                readOnly={estadoRegistroEntrenador}
+                maxLength={8}
+                minLength={8}
+                style={{ maxWidth: "100%" }}
+                onKeyPress={onlyNumbers}
+              ></Input>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </div>
+    );
+  };
 }
