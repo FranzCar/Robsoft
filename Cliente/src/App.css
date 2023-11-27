@@ -382,15 +382,20 @@ h3 {
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
+.etapas-columna1{
+    width: 90%;
+}
 .etapas-columna2{
-    padding-left: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-left: -32px;
 }
 .reservar-hora-input{
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
 .etapa-fecha{
-    width: 202px;
+    width: 175px;
 }
 .etapa-ubicacion{
     width: 320px;
@@ -402,8 +407,15 @@ h3 {
     width: 100%;
 }
 .boton_aniadir_etapa{
-    margin-left: 74.7%;
+    margin-left: 20%;
 }
+
+.columna-horas{
+    padding-left: 100px;
+}
+
+
+
 /*Modal de las pestañas*/
 .pestanias{
     padding-left: 15px;

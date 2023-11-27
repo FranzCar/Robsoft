@@ -122,7 +122,8 @@ private function transformarEventos($eventos)
             'DESCRIPCION' => $evento->DESCRIPCION,
             'MOSTRAR' => $evento->MOSTRAR,
             'AFICHE' => $evento->AFICHE,
-            'TIPO_EVENTO' => $evento->tipoEvento->nombre_tipo_evento,
+            'TIPO_EVENTO' => $evento->tipoEvento->id_tipo_evento,
+            'NOMBRE_TIPO_EVENTO' => $evento->tipoEvento->nombre_tipo_evento,
             'AUSPICIADORES' => $evento->auspiciadores->map(function ($auspiciador) {
                 return [
                     'id' => $auspiciador->id_auspiciador,
@@ -461,6 +462,16 @@ private function eliminarInscripciones($evento)
 
         return $this->transformarEventos($eventos);
     }
+    public function listaEliminables() {
+        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
+                    ->where('MOSTRAR', 1)
+                    ->whereIn('ESTADO', ['En espera', 'Listo', 'Inscrito'])
+                    ->orderBy('id_evento', 'desc')
+                    ->get();
+
+        return $this->transformarEventos($eventos);
+    }
+
     public function guardarCaracteristicasEvento(Request $request, $id) {
         // Encuentra el evento y su tipo
         $evento = Evento::with('tipoEvento')->findOrFail($id);

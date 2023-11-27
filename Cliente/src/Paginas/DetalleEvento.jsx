@@ -14,6 +14,7 @@ import {
   message,
   Upload,
   Tabs,
+  TimePicker,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
@@ -23,12 +24,12 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import TextArea from "antd/es/input/TextArea";
-import { useNavigate } from "react-router-dom";
 import moment from "moment";
 
 const { TabPane } = Tabs;
 const { Column } = Table;
 const { confirm } = Modal;
+const formatoHora = "HH:mm";
 const { RangePicker } = DatePicker;
 
 const getBase64 = (file) => {
@@ -85,7 +86,10 @@ export default function DetalleEvento() {
   const [fechaFin, setFechaFin] = useState(null);
   const [horafin, setHoraFin] = useState(null);
   const [idEvento, setIdEvento] = useState(null);
-  const [listaFacilitadores, setListaFacilitadores] = useState([])
+  const [listaFacilitadores, setListaFacilitadores] = useState([]);
+  const [estadoHoraInicio, setEstadoHoraInicio] = useState(false);
+  const [estadoHoraFin, setEstadoHoraFin] = useState(false);
+  const [estadoEntrenador, setEstadoEntrenador] = useState(false);
   //Kevin
   const [form2] = Form.useForm();
   //Solo permitir numeros en los input
@@ -120,8 +124,8 @@ export default function DetalleEvento() {
         setFechaFin(null);
         setHoraInicio(null);
         setHoraFin(null);
-        setMostrarInputURL(false)
-        setMostrarUbicacion(false)
+        setMostrarInputURL(false);
+        setMostrarUbicacion(false);
         form.resetFields();
         formActividades.resetFields();
       },
@@ -190,8 +194,8 @@ export default function DetalleEvento() {
       let modalidad = formModalidad === 1 ? "Cerrado" : "Abierto";
       let participacion = formParticipacion === 1 ? "Grupal" : "Individual";
       let categoria = verificarCategoria(formCategoria);
-      let costoNuevo = parseFloat(formCosto)
-      console.log("el formato del costo es ", costoNuevo)
+      let costoNuevo = parseFloat(formCosto);
+      console.log("el formato del costo es ", costoNuevo);
       let entrenador = formEntrenador === 1 ? true : false;
       const datos = {
         caracteristica_1: modalidad,
@@ -218,7 +222,10 @@ export default function DetalleEvento() {
           url_etapa: datosEtapas.url_etapa,
         };
         axios
-          .post(`http://localhost:8000/api/guardar-etapa/${id}`, nuevosDatosEtapas)
+          .post(
+            `http://localhost:8000/api/guardar-etapa/${id}`,
+            nuevosDatosEtapas
+          )
           .then((response) => {})
           .catch((error) => {
             console.log(error);
@@ -229,7 +236,7 @@ export default function DetalleEvento() {
         .post(`http://localhost:8000/api/detallar-evento/${id}`, datos)
         .then((response) => {
           message.success("Los detalles del evento se guardo correctamente");
-          obtenerDatos()
+          obtenerDatos();
           setMostrarPestanias(false);
           setMostrarFormEntrenamiento(false);
           setMostrarFormICPC(false);
@@ -246,8 +253,8 @@ export default function DetalleEvento() {
           setFechaFin(null);
           setHoraInicio(null);
           setHoraFin(null);
-          setMostrarInputURL(false)
-          setMostrarUbicacion(false)
+          setMostrarInputURL(false);
+          setMostrarUbicacion(false);
           form.resetFields();
           formActividades.resetFields();
         })
@@ -279,7 +286,7 @@ export default function DetalleEvento() {
   useEffect(() => {
     obtenerDatos();
     obtenerListaUbicaciones();
-    obtenerListaFacilitadores()
+    obtenerListaFacilitadores();
   }, []);
 
   const obtenerDatos = () => {
@@ -316,64 +323,235 @@ export default function DetalleEvento() {
 
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
-    console.log("El record es ", record.id_evento);
+    console.log("El record es ", record);
     setFechaInicioBD(record.FECHA_INICIO);
     setIdEvento(record.id_evento);
     const tipoEvento = record.TIPO_EVENTO;
     setMostrarPestanias(true);
-    if (tipoEvento === "Competencia estilo ICPC") {
+    if (tipoEvento === 1) {
       setMostrarFormICPC(true);
-    } else if (tipoEvento === "Competencia estilo libre") {
+    } else if (tipoEvento === 2) {
       setMostrarFormLibre(true);
-    } else if (tipoEvento === "Taller de programación") {
+    } else if (tipoEvento === 3) {
       setMostrarFormTaller(true);
-    } else if (tipoEvento === "Entrenamiento") {
+    } else if (tipoEvento === 4) {
       setMostrarFormEntrenamiento(true);
-    } else if (tipoEvento === "Reclutamiento") {
+    } else if (tipoEvento === 5) {
       setMostrarFormReclutamiento(true);
-    } else if (tipoEvento === "Torneo") {
+    } else if (tipoEvento === 6) {
       setMostrarFormTorneo(true);
-    } else if (tipoEvento === "Otro") {
+    } else if (tipoEvento === 7) {
       setMostrarFormOtro(true);
     }
   };
 
   const onChangeICPC = (e) => {
     const requisito = e.target.value;
-    console.log("El valor de onchange ICPC es ", requisito)
-    // Divide los requisitos actuales en un array
-    if (requisito === 1) {
-      setRequisitos("Codigo SIS")
-      console.log("el requisito es codigo sis", requisitos)
-    } else if (requisito === 2) {
-      console.log("se quita el requisito condigo sis")
+    const valorAnterior = form.getFieldValue("requisitos");
+    if (valorAnterior === undefined) {
+      if (requisito === 1) {
+        form.setFieldValue("requisitos", "- Código SIS");
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    } else {
+      if (valorAnterior.includes("- Certificado de estudiante")) {
+        if (requisito === 1) {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        }
+      } else if (valorAnterior.includes("- RUDE")) {
+        if (requisito === 1) {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- RUDE");
+        }
+      } else {
+        form.resetFields(["requisitos"]);
+      }
     }
 
-    // Actualiza el valor
+    // Actualiza el valor del Radio.Group
     setValue(e.target.value);
   };
 
   const onChangeLibre = (e) => {
+    const requisito = e.target.value;
+    const valorAnterior = form.getFieldValue("requisitos");
+    if (valorAnterior === undefined) {
+      if (requisito === 1) {
+        form.setFieldValue("requisitos", "- Código SIS");
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    } else {
+      if (valorAnterior.includes("- Certificado de estudiante")) {
+        if (requisito === 1) {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        }
+      } else if (valorAnterior.includes("- RUDE")) {
+        if (requisito === 1) {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- RUDE");
+        }
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    }
+
     setValue2(e.target.value);
   };
 
   const onChangeTaller = (e) => {
+    const requisito = e.target.value;
+    const valorAnterior = form.getFieldValue("requisitos");
+    if (valorAnterior === undefined) {
+      if (requisito === 1) {
+        form.setFieldValue("requisitos", "- Código SIS");
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    } else {
+      if (valorAnterior.includes("- Certificado de estudiante")) {
+        if (requisito === 1) {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        }
+      } else if (valorAnterior.includes("- RUDE")) {
+        if (requisito === 1) {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- RUDE");
+        }
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    }
+
     setValue3(e.target.value);
   };
 
   const onChangeEntrenamiento = (e) => {
+    const requisito = e.target.value;
+    const valorAnterior = form.getFieldValue("requisitos");
+    if (valorAnterior === undefined) {
+      if (requisito === 1) {
+        form.setFieldValue("requisitos", "- Código SIS");
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    } else {
+      if (valorAnterior.includes("- Certificado de estudiante")) {
+        if (requisito === 1) {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        }
+      } else if (valorAnterior.includes("- RUDE")) {
+        if (requisito === 1) {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- RUDE");
+        }
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    }
+
     setValue4(e.target.value);
   };
 
   const onChangeTorneo = (e) => {
+    const requisito = e.target.value;
+    const valorAnterior = form.getFieldValue("requisitos");
+    if (valorAnterior === undefined) {
+      if (requisito === 1) {
+        form.setFieldValue("requisitos", "- Código SIS");
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    } else {
+      if (valorAnterior.includes("- Certificado de estudiante")) {
+        if (requisito === 1) {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        }
+      } else if (valorAnterior.includes("- RUDE")) {
+        if (requisito === 1) {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- RUDE");
+        }
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    }
+
     setValue5(e.target.value);
   };
 
   const onChangeOtros = (e) => {
+    const requisito = e.target.value;
+    const valorAnterior = form.getFieldValue("requisitos");
+    if (valorAnterior === undefined) {
+      if (requisito === 1) {
+        form.setFieldValue("requisitos", "- Código SIS");
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    } else {
+      if (valorAnterior.includes("- Certificado de estudiante")) {
+        if (requisito === 1) {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        }
+      } else if (valorAnterior.includes("- RUDE")) {
+        if (requisito === 1) {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else if (requisito === 2) {
+          form.setFieldValue("requisitos", "- RUDE");
+        }
+      } else {
+        form.resetFields(["requisitos"]);
+      }
+    }
+
     setValue6(e.target.value);
   };
 
   const onChangeParticipacion = (e) => {
+    const participacion = e.target.value;
+    if (participacion === 1) {
+      setEstadoEntrenador(true);
+    } else {
+      setEstadoEntrenador(false);
+      form.resetFields(["entrenador"]);
+    }
     setValueParticipacion(e.target.value);
   };
   const onChangeModalidad = (e) => {
@@ -431,7 +609,6 @@ export default function DetalleEvento() {
     return imageExtensions.includes(extension);
   };
 
- 
   // Puedes seguir agregando más objetos a la lista según tus necesidades
 
   function onChangeTabs(key) {
@@ -504,9 +681,9 @@ export default function DetalleEvento() {
     const fechaInicio = formActividades.getFieldValue("FECHA_INICIO");
     const fechaFin = formActividades.getFieldValue("FECHA_FIN");
     const nuevaFechaInicio = fechaInicio
-      ? fechaInicio.format("YYYY-MM-DD HH:mm")
+      ? fechaInicio.format("YYYY-MM-DD")
       : null;
-    const nuevaFechaFin = fechaFin ? fechaFin.format("YYYY-MM-DD HH:mm") : null;
+    const nuevaFechaFin = fechaFin ? fechaFin.format("YYYY-MM-DD") : null;
     const modalidadNueva = modalidad === 1 ? "En linea" : "Presencial";
     // Validar que los campos obligatorios no estén vacíos
     if (!titulo || !modalidad || !ubicacion || !fechaInicio || !fechaFin) {
@@ -514,13 +691,16 @@ export default function DetalleEvento() {
       message.error("Por favor, complete todos los campos obligatorios");
       return;
     }
+    const fechaHoraInicio = nuevaFechaInicio + " " + horaInicio;
+    const fechaHoraFin = nuevaFechaFin + " " + horafin;
+    console.log("la fecha inicio es ", fechaHoraInicio);
     // Crear un nuevo objeto con la información de la etapa
     const nuevaEtapa = {
       nombre_etapa: titulo,
       modalidad_ubicacion: modalidadNueva,
       id_ubicacion: ubicacion,
-      fecha_hora_inicio: nuevaFechaInicio,
-      fecha_hora_fin: nuevaFechaFin,
+      fecha_hora_inicio: fechaHoraInicio,
+      fecha_hora_fin: fechaHoraFin,
       url_etapa: ubicacion,
     };
     console.log("los datos de las actividades son: ", nuevaEtapa);
@@ -537,17 +717,44 @@ export default function DetalleEvento() {
       // Actualizar el estado con la nueva lista de etapas
       setListaEtapas([...listaEtapas, nuevaEtapa]);
       formActividades.resetFields();
-      setHoraReservada(null);
+      setMostrarInputURL(false);
+      setMostrarUbicacion(false);
+      setEstadoHoraInicio(false);
+      setEstadoHoraFin(false);
     }
   };
 
   const insertarRequisitos = (value) => {
-    if (value === "1") {
-     
-    } else if (value === "2") {
-      
+    const valorAnterior = form.getFieldValue("requisitos");
+
+    if (valorAnterior === undefined) {
+      if (value === "1") {
+        form.setFieldValue("requisitos", "- Certificado de estudiante");
+      } else if (value === "2") {
+        form.setFieldValue("requisitos", "- RUDE");
+      }
     } else {
-      
+      // Reemplaza la comparación con includes
+      if (valorAnterior.includes("- Código SIS")) {
+        if (value === "1") {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (value === "2") {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else {
+          form.setFieldValue("requisitos", "- Código SIS");
+        }
+      } else {
+        if (value === "1") {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        } else if (value === "2") {
+          form.setFieldValue("requisitos", "- RUDE");
+        } else {
+          // Lógica adicional si es necesario
+        }
+      }
     }
   };
 
@@ -569,20 +776,18 @@ export default function DetalleEvento() {
   const onChange = (value, dateString) => {
     // Verificar si dateString tiene un valor antes de intentar dividirlo
     if (dateString) {
-      var partesFecha = dateString.split(" ");
-
-      // Almacenar la fecha y la hora en variables separadas
-      var fechaInicio = partesFecha[0];
-      var horaInicio = partesFecha[1];
-
-      setFechaInicio(fechaInicio);
-      setHoraInicio(horaInicio);
+      setFechaInicio(dateString);
+      setEstadoHoraInicio(true);
     } else {
       // Si dateString es undefined, establecer las variables de estado como cadenas vacías
       setFechaFin(null);
       setHoraFin(null);
       setFechaInicio(null);
       setHoraInicio(null);
+      setEstadoHoraInicio(false);
+      setEstadoHoraFin(false);
+      formActividades.setFieldsValue({ HORA_INICIO: null });
+      formActividades.setFieldsValue({ HORA_FIN: null });
       formActividades.setFieldsValue({ FECHA_FIN: null });
     }
   };
@@ -590,20 +795,18 @@ export default function DetalleEvento() {
   const onChange2 = (value, dateString) => {
     // Verificar si dateString tiene un valor antes de intentar dividirlo
     if (dateString) {
-      var partesFecha = dateString.split(" ");
-
-      // Almacenar la fecha y la hora en variables separadas
-      var fechaFin = partesFecha[0];
-      var horaFin = partesFecha[1];
-
-      setFechaFin(fechaFin);
-      setHoraFin(horaFin);
+      setFechaFin(dateString);
+      console.log("la hora inicio es ", horaInicio);
+      if (horaInicio === null) {
+        setEstadoHoraFin(false);
+      } else {
+        setEstadoHoraFin(true);
+      }
     } else {
-      console.error(
-        "dateString es undefined. Asegúrate de que estás recibiendo la fecha correctamente."
-      );
+      setEstadoHoraFin(false);
       setFechaFin(null);
       setHoraFin(null);
+      formActividades.setFieldsValue({ HORA_FIN: null });
     }
   };
   const onOk = (value) => {
@@ -632,38 +835,6 @@ export default function DetalleEvento() {
     return current < minDate || current > maxDate;
   };
 
-  const obtenerHorasHabilitadas = () => {
-    const horasHabilitadas = [];
-    // Verificar si fechaInicio es igual a fechaFin
-    if (fechaInicio === fechaFin) {
-      if (horaInicio) {
-        const horaInicioArray = horaInicio.split(":");
-        const horaInicioNum = parseInt(horaInicioArray[0], 10);
-
-        if (!isNaN(horaInicioNum)) {
-          const horaFinBloqueo = 20; // Hora de fin del bloqueo hasta las 20:00
-
-          for (let i = horaInicioNum + 1; i <= horaFinBloqueo; i++) {
-            horasHabilitadas.push(i);
-          }
-        } else {
-          console.log("La hora de inicio no es un número válido.");
-        }
-      } else {
-        console.log(
-          "La hora de inicio no está definida. Asegúrate de establecerla correctamente."
-        );
-      }
-    } else {
-      // Si fechaInicio es diferente de fechaFin, habilitar las horas desde las 08:00 hasta las 20:00
-      for (let i = 8; i <= 20; i++) {
-        horasHabilitadas.push(i);
-      }
-    }
-
-    return horasHabilitadas;
-  };
-
   const obtenerListaFacilitadores = () => {
     axios
       .get("http://localhost:8000/api/lista-facilitadores")
@@ -679,7 +850,119 @@ export default function DetalleEvento() {
       .catch((error) => {
         console.error(error);
       });
-  }
+  };
+  const disabledTimeInicio = (now) => {
+    const currentHour = now.hour();
+
+    // Deshabilitar las horas antes de las 8 y después de las 20
+    const disabledHours = () => {
+      const hours = [];
+      for (let i = 0; i < 8; i++) {
+        hours.push(i);
+      }
+      for (let i = 21; i < 24; i++) {
+        hours.push(i);
+      }
+      return hours;
+    };
+
+    // Deshabilitar los minutos si la hora seleccionada es 20
+    const disabledMinutes = (selectedHour) => {
+      if (selectedHour === 20) {
+        const minutes = [];
+        for (let i = 1; i < 60; i++) {
+          minutes.push(i);
+        }
+        return minutes;
+      }
+      return [];
+    };
+
+    return {
+      disabledHours,
+      disabledMinutes,
+    };
+  };
+
+  const onChangeHoraInicio = (time, timeString) => {
+    console.log("LA hora es ", timeString);
+    setHoraInicio(timeString);
+    if (fechaFin !== null && timeString) {
+      setEstadoHoraFin(true);
+    } else {
+      setEstadoHoraFin(false);
+      formActividades.setFieldsValue({ HORA_FIN: null });
+    }
+  };
+
+  const onChangeHoraFin = (time, timeString) => {
+    setHoraFin(timeString);
+  };
+
+  const disabledTimeFin = (now) => {
+    if (fechaInicio === fechaFin) {
+      // Convertir horaInicio a un objeto de fecha
+      const newHoraInicio = moment(horaInicio, "HH:mm").add(1, "hour");
+      const inicioMinutes = newHoraInicio.minutes();
+      // Deshabilitar las horas antes de la nueva hora de inicio y después de las 20:00
+      const disabledHours = () => {
+        const hours = [];
+        for (let i = 0; i < newHoraInicio.hour(); i++) {
+          hours.push(i);
+        }
+        for (let i = 21; i < 24; i++) {
+          hours.push(i);
+        }
+        return hours;
+      };
+
+      // Deshabilitar los minutos si la nueva hora de inicio es 20:00
+      const disabledMinutes = (selectedHour) => {
+        if (selectedHour === 20) {
+          const minutes = [];
+          for (let i = 1; i < 60; i++) {
+            minutes.push(i);
+          }
+          return minutes;
+        }
+        return [];
+      };
+
+      return {
+        disabledHours,
+        disabledMinutes,
+      };
+    } else {
+      // Lógica actual para fechas diferentes
+      const currentHour = now.hour();
+      const disabledHours = () => {
+        const hours = [];
+        for (let i = 0; i < 8; i++) {
+          hours.push(i);
+        }
+        for (let i = 21; i < 24; i++) {
+          hours.push(i);
+        }
+        return hours;
+      };
+
+      const disabledMinutes = (selectedHour) => {
+        if (selectedHour === 20) {
+          const minutes = [];
+          for (let i = 1; i < 60; i++) {
+            minutes.push(i);
+          }
+          return minutes;
+        }
+        return [];
+      };
+
+      return {
+        disabledHours,
+        disabledMinutes,
+      };
+    }
+  };
 
   return (
     <div>
@@ -701,7 +984,7 @@ export default function DetalleEvento() {
         }}
       >
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
-        <Column title="Tipo" dataIndex="TIPO_EVENTO" key="tipo_evento" />
+        <Column title="Tipo" dataIndex="NOMBRE_TIPO_EVENTO" key="tipo_evento" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
         <Column
           title="Fecha inicio"
@@ -819,89 +1102,98 @@ export default function DetalleEvento() {
                     </Form.Item>
                   </div>
                   <div className="etapas-columna2">
-                    <Form.Item
-                      label="Fecha y hora de inicio"
-                      name="FECHA_INICIO"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Por favor, seleccione una fecha",
-                        },
-                      ]}
-                    >
-                      <DatePicker
-                        placeholder="Seleccione una fecha"
-                        className="etapa-fecha"
-                        showTime={{
-                          defaultValue: moment("08:00", "HH:mm"),
-                          format: "HH:mm", // Muestra solo horas y minutos
-                          minuteStep: 1,
-                          disabledHours: () => {
-                            const currentHour = new Date().getHours();
-                            // Deshabilita las horas antes de las 8 y después de las 20
-                            return Array.from({ length: 24 }, (_, i) =>
-                              i < 8 || i > 20 ? i : null
-                            );
+                    <div className="columna-fechas">
+                      <Form.Item
+                        label="Fecha y hora de inicio"
+                        name="FECHA_INICIO"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Por favor, seleccione una fecha",
                           },
-                          disabledMinutes: (selectedHour) => {
-                            // Si la hora seleccionada es 20, deshabilita los minutos que no son 00
-                            if (selectedHour === 20) {
-                              return Array.from({ length: 60 }, (_, i) =>
-                                i !== 0 ? i : null
-                              );
-                            }
+                        ]}
+                      >
+                        <DatePicker
+                          placeholder="Seleccione una fecha"
+                          className="etapa-fecha"
+                          format="YYYY-MM-DD"
+                          onChange={onChange}
+                          onOk={onOk}
+                          disabledDate={disabledDate}
+                          showNow={false}
+                          inputReadOnly="false"
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Fecha y hora de fin"
+                        name="FECHA_FIN"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Por favor, seleccione una hora",
                           },
-                        }}
-                        format="YYYY-MM-DD HH:mm"
-                        onChange={onChange}
-                        onOk={onOk}
-                        disabledDate={disabledDate}
-                        showNow={false}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Fecha y hora de fin"
-                      name="FECHA_FIN"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Por favor, seleccione una fecha",
-                        },
-                      ]}
-                    >
-                      <DatePicker
-                        placeholder="Seleccione una fecha"
-                        className="etapa-fecha"
-                        showTime={{
-                          format: "HH:mm",
-                          minuteStep: 1,
-                          disabledHours: () => {
-                            return Array.from({ length: 24 }, (_, i) =>
-                              obtenerHorasHabilitadas().indexOf(i) === -1
-                                ? i
-                                : null
-                            );
+                        ]}
+                      >
+                        <DatePicker
+                          placeholder="Seleccione una fecha"
+                          className="etapa-fecha"
+                          format="YYYY-MM-DD"
+                          onChange={onChange2}
+                          onOk={onOk2}
+                          disabledDate={disabledDate2}
+                          showNow={false}
+                          inputReadOnly="false"
+                        />
+                      </Form.Item>
+                    </div>
+                    <div className="columna-horas">
+                      <Form.Item
+                        name="HORA_INICIO"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Por favor, seleccione una hora",
                           },
-                          disabledMinutes: (selectedHour) => {
-                            if (selectedHour === 20) {
-                              return Array.from({ length: 60 }, (_, i) =>
-                                i !== 0 ? i : null
-                              );
-                            }
+                        ]}
+                      >
+                        <TimePicker
+                          placeholder="Hora inicio"
+                          disabledTime={disabledTimeInicio}
+                          onChange={onChangeHoraInicio}
+                          format="HH:mm"
+                          showNow={false}
+                          inputReadOnly="false"
+                          disabled={!estadoHoraInicio}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="HORA_FIN"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Por favor, seleccione una hora",
                           },
-                        }}
-                        format="YYYY-MM-DD HH:mm"
-                        onChange={onChange2}
-                        onOk={onOk2}
-                        disabledDate={disabledDate2}
-                        showNow={false}
-                      />
-                    </Form.Item>
-                    <Form.Item>
-                      <Button className="boton_aniadir_etapa" htmlType="submit">
+                        ]}
+                      >
+                        <TimePicker
+                          placeholder="Hora fin"
+                          disabledTime={disabledTimeFin}
+                          onChange={onChangeHoraFin}
+                          format="HH:mm"
+                          showNow={false}
+                          inputReadOnly="false"
+                          disabled={!estadoHoraFin}
+                        />
+                      </Form.Item>
+                      <Button
+                        type="primary"
+                        className="boton_aniadir_etapa"
+                        htmlType="submit"
+                      >
                         Añadir etapa
                       </Button>
-                    </Form.Item>
+                    </div>
                   </div>
                 </div>
                 <Table
@@ -957,10 +1249,20 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Entrenador requerido" name="entrenador">
+                      <Form.Item
+                        label="Entrenador requerido"
+                        name="entrenador"
+                        rules={[
+                          {
+                            required: estadoEntrenador,
+                            message: "Por favor, seleccione una opción",
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeEntrenador}
                           value={valueEntrenador}
+                          disabled={!estadoEntrenador}
                         >
                           <Radio value={1}>Si</Radio>
                           <Radio value={2}>No</Radio>
@@ -1032,7 +1334,7 @@ export default function DetalleEvento() {
                         <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos" name="requisitos">
-                        <TextArea defaultValue={requisitos}></TextArea>
+                        <TextArea value={requisitos} readOnly></TextArea>
                       </Form.Item>
                       <Form.Item
                         label="Bases del evento reglas y premios"
@@ -1131,10 +1433,20 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Entrenador requerido" name="entrenador">
+                      <Form.Item
+                        label="Entrenador requerido"
+                        name="entrenador"
+                        rules={[
+                          {
+                            required: estadoEntrenador,
+                            message: "Por favor, seleccione una opción",
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeEntrenador}
                           value={valueEntrenador}
+                          disabled={!estadoEntrenador}
                         >
                           <Radio value={1}>Si</Radio>
                           <Radio value={2}>No</Radio>
@@ -1168,6 +1480,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
+                          onChange={insertarRequisitos}
                           options={[
                             {
                               value: "1",
@@ -1201,7 +1514,7 @@ export default function DetalleEvento() {
                         <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos" name="requisitos">
-                        <TextArea showCount></TextArea>
+                        <TextArea value={requisitos} readOnly></TextArea>
                       </Form.Item>
                       <Form.Item
                         label="Bases del evento reglas y premios"
@@ -1300,10 +1613,20 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Entrenador requerido" name="entrenador">
+                      <Form.Item
+                        label="Entrenador requerido"
+                        name="entrenador"
+                        rules={[
+                          {
+                            required: estadoEntrenador,
+                            message: "Por favor, seleccione una opción",
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeEntrenador}
                           value={valueEntrenador}
+                          disabled={!estadoEntrenador}
                         >
                           <Radio value={1}>Si</Radio>
                           <Radio value={2}>No</Radio>
@@ -1337,7 +1660,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
-                          placeholder= "Seleccione un facilitador"
+                          placeholder="Seleccione un facilitador"
                           options={listaFacilitadores}
                         />
                       </Form.Item>
@@ -1354,6 +1677,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
+                          onChange={insertarRequisitos}
                           options={[
                             {
                               value: "1",
@@ -1387,7 +1711,7 @@ export default function DetalleEvento() {
                         <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos" name="requisitos">
-                        <TextArea showCount></TextArea>
+                        <TextArea value={requisitos} readOnly></TextArea>
                       </Form.Item>
                       <Form.Item label="Contenido del taller" name="bases">
                         <Upload
@@ -1483,10 +1807,20 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Entrenador requerido" name="entrenador">
+                      <Form.Item
+                        label="Entrenador requerido"
+                        name="entrenador"
+                        rules={[
+                          {
+                            required: estadoEntrenador,
+                            message: "Por favor, seleccione una opción",
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeEntrenador}
                           value={valueEntrenador}
+                          disabled={!estadoEntrenador}
                         >
                           <Radio value={1}>Si</Radio>
                           <Radio value={2}>No</Radio>
@@ -1540,6 +1874,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
+                          onChange={insertarRequisitos}
                           options={[
                             {
                               value: "1",
@@ -1573,7 +1908,7 @@ export default function DetalleEvento() {
                         <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos" name="requisitos">
-                        <TextArea showCount></TextArea>
+                        <TextArea value={requisitos} readOnly></TextArea>
                       </Form.Item>
                       <Form.Item
                         label="Contenido del entrenamiento"
@@ -1669,15 +2004,6 @@ export default function DetalleEvento() {
                           <Radio value={2}>Abierto</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Entrenador requerido" name="entrenador">
-                        <Radio.Group
-                          onChange={onChangeEntrenador}
-                          value={valueEntrenador}
-                        >
-                          <Radio value={1}>Si</Radio>
-                          <Radio value={2}>No</Radio>
-                        </Radio.Group>
-                      </Form.Item>
                       <Form.Item
                         label="Dirigido a"
                         name="categoria"
@@ -1690,6 +2016,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
+                          onChange={insertarRequisitos}
                           options={[
                             {
                               value: "1",
@@ -1729,7 +2056,7 @@ export default function DetalleEvento() {
                         />
                       </Form.Item>
                       <Form.Item label="Requisitos" name="requisitos">
-                        <TextArea showCount></TextArea>
+                        <TextArea value={requisitos} readOnly></TextArea>
                       </Form.Item>
                     </div>
                   </div>
@@ -1797,10 +2124,20 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Entrenador requerido" name="entrenador">
+                      <Form.Item
+                        label="Entrenador requerido"
+                        name="entrenador"
+                        rules={[
+                          {
+                            required: estadoEntrenador,
+                            message: "Por favor, seleccione una opción",
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeEntrenador}
                           value={valueEntrenador}
+                          disabled={!estadoEntrenador}
                         >
                           <Radio value={1}>Si</Radio>
                           <Radio value={2}>No</Radio>
@@ -1868,6 +2205,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
+                          onChange={insertarRequisitos}
                           options={[
                             {
                               value: "1",
@@ -1899,7 +2237,7 @@ export default function DetalleEvento() {
                         <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos" name="requisitos">
-                        <TextArea></TextArea>
+                        <TextArea value={requisitos} readOnly></TextArea>
                       </Form.Item>
                     </div>
                   </div>
@@ -1968,10 +2306,20 @@ export default function DetalleEvento() {
                           <Radio value={2}>Individual</Radio>
                         </Radio.Group>
                       </Form.Item>
-                      <Form.Item label="Entrenador requerido" name="entrenador">
+                      <Form.Item
+                        label="Entrenador requerido"
+                        name="entrenador"
+                        rules={[
+                          {
+                            required: estadoEntrenador,
+                            message: "Por favor, seleccione una opción",
+                          },
+                        ]}
+                      >
                         <Radio.Group
                           onChange={onChangeEntrenador}
                           value={valueEntrenador}
+                          disabled={!estadoEntrenador}
                         >
                           <Radio value={1}>Si</Radio>
                           <Radio value={2}>No</Radio>
@@ -2054,6 +2402,7 @@ export default function DetalleEvento() {
                       >
                         <Select
                           allowClear
+                          onChange={insertarRequisitos}
                           options={[
                             {
                               value: "1",
@@ -2085,7 +2434,7 @@ export default function DetalleEvento() {
                         <Slider min={20} max={100} />
                       </Form.Item>
                       <Form.Item label="Requisitos" name="requisitos">
-                        <TextArea showCount></TextArea>
+                        <TextArea value={requisitos} readOnly></TextArea>
                       </Form.Item>
                     </div>
                   </div>

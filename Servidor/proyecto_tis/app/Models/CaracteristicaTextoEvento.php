@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class CaracteristicaTextoEvento extends Model
 {
     protected $table = 'CARACTERISTICA_TEXTO_EVENTO';
+    protected $primaryKey = 'id_ct_e';
     public $timestamps = false;
-    protected $fillable = ['valor_texto_evento', 'id_caracteristica_evento', 'id_evento'];
+    protected $fillable = ['id_ct_e', 'valor_texto_evento', 'id_caracteristica_evento', 'id_evento'];
     use HasFactory;
 }
