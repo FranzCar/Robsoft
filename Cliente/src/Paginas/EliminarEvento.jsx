@@ -34,7 +34,7 @@ export default function EliminarEvento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-modificables")
+      .get("http://localhost:8000/api/eventos-eliminables")
       .then((response) => {
         setData(response.data);
         console.log("los datos de la base de daatos son ", response)
