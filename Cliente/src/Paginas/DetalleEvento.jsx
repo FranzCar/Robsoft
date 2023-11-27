@@ -727,25 +727,33 @@ export default function DetalleEvento() {
   const insertarRequisitos = (value) => {
     const valorAnterior = form.getFieldValue("requisitos");
 
-    // Reemplaza la comparación con includes
-    if (valorAnterior.includes("- Código SIS")) {
-      if (value === "1") {
-        form.setFieldValue(
-          "requisitos",
-          "- Código SIS - Certificado de estudiante"
-        );
-      } else if (value === "2") {
-        form.setFieldValue("requisitos", "- Código SIS - RUDE");
-      } else {
-        form.setFieldValue("requisitos", "- Código SIS");
-      }
-    } else {
+    if (valorAnterior === undefined) {
       if (value === "1") {
         form.setFieldValue("requisitos", "- Certificado de estudiante");
       } else if (value === "2") {
         form.setFieldValue("requisitos", "- RUDE");
+      }
+    } else {
+      // Reemplaza la comparación con includes
+      if (valorAnterior.includes("- Código SIS")) {
+        if (value === "1") {
+          form.setFieldValue(
+            "requisitos",
+            "- Código SIS - Certificado de estudiante"
+          );
+        } else if (value === "2") {
+          form.setFieldValue("requisitos", "- Código SIS - RUDE");
+        } else {
+          form.setFieldValue("requisitos", "- Código SIS");
+        }
       } else {
-        // Lógica adicional si es necesario
+        if (value === "1") {
+          form.setFieldValue("requisitos", "- Certificado de estudiante");
+        } else if (value === "2") {
+          form.setFieldValue("requisitos", "- RUDE");
+        } else {
+          // Lógica adicional si es necesario
+        }
       }
     }
   };
@@ -1994,25 +2002,6 @@ export default function DetalleEvento() {
                         <Radio.Group onChange={onChangeTorneo} value={value4}>
                           <Radio value={1}>Cerrado</Radio>
                           <Radio value={2}>Abierto</Radio>
-                        </Radio.Group>
-                      </Form.Item>
-                      <Form.Item
-                        label="Entrenador requerido"
-                        name="entrenador"
-                        rules={[
-                          {
-                            required: estadoEntrenador,
-                            message: "Por favor, seleccione una opción",
-                          },
-                        ]}
-                      >
-                        <Radio.Group
-                          onChange={onChangeEntrenador}
-                          value={valueEntrenador}
-                          disabled={!estadoEntrenador}
-                        >
-                          <Radio value={1}>Si</Radio>
-                          <Radio value={2}>No</Radio>
                         </Radio.Group>
                       </Form.Item>
                       <Form.Item
