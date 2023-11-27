@@ -83,7 +83,7 @@ export default function Evento() {
         }}
       >
         <Column title="T&iacute;tulo" dataIndex="TITULO" key="titulo" />
-        <Column title="Tipo" dataIndex="TIPO_EVENTO" key="titulo" />
+        <Column title="Tipo" dataIndex="NOMBRE_TIPO_EVENTO" key="titulo" />
         <Column title="Estado" dataIndex="ESTADO" key="estado" />
         <Column
           title="Fecha inicio"
@@ -132,7 +132,7 @@ export default function Evento() {
             <p>{info.TITULO}</p>
             <br />
             <h3>Tipo :</h3>
-            <p>{info.TIPO_EVENTO}</p>
+            <p>{info.NOMBRE_TIPO_EVENTO}</p>
             <br />
             <h3>Fecha inicio:</h3>
             <p>{info.FECHA_INICIO}</p>
