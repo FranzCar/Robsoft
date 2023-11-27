@@ -465,7 +465,7 @@ private function eliminarInscripciones($evento)
     public function listaEliminables() {
         $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
                     ->where('MOSTRAR', 1)
-                    ->where('ESTADO', ['En espera', 'Listo', 'Inscrito'])
+                    ->whereIn('ESTADO', ['En espera', 'Listo', 'Inscrito'])
                     ->orderBy('id_evento', 'desc')
                     ->get();
 
