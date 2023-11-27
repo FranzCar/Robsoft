@@ -55,13 +55,74 @@ class EstudianteCaracteristicasHandler implements PersonaCaracteristicasHandler 
             }
         }
         
-        // Realizar cualquier otra operación necesaria después de guardar los datos
+    }
+    public function actualizarCaracteristicas($persona, $request) {
+        $caracteristicasEstudiante = [
+            'semestre' => 1,
+            'talla_polera' => 2,
+            'codigoSIS' => 3,
+            'fecha_nacimiento' => 4,
+            'foto' => 5,
+            'certificado_estudiante' => 6,
+        ];
+    
+        // Actualizar características de texto
+        foreach (['semestre', 'talla_polera', 'codigoSIS'] as $caracteristica) {
+            $valor = $request->input($caracteristica);
+            if ($valor !== null) {
+                // Intenta encontrar el registro existente
+                $registroExistente = CaracteristicaTextoPersona::where('id_caract_per', $caracteristicasEstudiante[$caracteristica])
+                                                               ->where('id_persona', $persona->id_persona)
+                                                               ->first();
+    
+                if ($registroExistente) {
+                    // Actualiza el registro existente
+                    $registroExistente->valor_texto_persona = $valor;
+                    $registroExistente->save();
+                } else {
+                    // Crea un nuevo registro
+                    CaracteristicaTextoPersona::create([
+                        'valor_texto_persona' => $valor,
+                        'id_caract_per' => $caracteristicasEstudiante[$caracteristica],
+                        'id_persona' => $persona->id_persona,
+                    ]);
+                }
+            }
+        }
+    
+        // Actualizar la fecha de nacimiento
+        $valorFechaNacimiento = $request->input('fecha_nacimiento');
+        if ($valorFechaNacimiento !== null) {
+            CaracteristicaFechaPersona::updateOrCreate(
+                [
+                    'id_caract_per' => $caracteristicasEstudiante['fecha_nacimiento'],
+                    'id_persona' => $persona->id_persona,
+                ],
+                ['valor_fecha_persona' => $valorFechaNacimiento]
+          );
+        }
+    
+        // Actualizar características de longtext
+        foreach(['foto', 'certificado_estudiante'] as $caracteristica) {
+            $valor = $request->input($caracteristica);
+            if ($valor !== null) {
+                CaracteristicaLongtextPersona::updateOrCreate(
+                    [
+                        'id_caract_per' => $caracteristicasEstudiante[$caracteristica],
+                        'id_persona' => $persona->id_persona,
+                    ],
+                    ['valor_longtext_persona' => $valor]
+                );
+            }
+        }
     }
 }
+    
 
 //ejemplo
 class ProfesorCaracteristicasHandler implements PersonaCaracteristicasHandler {
     public function guardarCaracteristicas($persona, $request) {
         // Lógica para guardar las características de un profesor
     }
+    
 }

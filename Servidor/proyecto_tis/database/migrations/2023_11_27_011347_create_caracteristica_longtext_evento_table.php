@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('caracteristica_texto_evento', function (Blueprint $table) {
-            $table->string('valor_texto_evento', 50)->nullable();
+        Schema::create('caracteristica_longtext_evento', function (Blueprint $table) {
+            $table->integer('id_clt_e', true);
+            $table->longText('valor_longtext_evento')->nullable();
             $table->integer('id_caracteristica_evento')->nullable()->index('id_caracteristica_evento');
             $table->integer('id_evento')->nullable()->index('id_evento');
         });
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('caracteristica_texto_evento');
+        Schema::dropIfExists('caracteristica_longtext_evento');
     }
 };

@@ -75,6 +75,19 @@ class PersonaController extends Controller
     
         return $participantes;           
     }
+    public function actualizarCaracteristicas(Request $request, $id) {
+        $persona = Persona::findOrFail($id); // Obtiene la persona o falla si no existe
+        DB::beginTransaction();
+        try {
+            $handler = PersonaCaracteristicasFactory::getHandler('estudiante');
+            $handler->actualizarCaracteristicas($persona, $request);
     
+            DB::commit();
+            return response()->json(['message' => 'Características actualizadas con éxito']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error al actualizar las características', 'error' => $e->getMessage()], 500);
+        }
+    }
 }
 
