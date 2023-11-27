@@ -43,7 +43,10 @@ class EquipoController extends Controller {
                     ]);
                 }
     
-                return response()->json(['message' => 'Equipo y participantes guardados con éxito']);
+                return response()->json([
+                    'message' => 'Equipo y participantes guardados con éxito',
+                    'id_equipo' => $equipo->id_equipo
+                ]);
             } catch (\Exception $e) {
                 \Log::error('Error al guardar equipo: ' . $e->getMessage());
                 DB::rollBack();
