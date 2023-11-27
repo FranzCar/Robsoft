@@ -51,3 +51,4 @@ Route::put('actualizar-participante/{id}',[PersonaController::class, 'actualizar
 Route::post('guardar-coach',[PersonaController::class, 'guardarCoach']);
 Route::get('eventos-eliminables', [EventoController::class, 'listaEliminables']);
 Route::post('inscribir-equipo',[InscripcionController::class, 'inscribirEquipo']);
+Route::get('eventos-inscritos', [EventoController::class, 'listaReporteInscritosEvento']);

@@ -626,5 +626,14 @@ private function eliminarCodigosVerificacion($evento)
         }
                    
     }
+    public function listaReporteInscritosEvento() {
+        $eventos = Evento::with(['tipoEvento', 'auspiciadores', 'organizadores'])
+                    ->where('MOSTRAR', 1)
+                    ->whereIn('ESTADO', ['Inscrito', 'En curso', 'Terminado'])
+                    ->orderBy('id_evento', 'desc')
+                    ->get();
+
+        return $this->transformarEventos($eventos);
+    }
 }
 
