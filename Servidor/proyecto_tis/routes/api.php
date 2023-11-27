@@ -49,3 +49,4 @@ Route::get('lista-tipo-eventos',[TipoEventoController::class, 'listaTipoEventos'
 Route::post('inscribir-individual',[InscripcionController::class, 'inscribirEstudiante']);
 Route::put('actualizar-participante/{id}',[PersonaController::class, 'actualizarCaracteristicas']);
 Route::post('guardar-coach',[PersonaController::class, 'guardarCoach']);
+Route::get('eventos-eliminables', [EventoController::class, 'listaEliminables']);
