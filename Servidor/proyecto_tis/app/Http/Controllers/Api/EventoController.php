@@ -13,6 +13,8 @@ use App\Models\CaracteristicaBooleanEvento;
 use App\Models\Inscripcion;
 use App\Models\Etapa;
 use App\Models\Persona;
+use App\Models\RolPersonaEquipo;
+use App\Models\RolPersona;
 use App\Notifications\EventoNotificacion;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -350,6 +352,8 @@ public function quitarEvento($id)
     try {
         $evento = Evento::findOrFail($id);
 
+        $this->eliminarCodigosVerificacion($evento);
+
         switch ($evento->ESTADO) {
             case 'En espera':
                 // Si el evento está en estado 'En espera', eliminar directamente
@@ -361,7 +365,10 @@ public function quitarEvento($id)
                 $this->eliminarEvento($evento);
                 break;
             case 'Inscrito':
-                // Si el evento está en estado 'Inscrito', eliminar inscripciones, etapas y características del evento
+                $participantes = $this->obtenerParticipantesEvento($evento);
+                foreach ($participantes as $participante) {
+                    Notification::send($participante, new EventoNotificacion($evento, 'eliminado'));
+                }
                 $this->eliminarInscripciones($evento);
                 $this->eliminarEtapaYCaracteristicas($evento);
                 $this->eliminarEvento($evento);
@@ -378,6 +385,44 @@ public function quitarEvento($id)
     }
 }
 
+private function obtenerParticipantesEvento($evento)
+{
+    $participantes = [];
+
+    // Obtener inscripciones individuales y de equipos para el evento
+    $inscripciones = Inscripcion::where('id_evento', $evento->id_evento)->get();
+
+    foreach ($inscripciones as $inscripcion) {
+        if ($inscripcion->id_rol_persona) {
+            // Obtener participante individual
+            $rolPersona = RolPersona::where('id_rol_persona', $inscripcion->id_rol_persona)
+                                    ->first();
+            if ($rolPersona && $rolPersona->persona) {
+                $participantes[] = $rolPersona->persona;
+            }
+        }
+
+        if ($inscripcion->id_equipo) {
+            // Obtener miembros del equipo
+            $miembrosEquipo = RolPersonaEquipo::where('id_equipo', $inscripcion->id_equipo)
+                                              ->get();
+
+            foreach ($miembrosEquipo as $miembro) {
+                $rolPersona = RolPersona::where('id_rol_persona', $miembro->id_rol_persona)
+                                        ->first();
+                if ($rolPersona && $rolPersona->persona) {
+                    $participantes[] = $rolPersona->persona;
+                }
+            }
+        }
+    }
+
+    // Eliminar duplicados (en caso de que una persona esté inscrita individualmente y también como parte de un equipo)
+    $participantes = array_unique($participantes, SORT_REGULAR);
+
+    return $participantes;
+}
+
 private function eliminarEvento($evento)
 {
     try {
@@ -389,8 +434,6 @@ private function eliminarEvento($evento)
 
         // Eliminar relaciones en ROL_PERSONA_EN_EVENTO
         DB::table('ROL_PERSONA_EN_EVENTO')->where('id_evento', $evento->id_evento)->delete();
-
-        // Agrega aquí la eliminación de otras relaciones si es necesario
 
         // Eliminar el evento
         $evento->delete();
@@ -407,18 +450,32 @@ private function eliminarEvento($evento)
 
 private function eliminarEtapaYCaracteristicas($evento)
 {
+    // Obtener todas las etapas asociadas al evento
+    $etapas = Etapa::where('id_evento', $evento->id_evento)->get();
+
+    foreach ($etapas as $etapa) {
+        // Eliminar todas las ubicaciones asociadas a cada etapa
+        DB::table('ubicacion_etapa')->where('id_etapa', $etapa->id_etapa)->delete();
+    }
     // Eliminar etapas y características asociadas al evento
-    Etapa::where('id_evento', $evento->id)->delete();
-    CaracteristicaLongtextEvento::where('id_evento', $evento->id)->delete();
-    CaracteristicaTextoEvento::where('id_evento', $evento->id)->delete();
-    CaracteristicaIntEvento::where('id_evento', $evento->id)->delete();
-    CaracteristicaFechaEvento::where('id_evento', $evento->id)->delete();
+    Etapa::where('id_evento', $evento->id_evento)->delete();
+    CaracteristicaLongtextEvento::where('id_evento', $evento->id_evento)->delete();
+    CaracteristicaTextoEvento::where('id_evento', $evento->id_evento)->delete();
+    CaracteristicaIntEvento::where('id_evento', $evento->id_evento)->delete();
+    CaracteristicaFechaEvento::where('id_evento', $evento->id_evento)->delete();
+    CaracteristicaBooleanEvento::where('id_evento', $evento->id_evento)->delete();
+    CaracteristicaDecimalEvento::where('id_evento', $evento->id_evento)->delete();
 }
 
 private function eliminarInscripciones($evento)
 {
     // Eliminar inscripciones asociadas al evento
-    Inscripcion::where('id_evento', $evento->id)->delete();
+    Inscripcion::where('id_evento', $evento->id_evento)->delete();
+}
+private function eliminarCodigosVerificacion($evento)
+{
+    // Eliminar códigos de verificación asociados al evento
+    DB::table('CODIGOS_VERIFICACION')->where('id_evento', $evento->id_evento)->delete();
 }
 
     public function actualizarEstadoTodos()
@@ -562,16 +619,12 @@ private function eliminarInscripciones($evento)
             return response()->json(['message' => 'Error al guardar las características', 'error' => $e->getMessage()], 500);
         }
     }
-    public function enviarNotificacion(Request $request)
+    private function notificarParticipantes($participantes, $evento, $tipo)
     {
-        $persona = Persona::findOrFail($request->persona_id);
-        $evento = Evento::findOrFail($request->evento_id);
-        $tipo = $request->tipo; // 'eliminado' o 'modificado'
-
-        Notification::send($persona, new EventoNotificacion($evento, $tipo));
-
-        return response()->json(['message' => 'Notificación enviada con éxito.']);
-    }
+        foreach ($participantes as $participante) {
+            Notification::send($participante, new EventoNotificacion($evento, $tipo));
+        }
                    
+    }
 }
 

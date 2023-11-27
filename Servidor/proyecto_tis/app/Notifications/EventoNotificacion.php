@@ -42,22 +42,6 @@ class EventoNotificacion  extends Notification
                 ->action('Visitar ICPC UMSS', url('/'));
         }
     }
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
-    /*public function toMail($notifiable)
-    {
-        $code = random_int(100000, 999999);
-    return (new MailMessage)
-        ->line('La introducción a la notificación.')
-        ->line('Código de verificación: ' . $code)
-        ->action('Verificar', url('/'))
-        ->line('¡Gracias por utilizar nuestra aplicación!');
-    }
-    */
 
     public function toArray($notifiable)
     {
