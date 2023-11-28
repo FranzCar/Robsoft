@@ -510,7 +510,9 @@ export default function Participante() {
         CORREO: participanteEncontrado.correo_electronico,
         TELEFONO: participanteEncontrado.telefono,
         GENERO: participanteEncontrado.genero,
-        FECHA: participanteEncontrado.fecha_nacimiento,
+       /* FECHA: participanteEncontrado.fecha_nacimiento,*/
+       INSTITUCION: participanteEncontrado.id_institucion,
+       CODIGOSIS:participanteEncontrado.codigoSIS,
       };
       form.setFieldsValue(datos);
       formCI.resetFields();
@@ -1334,7 +1336,7 @@ export default function Participante() {
                   style={{
                     width: "200px",
                     maxWidth:
-                      "100%" /*pointerEvents: verificado || ciEncontrado ? "none" : "auto",*/,
+                      "100%" ,pointerEvents: verificado ? "none" : "auto",
                   }}
                   placeholder="Selecciona una fecha"
                   disabledDate={disabledDate}
@@ -1456,9 +1458,9 @@ export default function Participante() {
                   placeholder="Seleccione una institución."
                   options={instituciones}
                   onChange={onInstitutionChange}
-                  /*style={{
+                  style={{
                     pointerEvents: verificado || ciEncontrado ? "none" : "auto",
-                  }}*/
+                  }}
                 />
               </Form.Item>
               <Form.Item label="Semestre" name="SEMESTRE">
@@ -1481,6 +1483,7 @@ export default function Participante() {
                   minLength={9}
                   onKeyPress={onlyNumbers}
                   disabled={isInstitucionDisabled}
+                  readOnly={verificado || ciEncontrado}
                 ></Input>
               </Form.Item>
               <Form.Item label="Talla de polera" name="TALLA_POLERA">
