@@ -961,10 +961,8 @@ export default function Participante() {
     useState(false);
   const [formNuevoParticipante] = Form.useForm();
   const [verificadoEntrenador, setVerificadoEntrenador] = useState(false);
-  const [correoVerificacionEntrenador, setCorreoVerificacionEntrenador] =
-    useState("");
-  const [modalVerificarCodigoEntrenador, setModalVerificarCodigoEntrenador] =
-    useState(false);
+  const [correoVerificacionEntrenador, setCorreoVerificacionEntrenador] =useState("");
+  const [modalVerificarCodigoEntrenador, setModalVerificarCodigoEntrenador] =useState(false);
 
   const datosParticipanteRegistro = (values) => {
     const datos = {
@@ -1007,8 +1005,7 @@ export default function Participante() {
     });
   };
 
-  const registrarNuevoParticipante = (values) => {
-    console.log("Formulario enviado:", values);
+  
     //guardar nuevo participante
     const confirmSaveNuevo = (values) => {
       const datos = datosParticipante(values);
@@ -1942,14 +1939,14 @@ export default function Participante() {
               value={searchEntrenador}
               onSearch={onSearchEntrenador}
               onChange={(e) => onSearchEntrenador(e.target.value)}
-              maxLength={30}
+              maxLength={8}
               allowClear
             />
           </div>
           <Form layout="vertical">
-            <Form.Input name="resultadoBusquedaEntrenador">
+            <Form.Item name="resultadoBusquedaEntrenador">
               <Input />
-            </Form.Input>
+            </Form.Item>
             <Button onClick={onSearchEntrenador}>Buscar</Button>
             <Form.Item label="Nombre del Entrenador">
               {datoFiltradoEntrenador.slice(0, 3).map((item) => (
@@ -2296,4 +2293,3 @@ export default function Participante() {
       </div>
     );
   };
-}
