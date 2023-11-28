@@ -78,6 +78,7 @@ export default function DetalleEvento() {
   const [horaReservada, setHoraReservada] = useState(null);
   const [listaHorarios, setListaHorarios] = useState([]);
   const [fechaInicioBD, setFechaInicioBD] = useState(null);
+  const [fechaFinBD, setFechaFinBD] = useState(null);
   const [requisitos, setRequisitos] = useState("");
   const [mostrarInputURL, setMostrarInputURL] = useState(false);
   const [mostrarUbicacion, setMostrarUbicacion] = useState(false);
@@ -120,6 +121,7 @@ export default function DetalleEvento() {
         setFileList([]);
         setHoraReservada(null);
         setFechaInicioBD(null);
+        setFechaFinBD(null);
         setFechaInicio(null);
         setFechaFin(null);
         setHoraInicio(null);
@@ -235,7 +237,7 @@ export default function DetalleEvento() {
       axios
         .post(`http://localhost:8000/api/detallar-evento/${id}`, datos)
         .then((response) => {
-          message.success("Los detalles del evento se guardo correctamente");
+          message.success("Los detalles del evento se guardaron correctamente");
           obtenerDatos();
           setMostrarPestanias(false);
           setMostrarFormEntrenamiento(false);
@@ -249,6 +251,7 @@ export default function DetalleEvento() {
           setFileList([]);
           setHoraReservada(null);
           setFechaInicioBD(null);
+          setFechaFinBD(null);
           setFechaInicio(null);
           setFechaFin(null);
           setHoraInicio(null);
@@ -325,6 +328,7 @@ export default function DetalleEvento() {
   const showDetalle = (record) => {
     console.log("El record es ", record);
     setFechaInicioBD(record.FECHA_INICIO);
+    setFechaFinBD(record.FECHA_FIN);
     setIdEvento(record.id_evento);
     const tipoEvento = record.TIPO_EVENTO;
     setMostrarPestanias(true);
@@ -633,6 +637,7 @@ export default function DetalleEvento() {
         setMostrarFormTaller(false);
         setMostrarFormTorneo(false);
         setFechaInicioBD(null);
+        setFechaFinBD(null);
         form.resetFields();
       },
       onCancel() {},
@@ -712,7 +717,7 @@ export default function DetalleEvento() {
 
     if (etapaExistente) {
       // Mostrar un mensaje indicando que la etapa ya existe
-      message.error("La etapa ya se encuentra añadida");
+      message.error("La actividad ya se encuentra añadida");
     } else {
       // Actualizar el estado con la nueva lista de etapas
       setListaEtapas([...listaEtapas, nuevaEtapa]);
@@ -752,22 +757,22 @@ export default function DetalleEvento() {
         } else if (value === "2") {
           form.setFieldValue("requisitos", "- RUDE");
         } else {
-          // Lógica adicional si es necesario
+          form.resetFields(["requisitos"])
         }
       }
     }
   };
 
   const disabledDate = (current) => {
-    // Establecemos la fecha mínima como la fecha de inicio proveniente de la base de datos
+    // Establecemos la fecha de inicio proveniente de la base de datos
     const minDate = new Date(fechaInicioBD);
     minDate.setDate(minDate.getDate());
 
-    // Establecemos la fecha máxima como 180 días después de la fecha de inicio
-    const maxDate = new Date(minDate);
-    maxDate.setDate(maxDate.getDate() + 180);
+    // Establecemos la fecha de finalización proveniente de la base de datos
+    const maxDate = new Date(fechaFinBD);
+    maxDate.setDate(maxDate.getDate() + 1);
 
-    // Solo permitimos fechas dentro del rango [minDate, maxDate]
+    // Permitimos fechas dentro del rango [minDate, maxDate]
     return current < minDate || current > maxDate;
   };
 
@@ -827,9 +832,9 @@ export default function DetalleEvento() {
     // Establecemos la fecha mínima como la fecha de inicio proveniente del campo de fecha inicio
     const minDate = new Date(fechaInicio);
 
-    // Establecemos la fecha máxima como 180 días después de la fecha actual
-    const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 180);
+    // Establecemos la fecha máxima como la fecha almacenada en fechaFinBD
+    const maxDate = new Date(fechaFinBD);
+    maxDate.setDate(maxDate.getDate() + 1);
 
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
@@ -1191,7 +1196,7 @@ export default function DetalleEvento() {
                         className="boton_aniadir_etapa"
                         htmlType="submit"
                       >
-                        Añadir etapa
+                        Añadir actividad
                       </Button>
                     </div>
                   </div>
@@ -1210,8 +1215,11 @@ export default function DetalleEvento() {
                   }}
                 >
                   <Column title="Título" dataIndex="nombre_etapa" />
-                  <Column title="Fecha inicio" dataIndex="fecha_hora_inicio" />
-                  <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                  <Column
+                    title="Fecha hora inicio"
+                    dataIndex="fecha_hora_inicio"
+                  />
+                  <Column title="Fecha hora fin" dataIndex="fecha_hora_fin" />
                   <Column title="Ubicación" dataIndex="id_ubicacion" />
                 </Table>
               </Form>
@@ -1369,6 +1377,7 @@ export default function DetalleEvento() {
                       </Form.Item>
                     </div>
                   </div>
+                  <label className="titulo-cronograma">Cronograma: </label>
                   <Table
                     className="tabla-etapas"
                     scroll={{ y: 180 }}
@@ -1384,10 +1393,10 @@ export default function DetalleEvento() {
                   >
                     <Column title="Título" dataIndex="nombre_etapa" />
                     <Column
-                      title="Fecha inicio"
+                      title="Fecha hora inicio"
                       dataIndex="fecha_hora_inicio"
                     />
-                    <Column title="Fecha fin" dataIndex="fecha_hora_fin" />
+                    <Column title="Fecha hora fin" dataIndex="fecha_hora_fin" />
                     <Column title="Ubicación" dataIndex="id_ubicacion" />
                   </Table>
                   <div className="botones-detalle">
@@ -1488,7 +1497,7 @@ export default function DetalleEvento() {
                             },
                             {
                               value: "2",
-                              label: "Colegio",
+                              label: "Colegios",
                             },
                             {
                               value: "3",
@@ -1497,6 +1506,10 @@ export default function DetalleEvento() {
                             {
                               value: "4",
                               label: "Técnico",
+                            },
+                            {
+                              value: "5",
+                              label: "Todo público",
                             },
                           ]}
                         />
@@ -1685,7 +1698,7 @@ export default function DetalleEvento() {
                             },
                             {
                               value: "2",
-                              label: "Colegio",
+                              label: "Colegios",
                             },
                             {
                               value: "3",
@@ -1694,6 +1707,10 @@ export default function DetalleEvento() {
                             {
                               value: "4",
                               label: "Técnico",
+                            },
+                            {
+                              value: "5",
+                              label: "Todo público",
                             },
                           ]}
                         />
@@ -1882,7 +1899,7 @@ export default function DetalleEvento() {
                             },
                             {
                               value: "2",
-                              label: "Colegio",
+                              label: "Colegios",
                             },
                             {
                               value: "3",
@@ -1891,6 +1908,10 @@ export default function DetalleEvento() {
                             {
                               value: "4",
                               label: "Técnico",
+                            },
+                            {
+                              value: "5",
+                              label: "Todo público",
                             },
                           ]}
                         />
@@ -2024,7 +2045,7 @@ export default function DetalleEvento() {
                             },
                             {
                               value: "2",
-                              label: "Colegio",
+                              label: "Colegios",
                             },
                             {
                               value: "3",
@@ -2033,6 +2054,10 @@ export default function DetalleEvento() {
                             {
                               value: "4",
                               label: "Técnico",
+                            },
+                            {
+                              value: "5",
+                              label: "Todo público",
                             },
                           ]}
                         />
@@ -2213,7 +2238,7 @@ export default function DetalleEvento() {
                             },
                             {
                               value: "2",
-                              label: "Colegio",
+                              label: "Colegios",
                             },
                             {
                               value: "3",
@@ -2222,6 +2247,10 @@ export default function DetalleEvento() {
                             {
                               value: "4",
                               label: "Técnico",
+                            },
+                            {
+                              value: "5",
+                              label: "Todo público",
                             },
                           ]}
                         />
@@ -2410,7 +2439,7 @@ export default function DetalleEvento() {
                             },
                             {
                               value: "2",
-                              label: "Colegio",
+                              label: "Colegios",
                             },
                             {
                               value: "3",
@@ -2419,6 +2448,10 @@ export default function DetalleEvento() {
                             {
                               value: "4",
                               label: "Técnico",
+                            },
+                            {
+                              value: "5",
+                              label: "Todo público",
                             },
                           ]}
                         />

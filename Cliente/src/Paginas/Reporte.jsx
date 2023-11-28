@@ -46,7 +46,7 @@ export default function Reporte() {
 
   const items = [
     getItem("Reportes Generales", "sub1", <MailOutlined />, []),
-    getItem("Reportes de Eventos", "sub2", <AppstoreOutlined />, [
+    getItem("Reporte de Eventos", "sub2", <AppstoreOutlined />, [
       getItem(
         <Link onClick={seleccionarEvento}>Reportes de participantes</Link>,
         "5"
@@ -144,12 +144,12 @@ export default function Reporte() {
             >
               <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
               <Column
-                title="Correo electronico"
+                title="Correo electrónico"
                 dataIndex="correo_electronico"
                 key="correo"
               />
               <Column title="Carnet de identidad" dataIndex="ci" key="ci" />
-              <Column title="Genero" dataIndex="genero" key="genero" />
+              <Column title="Género" dataIndex="genero" key="genero" />
             </Table>
           </Col>
         </Row>

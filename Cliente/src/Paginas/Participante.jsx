@@ -26,6 +26,8 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import Column from "antd/es/table/Column";
+import moment from 'moment';
+
 
 import { useNavigate } from "react-router-dom";
 
@@ -73,6 +75,7 @@ export default function Participante() {
   const [dataInscritos, setDataInscritos] = useState([]);
   const [indice, setIndice] = useState();
   const [visible, setVisible] = useState(false);
+  const [disableFechaNacimento, setDisableFechaNacimiento] = useState(false)
 
   const showModal = () => {
     setVisible(true);
@@ -515,6 +518,8 @@ export default function Participante() {
         obtenerParticipantesCI();
         form.resetFields();
         setVerificado(false);
+        setCiEncontrado(false)
+        setDisableFechaNacimiento(false)
       },
       onCancel() {
         setIsInstitucionDisabled(true);
@@ -557,17 +562,19 @@ export default function Participante() {
       } else {
         message.success("El carnet de identidad ya esta registrado.");
 
+        const nuevaFecha = moment(participanteEncontrado.fecha_nacimiento, 'YYYY-MM-DD');
         const datos = {
           CI: values.CI,
           NOMBRE: participanteEncontrado.nombre,
           CORREO: participanteEncontrado.correo_electronico,
           TELEFONO: participanteEncontrado.telefono,
           GENERO: participanteEncontrado.genero,
-          /* FECHA: participanteEncontrado.fecha_nacimiento,*/
+          FECHA: nuevaFecha,
           INSTITUCION: participanteEncontrado.id_institucion,
           CODIGOSIS: participanteEncontrado.codigoSIS,
         };
         form.setFieldsValue(datos);
+        setDisableFechaNacimiento(true)
         formCI.resetFields();
         setCiEncontrado(true);
         setVisible(true);
@@ -1265,6 +1272,11 @@ export default function Participante() {
                     </p>
                     <br />
                     <p>
+                      <h3>Tipo:</h3>
+                      {item.TIPO_EVENTO}
+                    </p>
+                    <br />
+                    <p>
                       <h3>Fecha de inicio:</h3>
                       {item.FECHA_INICIO}
                     </p>
@@ -1290,7 +1302,7 @@ export default function Participante() {
                     </p>
                     <br />
                     <p>
-                      <h3>Modalidad</h3>
+                      <h3>Participacion </h3>
                       {item.caracteristicas.tipo_participacion}
                     </p>
                     <br />
@@ -1576,6 +1588,7 @@ export default function Participante() {
                   }}
                   placeholder="Selecciona una fecha"
                   disabledDate={disabledDate}
+                  disabled={disableFechaNacimento}
                 />
               </Form.Item>
               <Form.Item

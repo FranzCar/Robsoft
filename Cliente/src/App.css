@@ -379,6 +379,11 @@ h3 {
     padding-right: 20px;
   }
 
+  .titulo-cronograma{
+    color: black;
+    padding-left: 10px;;
+  }
+
   /*Pestaña de etapas*/
   .formEtapas{
     padding: 20px ;
@@ -414,7 +419,7 @@ h3 {
     width: 100%;
 }
 .boton_aniadir_etapa{
-    margin-left: 20%;
+    margin-left: 10%;
 }
 
 .columna-horas{
