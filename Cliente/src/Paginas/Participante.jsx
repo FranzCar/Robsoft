@@ -826,11 +826,11 @@ export default function Participante() {
     }
   };
   //obtener inscritos al evento
-  const obtenerParticipantesEvento = () => {
+  const obtenerParticipantesEvento = (id) => {
     console.log("idEvento: ", idEVENTO);
     //Obtener participantes inscritos al evento para validar
     axios
-      .get(`http://localhost:8000/api/inscritos-evento/${idEVENTO}`)
+      .get(`http://localhost:8000/api/inscritos-evento/${id}`)
       .then((response) => {
         console.log(response.data);
         setDataInscritos(response.data);
@@ -1187,6 +1187,8 @@ export default function Participante() {
   };
   const showModalidadEvento = (tipo, data) => {
     console.log("El tipo es ", data);
+    obtenerParticipantesEvento(data.id_evento);
+    console.log("IDEVENTO SHOW MODAL  ",data.id_evento);
     if (tipo === "Individual") {
       showModalTipoParticipante();
     } else {
