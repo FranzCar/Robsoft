@@ -574,6 +574,7 @@ export default function Participante() {
         setTipoParticipante(false);
       }
       setTipoParticipante(false);
+      formCI.resetFields();
     } else {
       message.error("El carnet de identidad no se encuentra registrado.");
     }
