@@ -5,9 +5,9 @@ import {
   MailOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { Button, Table, Space, Modal, Form, Image, Menu, Col, Row } from "antd";
-import type { MenuProps } from "antd";
+import { Table, Modal, Form, Menu, Col, Row, Select, Button } from "antd";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const { Column } = Table;
 
@@ -21,49 +21,65 @@ function getItem(label, key, icon, children, type) {
   };
 }
 
-const items= [
-  getItem("Reportes Generales", "sub1", <MailOutlined />, [
-    getItem("Option 1", "1"),
-    getItem("Option 2", "2"),
-    getItem("Option 3", "3"),
-    getItem("Option 4", "4"),
-  ]),
-  getItem("Reportes de Eventos", "sub2", <AppstoreOutlined />, [
-    getItem("Reporte Participantes", "5"),
-    getItem("Option 6", "6"),
-    getItem("Submenu", "sub3", null, [
-      getItem("Option 7", "7"),
-      getItem("Option 8", "8"),
-    ]),
-  ]),
-  getItem("Generar Reporte", "sub4", <SettingOutlined />, [
-    getItem("Option 9", "9"),
-    getItem("Option 10", "10"),
-    getItem("Option 11", "11"),
-    getItem("Option 12", "12"),
-  ]),
-];
-
 // submenu keys of first level
 const rootSubmenuKeys = ["sub1", "sub2", "sub4"];
 
 export default function Reporte() {
-  const [data, setData] = useState([]);
+  const [form] = Form.useForm();
+  const [modalEventos, setModalEventos] = useState(false);
+  const [listaEventos, setListaEventos] = useState([]);
+  const [listaParticipantes, setListaParticipantes] = useState([]);
+
   useEffect(() => {
-    obtenerParticipantes();
+    obtenerEventosConIncritos();
   }, []);
-  const obtenerParticipantes = () => {
+
+  const seleccionarEvento = () => {
+    setModalEventos(true);
+  };
+  const handleOk = () => {
+    setModalEventos(false);
+  };
+  const handleCancel = () => {
+    setModalEventos(false);
+  };
+
+  const items = [
+    getItem("Reportes Generales", "sub1", <MailOutlined />, []),
+    getItem("Reportes de Eventos", "sub2", <AppstoreOutlined />, [
+      getItem(
+        <Link onClick={seleccionarEvento}>Reportes de participantes</Link>,
+        "5"
+      ),
+    ]),
+    getItem("Generar Reporte", "sub4", <SettingOutlined />, [
+      getItem("Option 9", "9"),
+      getItem("Option 10", "10"),
+      getItem("Option 11", "11"),
+      getItem("Option 12", "12"),
+    ]),
+  ];
+
+  const obtenerEventosConIncritos = () => {
     axios
-      .get("http://localhost:8000/api/lista-participantes")
+      .get("http://localhost:8000/api/eventos-con-inscritos")
       .then((response) => {
-        setData(response.data);
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_evento,
+          nombre_evento: element.TITULO,
+          value: element.TITULO,
+          label: element.TITULO,
+        }));
+
+        setListaEventos(listaConFormato);
+        console.log("Los eventos con inscritos son ", response.data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  const [openKeys, setOpenKeys] = useState(['sub1']);
+  const [openKeys, setOpenKeys] = useState(["sub1"]);
   const onOpenChange = (keys) => {
     const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
     if (latestOpenKey && rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
@@ -71,6 +87,28 @@ export default function Reporte() {
     } else {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
     }
+  };
+
+  const onFinish = () => {
+    const nombre = form.getFieldValue("EVENTOS");
+    let id_evento = null;
+    for (let i = 0; i < listaEventos.length; i++) {
+      if (listaEventos[i].nombre_evento === nombre) {
+        id_evento = listaEventos[i].id;
+      }
+    }
+    console.log("El id del evento es ", id_evento);
+    axios
+    .get(`http://localhost:8000/api/inscritos-evento/${id_evento}`)
+    .then((response) => {
+      setModalEventos(false)
+      form.resetFields()
+      setListaParticipantes(response.data)
+      console.log("los datos de los participantes son ", response)
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   };
 
   return (
@@ -84,7 +122,8 @@ export default function Reporte() {
               openKeys={openKeys}
               onOpenChange={onOpenChange}
               style={{
-                width: "95%",
+                marginTop: "20px",
+                width: "100%",
               }}
               items={items}
             />
@@ -93,7 +132,7 @@ export default function Reporte() {
             <Table
               className="tabla-reporte-participante"
               scroll={{ y: 340 }}
-              dataSource={data}
+              dataSource={listaParticipantes}
               pagination={false}
               locale={{
                 emptyText: (
@@ -115,6 +154,36 @@ export default function Reporte() {
           </Col>
         </Row>
       </div>
+
+      <Modal
+        title="Seleccionar un evento"
+        centered
+        open={modalEventos}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        maskClosable={false}
+        keyboard={false}
+        footer={[
+          <Form form={form} onFinish={onFinish}>
+            <Button type="primary" htmlType="submit">
+              Seleccionar
+            </Button>
+          </Form>,
+        ]}
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item label="Eventos" name="EVENTOS">
+            <Select
+              allowClear
+              style={{
+                width: "100%",
+              }}
+              placeholder="Selecione uno evento"
+              options={listaEventos}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
