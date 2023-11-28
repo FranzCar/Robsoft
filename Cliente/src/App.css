@@ -293,6 +293,13 @@ h3 {
 .buscador-participante{
     padding-top: 5px;
 }
+.boton-registrar-entrenador{
+    margin-left: 74%;
+    padding-top: 2%;
+}
+.grupal-input-institucion{
+    margin-top: -20px;
+}
 
 /*Parte añadir entrenador*/
 .botones-entrenador{
