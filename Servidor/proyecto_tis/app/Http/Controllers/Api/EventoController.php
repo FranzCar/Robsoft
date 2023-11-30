@@ -635,5 +635,20 @@ private function eliminarCodigosVerificacion($evento)
 
         return $this->transformarEventos($eventos);
     }
+    public function tieneEtapas($idEvento)
+    {
+        $tieneEtapa = Etapa::where('id_evento', $idEvento)->exists();
+        return response()->json(['tieneEtapas' => $tieneEtapa]);
+    }
+
+    public function tieneDetalles($idEvento)
+    {
+        $caracteristicasCompletas = CaracteristicaTextoEvento::where('id_evento', $idEvento)->exists() ||
+                                    CaracteristicaLongtextEvento::where('id_evento', $idEvento)->exists() ||
+                                    CaracteristicaIntEvento::where('id_evento', $idEvento)->exists() ||
+                                    CaracteristicaFechaEvento::where('id_evento', $idEvento)->exists();
+
+        return response()->json(['tieneDetalles' => $caracteristicasCompletas]);
+    }
 }
 

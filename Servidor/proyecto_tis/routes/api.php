@@ -53,3 +53,5 @@ Route::get('eventos-eliminables', [EventoController::class, 'listaEliminables'])
 Route::post('inscribir-equipo',[InscripcionController::class, 'inscribirEquipo']);
 Route::get('eventos-con-inscritos', [EventoController::class, 'listaReporteInscritosEvento']);
 Route::get('inscritos-evento/{id}', [InscripcionController::class, 'listaInscritosEvento']);
+Route::get('evento-con-etapas/{id}', [EventoController::class, 'tieneEtapas']);
+Route::get('evento-con-detalles/{id}', [EventoController::class, 'tieneDetalles']);
