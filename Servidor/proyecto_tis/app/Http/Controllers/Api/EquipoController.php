@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Equipo;
 use App\Models\RolPersona;
 use App\Models\RolPersonaEquipo;
+use App\Models\Institucion;
 
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +19,7 @@ class EquipoController extends Controller {
                 $equipo = new Equipo();
                 $equipo->nombre_equipo = $request->nombre_equipo;
                 $equipo->responsable = $request->responsable;
+                $equipo->id_institucion = $request->id_institucion;
 
                 $equipo->save();
                 

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('id_equipo', true);
             $table->string('nombre_equipo', 25)->nullable();
             $table->integer('responsable')->nullable();
+            $table->integer('id_institucion')->nullable()->index('id_institucion');
         });
     }
 
