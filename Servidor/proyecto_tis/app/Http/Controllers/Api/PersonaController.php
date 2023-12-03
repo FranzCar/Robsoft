@@ -97,6 +97,40 @@ class PersonaController extends Controller
     
         return $participantes;           
     }
+
+    public function listParticipantesInstitucion(Request $request) {
+        // Obtener el id_institucion del request
+        $idInstitucion = $request->id_institucion;
+    
+        $participantes = Persona::with(['caracteristicasTexto', 'caracteristicasFecha'])
+                            ->whereHas('RolPersona', function($query) {
+                                $query->where('id_roles', 6);
+                            })
+                            ->when($idInstitucion, function ($query) use ($idInstitucion) {
+                                return $query->where('id_institucion', $idInstitucion);
+                            })
+                            ->get()
+                            ->map(function ($persona) {
+                                // Buscar las características específicas
+                                $codigoSIS = $persona->caracteristicasTexto->firstWhere('id_caract_per', 3)->valor_texto_persona ?? null;
+                                $fechaNacimiento = $persona->caracteristicasFecha->firstWhere('id_caract_per', 4)->valor_fecha_persona ?? null;
+    
+                                return [
+                                    'id_persona' => $persona->id_persona,
+                                    'nombre' => $persona->nombre,
+                                    'correo_electronico' => $persona->correo_electronico,
+                                    'telefono' => $persona->telefono,
+                                    'ci' => $persona->ci,
+                                    'genero' => $persona->genero,
+                                    'id_institucion' => $persona->id_institucion,
+                                    'codigoSIS' => $codigoSIS,
+                                    'fecha_nacimiento' => $fechaNacimiento,
+                                ];
+                            });
+    
+        return $participantes;           
+    }
+
     public function actualizarCaracteristicas(Request $request, $id) {
         $persona = Persona::findOrFail($id); // Obtiene la persona o falla si no existe
         DB::beginTransaction();
