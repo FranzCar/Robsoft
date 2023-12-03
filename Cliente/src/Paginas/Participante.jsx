@@ -14,6 +14,7 @@ import {
   Table,
   Card,
   Image,
+  Alert,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
@@ -72,10 +73,11 @@ export default function Participante() {
 
   const [formNuevo] = Form.useForm();
   const [data, setData] = useState([]);
+  const [listaParticipantesEvento, setListaParticipantesEvento] = useState([]);
   const [dataInscritos, setDataInscritos] = useState([]);
   const [indice, setIndice] = useState();
   const [visible, setVisible] = useState(false);
-  const [disableFechaNacimento, setDisableFechaNacimiento] = useState(false)
+  const [disableFechaNacimento, setDisableFechaNacimiento] = useState(false);
 
   const showModal = () => {
     setVisible(true);
@@ -518,8 +520,8 @@ export default function Participante() {
         obtenerParticipantesCI();
         form.resetFields();
         setVerificado(false);
-        setCiEncontrado(false)
-        setDisableFechaNacimiento(false)
+        setCiEncontrado(false);
+        setDisableFechaNacimiento(false);
       },
       onCancel() {
         setIsInstitucionDisabled(true);
@@ -737,6 +739,7 @@ export default function Participante() {
   };
 
   const showModalGrupal = (data) => {
+    duplicadoCiEvento();
     if (data.caracteristicas.Coach_obligatorio === 1) {
       setEstadoEntrenador(true);
     } else {
@@ -778,12 +781,38 @@ export default function Participante() {
         console.error(error);
       });
   };
-
+  const duplicadoCiEvento = () => {
+    axios
+      .get(`http://localhost:8000/api/inscritos-evento/${idEVENTO}`)
+      .then((response) => {
+        setListaParticipantesEvento(response.data);
+        console.log("lista participante evento: ",response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  const [respon, setRespon] = useState();
   const datosGrupal = (values) => {
+    console.log("datos GRUPAL: ", values);
+    console.log("datos GRUPAL ENTRENADOR ID: ", entrenadorForm.id_persona);
+
+    if (entrenadorForm.id_persona) {
+      setRespon(entrenadorForm.id_persona);
+    } else {
+      setRespon(participanteForm1.id_persona);
+    }
+
     const datos = {
       nombre_equipo: values.EQUIPO,
-      id_coach_persona: datoFiltradoEntrenador[0].id_persona,
-      participantes: listaID_Persona,
+      coach: entrenadorForm.id_persona, // este es el id_rol_persona que obtienes de la lista de coachs
+      responsable: respon, // Este el id_persona, ya sea de coach o participante
+      participantes: [
+        participanteForm1.id_persona,
+        participanteForm2.id_persona,
+        participanteForm3.id_persona,
+      ],// id_persona de los participantes
+      id_institucion: values.INSTITUCION,
     };
     return datos;
   };
@@ -809,20 +838,45 @@ export default function Participante() {
     if (duplicado === true) {
       message.error("Existe un equipo con el mismo nombre");
     } else {
-      if (listaParticipante.length < 3) {
-        message.error("Para registrar el grupo, se requieren  3 participantes");
-      } else {
-        axios
-          .post("http://localhost:8000/api/guardar-equipo", datos)
-          .then((response) => {
-            message.success("El grupo se registró correctamente");
-            obtenerGrupos();
-            form.resetFields();
-          });
-        setVerModalGrupal(false);
-        setListaParticipante([]);
-        setNombreEntrenador("");
-      }
+      axios
+        .post("http://localhost:8000/api/guardar-equipo", datos)
+        .then((response) => {
+          message.success("El grupo se registró correctamente");
+          obtenerGrupos();
+          form.resetFields();
+          const datosEquipo = {
+            id_evento: idEVENTO,
+            id_equipo: response.data.id_equipo,
+          };
+          axios
+            .post("http://localhost:8000/api/inscribir-equipo", datosEquipo)
+            .then((response) => {
+              console.log(
+                "El grupo se registró correctamente con éxito al evento",
+                response.data
+              );
+              message.success("El equipo se registró correctamente al evento");
+              formGrupal.resetFields();
+              setEntrenadorForm(null);
+            })
+            .catch((error) => {
+              if (error.response) {
+                // El servidor respondió con un código de estado fuera del rango 2xx
+                const errores = error.response.data.errors;
+                for (let campo in errores) {
+                  message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+                }
+              } else {
+                // Otros errores (problemas de red, etc.)
+                message.error(
+                  "Ocurrió un error al guardar el registro del equipo al EVENTO."
+                );
+              }
+            });
+        });
+      setVerModalGrupal(false);
+      setListaParticipante([]);
+      setNombreEntrenador("");
     }
   };
   //obtener inscritos al evento
@@ -1059,6 +1113,7 @@ export default function Participante() {
           message.success("Se guardo correctamente");
           obtenerParticipantes();
           setVerModalParticipanteNuevo(false);
+          obtenerParticipantesCI();
         })
         .catch((error) => {
           message.error("Ocurrió un error al guardar el registro.");
@@ -1130,6 +1185,8 @@ export default function Participante() {
         setEstadoRegistroEntrenador(false);
         formNuevoEntrenador.resetFields();
         cerrarModalNuevoEntrenador(false);
+        obtenerEntrenadores();
+        console.log("entrenadores nuevo: ", entrenador);
       })
       .catch((error) => {
         console.error(error);
@@ -1228,6 +1285,104 @@ export default function Participante() {
 
   const registrarNuevoEntrenador = (values) => {
     showConfirmEntrenador(values);
+  };
+
+  const [busqueda, setBusqueda] = useState("");
+  const [alerta, setAlerta] = useState(null);
+
+  const handleInputChange = (event, setBusqueda, setAlerta) => {
+    const value = event.target.value;
+    setBusqueda(value);
+    // Limpiar la alerta cuando el usuario comienza a escribir
+    setAlerta(null);
+  };
+  const [entrenadorForm, setEntrenadorForm] = useState([]);
+  const handleBuscarEntrenador = (busqueda, setAlerta) => {
+    const entrenadorEncontrado = entrenador.find(
+      (entrenador) => entrenador.ci === busqueda
+    );
+    console.log("ENTRENADOR ENCONTRADO: ", entrenadorEncontrado);
+    if (entrenadorEncontrado) {
+      setAlerta({
+        type: "success",
+        message: `${entrenadorEncontrado.nombre}`,
+      });
+      setEntrenadorForm(entrenadorEncontrado);
+    } else {
+      setAlerta({
+        type: "error",
+        message: "Entrenador no encontrado",
+      });
+    }
+  };
+  //Busqueda Participante grupal
+  const [busquedaParticipante1, setBusquedaParticipante1] = useState("");
+  const [alertaParticipante1, setAlertaParticipante1] = useState(null);
+  const [participanteForm1, setParticipanteForm1] = useState(null);
+
+  const [busquedaParticipante2, setBusquedaParticipante2] = useState("");
+  const [alertaParticipante2, setAlertaParticipante2] = useState(null);
+  const [participanteForm2, setParticipanteForm2] = useState(null);
+
+  const [busquedaParticipante3, setBusquedaParticipante3] = useState("");
+  const [alertaParticipante3, setAlertaParticipante3] = useState(null);
+  const [participanteForm3, setParticipanteForm3] = useState(null);
+
+  const handleInputChangeParticipante = (
+    event,
+    setBusquedaParticipante,
+    setAlertaParticipante
+  ) => {
+    const value = event.target.value;
+    setBusquedaParticipante(value);
+    // Limpiar la alerta cuando el usuario comienza a escribir
+    setAlertaParticipante(null);
+  };
+
+  const handleBuscarParticipante = (
+    busquedaParticipante,
+    setAlertaParticipante,
+    num
+  ) => {
+    // Supongo que `data` es tu lista de participantes
+    const participanteEncontrado = data.find(
+      (participante) => participante.ci === busquedaParticipante
+    );
+
+    // Buscar en la lista de participantes en el evento
+    const participanteEnEvento = listaParticipantesEvento.find(
+      (enEvento) => enEvento.ci === busquedaParticipante
+    );
+
+    if (participanteEncontrado) {
+      if (num === 1) {
+        setParticipanteForm1(participanteEncontrado);
+      }
+      if (num === 2) {
+        setParticipanteForm2(participanteEncontrado);
+      }
+      if (num === 3) {
+        setParticipanteForm3(participanteEncontrado);
+      }
+
+      // Verificar si el participante ya está en la lista de participantes en el evento
+      if (participanteEnEvento) {
+        setAlertaParticipante({
+          type: "warning",
+          message: `¡Alerta! ${participanteEncontrado.nombre} ya está registrado en el evento.`,
+        });
+      } else {
+        setAlertaParticipante({
+          type: "success",
+          message: `${participanteEncontrado.nombre}`,
+        });
+      }
+    } else {
+      setAlertaParticipante({
+        type: "error",
+        message: "Participante no encontrado",
+      });
+    }
   };
 
   return (
@@ -1813,11 +1968,12 @@ export default function Participante() {
           form={formGrupal}
           initialValues={nombreEntrenador}
           onFinish={registrarGrupo}
-          layout="vertical"
+          layout="horizontal"
         >
           <Form.Item
             label="Nombre del equipo"
             name="EQUIPO"
+            style={{ margin: "3px" }}
             rules={[
               {
                 required: true,
@@ -1827,6 +1983,14 @@ export default function Participante() {
           >
             <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
           </Form.Item>
+          <div style={{ marginLeft: "15%" }}>
+            <Button type="link" onClick={handleAbrirModalParticipanteNuevo}>
+              Registrar Nuevo Participante
+            </Button>
+            <Button type="link" onClick={modalNuevoEntrenador}>
+              Registrar Nuevo Entrenador
+            </Button>
+          </div>
           <Form.Item
             label="Entrenador"
             name="ENTRENADOR"
@@ -1837,44 +2001,165 @@ export default function Participante() {
               },
             ]}
           >
-            <div className="botones-entrenador">
-              <Button
-                type="link"
-                onClick={showModalEntrenador}
-                className="icono-aniadir"
-              >
-                Buscar Entrenador
-              </Button>
+            <div>
+              <Input.Search
+                placeholder="Ingresa el carnet de identidad"
+                value={busqueda}
+                onChange={(event) =>
+                  handleInputChange(event, setBusqueda, setAlerta)
+                }
+                onSearch={() => handleBuscarEntrenador(busqueda, setAlerta)}
+                maxLength={8}
+              />
+              {alerta && (
+                <Alert
+                  message={alerta.message}
+                  type={alerta.type}
+                  showIcon
+                  closable
+                  onClose={() => setAlerta(null)}
+                  style={{ height: 28 }}
+                />
+              )}
             </div>
-
-            <Input
-              value={nombreEntrenador}
-              readOnly={estadoFormulario}
-              placeholder="Ingrese el nombre del entrenador"
-            />
-
-            <Button
-              className="boton-registrar-entrenador"
-              type="link"
-              onClick={modalNuevoEntrenador}
-            >
-              Registrar entrenador
-            </Button>
+          </Form.Item>
+          {/* Repite la estructura para Participante 1 */}
+          <Form.Item
+            label="Participante 1:"
+            name="PARTICIPANTE1"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, añada a un participante",
+              },
+            ]}
+          >
+            <div>
+              <Input.Search
+                placeholder="Ingresa el carnet de identidad"
+                value={busquedaParticipante1}
+                onChange={(event) =>
+                  handleInputChangeParticipante(
+                    event,
+                    setBusquedaParticipante1,
+                    setAlertaParticipante1
+                  )
+                }
+                onSearch={() =>
+                  handleBuscarParticipante(
+                    busquedaParticipante1,
+                    setAlertaParticipante1,
+                    1
+                  )
+                }
+                maxLength={8}
+                minLength={8}
+              />
+              {alertaParticipante1 && (
+                <Alert
+                  message={alertaParticipante1.message}
+                  type={alertaParticipante1.type}
+                  showIcon
+                  style={{ height: 28 }}
+                />
+              )}
+            </div>
           </Form.Item>
 
+          {/* Repite la estructura para Participante 2 */}
           <Form.Item
-            className="grupal-input-institucion"
-            label="Institución"
-            name="INSTITUCION"
+            label="Participante 2:"
+            name="PARTICIPANTE2"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, añada a un participante",
+              },
+            ]}
           >
+            <div>
+              <Input.Search
+                placeholder="Ingresa el carnet de identidad"
+                value={busquedaParticipante2}
+                onChange={(event) =>
+                  handleInputChangeParticipante(
+                    event,
+                    setBusquedaParticipante2,
+                    setAlertaParticipante2
+                  )
+                }
+                onSearch={() =>
+                  handleBuscarParticipante(
+                    busquedaParticipante2,
+                    setAlertaParticipante2,
+                    2
+                  )
+                }
+                maxLength={8}
+                minLength={8}
+              />
+              {alertaParticipante2 && (
+                <Alert
+                  message={alertaParticipante2.message}
+                  type={alertaParticipante2.type}
+                  showIcon
+                  style={{ height: 25 }}
+                />
+              )}
+            </div>
+          </Form.Item>
+
+          {/* Repite la estructura para Participante 3 */}
+          <Form.Item
+            label="Participante 3:"
+            name="PARTICIPANTE3"
+            rules={[
+              {
+                required: true,
+                message: "Por favor, añada a un participante",
+              },
+            ]}
+          >
+            <div>
+              <Input.Search
+                placeholder="Ingresa el carnet de identidad"
+                value={busquedaParticipante3}
+                onChange={(event) =>
+                  handleInputChangeParticipante(
+                    event,
+                    setBusquedaParticipante3,
+                    setAlertaParticipante3
+                  )
+                }
+                onSearch={() =>
+                  handleBuscarParticipante(
+                    busquedaParticipante3,
+                    setAlertaParticipante3,
+                    3
+                  )
+                }
+                maxLength={8}
+                minLength={8}
+              />
+              {alertaParticipante3 && (
+                <Alert
+                  message={alertaParticipante3.message}
+                  type={alertaParticipante3.type}
+                  showIcon
+                  style={{ height: 28 }}
+                />
+              )}
+            </div>
+          </Form.Item>
+          <Form.Item label="Institución" name="INSTITUCION">
             <Select
               placeholder="Seleccione una institución."
               options={instituciones}
               onChange={onInstitutionChange}
             />
           </Form.Item>
-
-          <div className="aniadir-participante">
+        </Form>
+        <div className="aniadir-participante">
             <div>
               <label>Participantes</label>
             </div>
@@ -1896,9 +2181,6 @@ export default function Participante() {
               >
                 <PlusOutlined />
               </Button>
-              <Button type="text" onClick={handleAbrirModalParticipanteNuevo}>
-                Registrar Nuevo Participante
-              </Button>
             </div>
           </div>
           <Table
@@ -1919,83 +2201,6 @@ export default function Participante() {
           >
             <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
           </Table>
-        </Form>
-      </Modal>
-
-      {/*Modal para buscar un participante*/}
-      <Modal
-        title="Buscar participante"
-        open={buscarParticipante}
-        onCancel={handleCancelBuscador}
-        footer={[
-          <Form onFinish={aniadirEntrenador}>
-            <Button type="primary" onClick={aniadirParticipante}>
-              Añadir
-            </Button>
-          </Form>,
-        ]}
-      >
-        <label>CI del participante</label>
-        <div>
-          <Search
-            className="buscador-participante"
-            value={searchText}
-            placeholder="Buscar participante"
-            onSearch={onSearch}
-            onChange={(e) => onSearch(e.target.value)}
-            maxLength={8}
-            allowClear
-          />
-        </div>
-        <Form layout="vertical">
-          <Form.Item label="Nombre del participante">
-            {datoFiltrado.map((item) => (
-              <div key={item}>
-                <p> {item.nombre}</p>
-              </div>
-            ))}
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/*Modal para buscar un entrenador*/}
-      <Modal
-        title="Selecionar un entrenador"
-        open={buscarEntrenador}
-        onCancel={handleCancelEntrenador}
-        footer={[
-          <Form>
-            <Button type="primary" onClick={aniadirEntrenador}>
-              Añadir
-            </Button>
-          </Form>,
-        ]}
-      >
-        <label>CI del entrenador</label>
-        <div>
-          <Search
-            placeholder="Buscar entrenador"
-            value={searchEntrenador}
-            onSearch={onSearchEntrenador}
-            onChange={(e) => onSearchEntrenador(e.target.value)}
-            maxLength={8}
-            allowClear
-          />
-        </div>
-        <Form layout="vertical">
-          <Form.Item name="resultadoBusquedaEntrenador">
-            <Input />
-          </Form.Item>
-          <Button onClick={onSearchEntrenador}>Buscar</Button>
-          <Form.Item label="Nombre del Entrenador">
-            {datoFiltradoEntrenador.slice(0, 3).map((item) => (
-              <div key={item}>
-                <p>{item.nombre}</p>
-              </div>
-            ))}
-            {nombreEntrenador}
-          </Form.Item>
-        </Form>
       </Modal>
 
       {/*modal para registrar nuevo participante*/}
