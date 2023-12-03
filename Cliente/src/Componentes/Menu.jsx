@@ -21,6 +21,10 @@ const items = [
     key: "4",
     label: <Link to="/detalleEvento">DETALLES DE EVENTO</Link>,
   },
+  {
+    key: "5",
+    label: <Link to="/actividades">ACTIVIDADES DE EVENTO</Link>,
+  },
 ];
 export default function Menu() {
   const location = useLocation();

@@ -376,7 +376,7 @@ h3 {
     grid-template-columns: 1fr 1fr;
   }
   .columna1-icpc{
-    padding-right: 20px;
+    padding-right: 50px;
   }
 
   .titulo-cronograma{
@@ -385,6 +385,7 @@ h3 {
   }
 
   /*Pestaña de etapas*/
+  
   .formEtapas{
     padding: 20px ;
     padding-bottom: 0;
@@ -462,9 +463,6 @@ h3 {
  }
  .columna1-reclutamiento{
     padding-right: 40px;
- }
- .botones-detalle{
-    float: right;
  }
  .boton-cancelar-detalle{
     margin-right: 20px;

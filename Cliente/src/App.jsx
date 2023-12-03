@@ -11,6 +11,7 @@ import EliminarEvento from './Paginas/EliminarEvento';
 import EditarEvento from './Paginas/EditarEvento';
 import Participante from './Paginas/Participante';
 import DetalleEvento from './Paginas/DetalleEvento';
+import Actividades from './Paginas/Actividades';
 import { Route, Routes } from 'react-router-dom';
 import React from 'react';
 import { Layout } from 'antd';
@@ -41,6 +42,7 @@ function App() {
           <Route path='/editarEvento' element= {<EditarEvento/>}/>
           <Route path='/detalleEvento' element= {<DetalleEvento/>}/>
           <Route path='/Reporte' element= {<Reporte/>}/>
+          <Route path='/actividades' element= {<Actividades/>}/>
         </Routes>
       </Content>
       <Footer className='footer'>Universidad Mayor de San Simon</Footer>
