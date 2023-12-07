@@ -11,4 +11,9 @@ class RolPersonaEquipo extends Model
     protected $table = 'ROL_PERSONA_EQUIPO';
     use HasFactory;
     protected $fillable = ['id_rol_persona', 'id_equipo'];
+
+    public function rolPersona()
+    {
+        return $this->belongsTo(RolPersona::class, 'id_rol_persona');
+    }
 }

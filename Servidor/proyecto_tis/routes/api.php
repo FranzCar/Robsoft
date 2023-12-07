@@ -57,3 +57,4 @@ Route::get('evento-con-etapas/{id}', [EventoController::class, 'tieneEtapas']);
 Route::get('evento-con-detalles/{id}', [EventoController::class, 'tieneDetalles']);
 Route::get('lista-participantes-institucion',[PersonaController::class, 'listParticipantesInstitucion']);
 Route::get('reporte-eventos', [EventoController::class, 'reporteEventos']);
+Route::get('lista-coach-institucion',[RolPersonaController::class, 'listaCoachInstitucion']);

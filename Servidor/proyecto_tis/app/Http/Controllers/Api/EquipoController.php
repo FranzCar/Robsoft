@@ -8,6 +8,7 @@ use App\Models\Equipo;
 use App\Models\RolPersona;
 use App\Models\RolPersonaEquipo;
 use App\Models\Institucion;
+use App\Notifications\EventoNotificacion;
 
 use Illuminate\Support\Facades\DB;
 

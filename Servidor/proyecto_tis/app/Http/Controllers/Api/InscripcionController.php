@@ -9,6 +9,9 @@ use App\Models\RolPersona;
 use App\Models\RolPersonaEquipo;
 use Illuminate\Support\Facades\DB;
 use App\Services\EstadoEventoService;
+use App\Notifications\EventoNotificacion;
+use App\Models\Evento;
+
 
 class InscripcionController extends Controller
 {
@@ -77,6 +80,19 @@ class InscripcionController extends Controller
             
             $inscripcion->save();
 
+            // Obtener el evento
+            $evento = Evento::find($idEvento);
+
+            // Enviar notificación a los miembros del equipo
+            $miembrosEquipo = RolPersonaEquipo::where('id_equipo', $idEquipo)->get();
+
+            foreach ($miembrosEquipo as $miembro) {
+                $persona = $miembro->rolPersona->persona; // Accediendo a través de la relación
+                if ($persona) {
+                        $persona->notify(new EventoNotificacion($evento, 'grupal'));
+
+                }
+            }
             DB::commit();
             
             // Después de guardar la inscripción con éxito
@@ -88,6 +104,7 @@ class InscripcionController extends Controller
             return response()->json(['message' => 'Error al inscribir el Equipo', 'error' => $e->getMessage()], 500);
         }
     }
+    
     public function listaInscritosEvento($idEvento)
 {
     try {
