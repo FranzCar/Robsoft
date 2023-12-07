@@ -12,4 +12,9 @@ class Etapa extends Model
     public $incrementing = true;
     public $timestamps = false;
     use HasFactory;
+    
+    public function ubicacionEtapa()
+    {
+        return $this->hasMany(UbicacionEtapa::class, 'id_etapa');
+    }
 }

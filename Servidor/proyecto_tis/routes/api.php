@@ -56,3 +56,4 @@ Route::get('inscritos-evento/{id}', [InscripcionController::class, 'listaInscrit
 Route::get('evento-con-etapas/{id}', [EventoController::class, 'tieneEtapas']);
 Route::get('evento-con-detalles/{id}', [EventoController::class, 'tieneDetalles']);
 Route::get('lista-participantes-institucion',[PersonaController::class, 'listParticipantesInstitucion']);
+Route::get('reporte-eventos', [EventoController::class, 'reporteEventos']);

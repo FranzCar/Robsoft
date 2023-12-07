@@ -22,6 +22,10 @@ class Evento extends Model
     {
         return $this->belongsToMany(Auspiciador::class, 'EVENTO_AUSPICIADOR', 'id_evento', 'id_auspiciador');
     }
+    public function patrocinadores()
+{
+    return $this->belongsToMany(Auspiciador::class, 'EVENTO_AUSPICIADOR', 'id_evento', 'id_auspiciador');
+}
 
     public function organizadores()
     {
@@ -72,4 +76,20 @@ class Evento extends Model
             'id_caracteristica_evento'
         );
     }
+    public function etapas()
+    {
+        return $this->hasMany(Etapa::class, 'id_evento');
+    }
+
+    public function ubicaciones()
+{
+    return $this->hasManyThrough(
+        Ubicacion::class, 
+        Etapa::class,
+        'id_evento', // Clave foránea en la tabla 'etapa'
+        'id_ubicacion', // Clave foránea en la tabla 'ubicacion_etapa'
+        'id_evento', // Clave local en la tabla 'evento'
+        'id_etapa' // Clave local en la tabla 'etapa'
+    );
+}
 }

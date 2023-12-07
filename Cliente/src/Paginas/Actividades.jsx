@@ -301,11 +301,11 @@ export default function Actividades() {
     if (listaEtapas.length === 0) {
       // Establecemos la fecha de inicio proveniente de la base de datos
       const minDate = new Date(fechaInicioBD);
-      minDate.setDate(minDate.getDate());
+      minDate.setDate(minDate.getDate()+1);
 
       // Establecemos la fecha de finalización proveniente de la base de datos
       const maxDate = new Date(fechaFinBD);
-      maxDate.setDate(maxDate.getDate() + 1);
+      maxDate.setDate(maxDate.getDate()+2);
 
       // Permitimos fechas dentro del rango [minDate, maxDate]
       return current < minDate || current > maxDate;
@@ -357,11 +357,11 @@ export default function Actividades() {
 
     // Establecemos la fecha mínima como la fecha de inicio proveniente del campo de fecha inicio
     const minDate = new Date(fechaInicio);
-    minDate.setDate(minDate.getDate());
+    minDate.setDate(minDate.getDate()+1);
 
     // Establecemos la fecha máxima como la fecha almacenada en fechaFinBD
     const maxDate = new Date(fechaFinBD);
-    maxDate.setDate(maxDate.getDate() + 1);
+    maxDate.setDate(maxDate.getDate() + 2);
 
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;

@@ -650,5 +650,129 @@ private function eliminarCodigosVerificacion($evento)
 
         return response()->json(['tieneDetalles' => $caracteristicasCompletas]);
     }
+    public function reporteEventos(Request $request)
+{
+    // Parámetros de filtro
+    $fechaInicio = $request->input('fecha_inicio');
+    $fechaFin = $request->input('fecha_fin');
+    $tipoEvento = $request->input('tipo_evento');
+    $modalidad = $request->input('modalidad');
+    $participacion = $request->input('participacion');
+    $publico = $request->input('publico');
+    $ubicacion = $request->input('ubicacion');
+    $entrenador = $request->input('entrenador');
+
+    // Columnas adicionales
+    $incluyeOrganizadores = $request->input('incluye_organizadores');
+    $incluyePatrocinadores = $request->input('incluye_patrocinadores');
+    $incluyeUbicaciones = $request->input('incluye_ubicaciones');
+
+    // Consulta base
+    $eventosQuery = Evento::with('TipoEvento');
+
+    // Aplicar filtros
+    if ($fechaInicio && $fechaFin) {
+        $eventosQuery->whereBetween('fecha_inicio', [$fechaInicio, $fechaFin]);
+    }
+    if ($tipoEvento) {
+        $eventosQuery->whereHas('tipoEvento', function ($query) use ($tipoEvento) {
+            $query->where('nombre_tipo_evento', $tipoEvento);
+        });
+    }
+    if ($modalidad) {
+        $eventosQuery->whereHas('caracteristicasTexto.caracteristicaEvento', function ($query) use ($modalidad) {
+            $query->where('nombre_caracteristica_evento', 'modalidad')
+                  ->where('valor_texto_evento', $modalidad);
+        });
+    }
+    if ($participacion) {
+        $eventosQuery->whereHas('caracteristicasTexto.caracteristicaEvento', function ($query) use ($participacion) {
+            $query->where('nombre_caracteristica_evento', 'tipo_participacion')
+                  ->where('valor_texto_evento', $participacion);
+        });
+    }
+    if ($publico) {
+        $eventosQuery->whereHas('caracteristicasTexto.caracteristicaEvento', function ($query) use ($publico) {
+            $query->where('nombre_caracteristica_evento', 'categoria_evento')
+                  ->where('valor_texto_evento', $publico);
+        });
+    }
+
+    if ($ubicacion) {
+        $eventosQuery->whereHas('etapas.ubicacionEtapa', function ($query) use ($ubicacion) {
+            $query->whereHas('ubicacion', function ($subQuery) use ($ubicacion) {
+                $subQuery->where('nombre_ambiente', $ubicacion); // Asegúrate de que 'nombre_ambiente' es la columna correcta en la tabla UBICACION
+            });
+        });
+    }
+    if ($entrenador) {
+    $eventosQuery->whereHas('rolPersonaEnEvento', function ($query) use ($entrenador) {
+        $query->where('id_roles', 4) // Suponiendo que 4 es el ID del rol de entrenador
+              ->whereHas('persona', function ($subQuery) use ($entrenador) {
+                  $subQuery->where('nombre', $entrenador); // o 'id_persona' si 'entrenador' es un ID
+              });
+    });
+}
+
+    // Incluir relaciones según sea necesario
+    if ($incluyeOrganizadores) {
+        $eventosQuery->with('organizadores');
+    }
+    if ($incluyePatrocinadores) {
+        $eventosQuery->with('patrocinadores');
+    }
+    if ($incluyeUbicaciones) {
+        $eventosQuery->with('ubicaciones');
+    }
+
+    $eventos = $eventosQuery->get();
+
+    $reporte = [];
+
+    foreach ($eventos as $evento) {
+        // Buscar la característica de 'modalidad'
+        $modalidadEvento = $evento->caracteristicasTexto->first(function ($caracteristicaTexto) {
+            return $caracteristicaTexto->caracteristicaEvento && $caracteristicaTexto->caracteristicaEvento->nombre_caracteristica_evento == 'modalidad';
+        });
+    
+        // Buscar la característica de 'tipo_participacion'
+        $participacionEvento = $evento->caracteristicasTexto->first(function ($caracteristicaTexto) {
+            return $caracteristicaTexto->caracteristicaEvento && $caracteristicaTexto->caracteristicaEvento->nombre_caracteristica_evento == 'tipo_participacion';
+        });
+    
+        $detalleEvento = [
+            'Titulo' => $evento->TITULO,
+            'Tipo de evento' => $evento->tipoEvento->nombre_tipo_evento,
+            'Modalidad' => $modalidadEvento ? $modalidadEvento->valor_texto_evento : 'No especificado',
+            'Participacion' => $participacionEvento ? $participacionEvento->valor_texto_evento : 'No especificado',
+        ];
+    
+
+        // Obtener detalles adicionales según solicitud
+        if ($incluyeOrganizadores) {
+            $organizadores = $evento->organizadores->pluck('persona.nombre')->toArray();
+            $detalleEvento['Organizadores'] = implode(', ', $organizadores);
+        }
+        if ($incluyePatrocinadores) {
+            $patrocinadores = $evento->patrocinadores->pluck('nombre_auspiciador')->toArray();
+            $detalleEvento['Patrocinadores'] = implode(', ', $patrocinadores);
+        }
+        if ($incluyeUbicaciones) {
+            $ubicaciones = $evento->etapas->flatMap(function($etapa) {
+                return $etapa->ubicacionEtapa->map(function($ubicacionEtapa) {
+                    // Asegúrate de que la relación ubicacion está presente y es un objeto
+                    return $ubicacionEtapa->ubicacion ? $ubicacionEtapa->ubicacion->nombre_ambiente : null;
+                })->filter();
+            })->unique();
+        
+            $detalleEvento['Ubicaciones'] = $ubicaciones->implode(', ');
+        }
+
+        $reporte[] = $detalleEvento;
+    }
+
+    return response()->json($reporte);
+}
+
 }
 

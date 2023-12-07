@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Ubicacion extends Model
 {
     protected $table = 'UBICACION';
+    protected $primaryKey = 'id_ubicacion';
     public $timestamps = false;
     use HasFactory;
     public function auspiciadores()
