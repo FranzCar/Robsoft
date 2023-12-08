@@ -15,6 +15,7 @@ import {
   Card,
   Image,
   Alert,
+  Divider,
 } from "antd";
 import React, { useState, useEffect } from "react";
 import {
@@ -27,8 +28,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import Column from "antd/es/table/Column";
-import moment from 'moment';
-
+import moment from "moment";
 
 import { useNavigate } from "react-router-dom";
 
@@ -46,21 +46,6 @@ const getBase64 = (file) => {
 };
 const onFinishFailed = (errorInfo) => {
   console.log("Failed:", errorInfo);
-};
-
-const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      "selectedRows: ",
-      selectedRows
-    );
-  },
-  getCheckboxProps: (record) => ({
-    disabled: record.nombre === "Disabled User",
-    // Column configuration not to be checked
-    name: record.nombre,
-  }),
 };
 
 export default function Participante() {
@@ -96,7 +81,6 @@ export default function Participante() {
   const [previewTitle, setPreviewTitle] = useState("");
   const handleCancelIMG = () => setPreviewOpen(false);
   const [datosEventos, setDatosEventos] = useState([]);
-  const [verImagen, setVerImagen] = React.useState("");
   const [estadoEntrenador, setEstadoEntrenador] = useState(false);
 
   useEffect(() => {
@@ -368,28 +352,7 @@ export default function Participante() {
   );
   // Registrar Imagen 2
   const [fileList1, setFileList1] = React.useState([]);
-  const handleChange1 = ({ fileList: newfileList }) =>
-    setFileList1(newfileList);
-  const handlePreview1 = async (file) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
-    }
-    setPreviewImage(file.url || file.preview);
-    setPreviewOpen(true);
-    setPreviewTitle(
-      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
-    );
-  };
-  const customRequest1 = ({ fileList1, onSuccess }) => {
-    onSuccess();
-  };
-  const uploadButton1 = (
-    <div>
-      {" "}
-      <PlusOutlined />
-      <div style={{ marginTop: 10 }}>Subir fotografia. </div>
-    </div>
-  );
+
   //Restringir las fechas de 17 a 30 años a la fecha actual
   const disabledDate = (current) => {
     // Obtenemos la fecha actual
@@ -564,7 +527,10 @@ export default function Participante() {
       } else {
         message.success("El carnet de identidad ya esta registrado.");
 
-        const nuevaFecha = moment(participanteEncontrado.fecha_nacimiento, 'YYYY-MM-DD');
+        const nuevaFecha = moment(
+          participanteEncontrado.fecha_nacimiento,
+          "YYYY-MM-DD"
+        );
         const datos = {
           CI: values.CI,
           NOMBRE: participanteEncontrado.nombre,
@@ -576,7 +542,7 @@ export default function Participante() {
           CODIGOSIS: participanteEncontrado.codigoSIS,
         };
         form.setFieldsValue(datos);
-        setDisableFechaNacimiento(true)
+        setDisableFechaNacimiento(true);
         formCI.resetFields();
         setCiEncontrado(true);
         setVisible(true);
@@ -723,7 +689,11 @@ export default function Participante() {
         setListaParticipante([]);
         setListaID_Persona([]);
         setVerModalGrupal(false);
-        form.resetFields();
+        setBusquedaParticipante1("");
+        setBusqueda("");
+        setAlerta(null);
+        setAlertaParticipante1(null);
+        formGrupal.resetFields();
       },
       onCancel() {},
     });
@@ -749,25 +719,16 @@ export default function Participante() {
   };
 
   const aniadirPArticipante = () => {
-    setBuscarParticipante(true);
+    aniadirParticipante();
   };
 
   const handleCancelBuscador = () => {
     setBuscarParticipante(false);
   };
 
-  //Modal para mostrar el buscador de entrenador
-  const showModalEntrenador = () => {
-    setBuscarEntrenador(true);
-  };
-  const handleCancelEntrenador = () => {
-    setBuscarEntrenador(false);
-  };
-
   //Guardar datos del formulario grupal
   const registrarGrupo = (values) => {
     showConfirmGrupal(values);
-    console.log("el valor de los datos del grupo son ", values);
   };
 
   //Obtener los equipos registrados
@@ -786,17 +747,15 @@ export default function Participante() {
       .get(`http://localhost:8000/api/inscritos-evento/${idEVENTO}`)
       .then((response) => {
         setListaParticipantesEvento(response.data);
-        console.log("lista participante evento: ",response.data);
+        console.log("lista participante evento: ", response.data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
   const [respon, setRespon] = useState();
-  const datosGrupal = (values) => {
-    console.log("datos GRUPAL: ", values);
-    console.log("datos GRUPAL ENTRENADOR ID: ", entrenadorForm.id_persona);
 
+  const datosGrupal = (values) => {
     if (entrenadorForm.id_persona) {
       setRespon(entrenadorForm.id_persona);
     } else {
@@ -807,11 +766,7 @@ export default function Participante() {
       nombre_equipo: values.EQUIPO,
       coach: entrenadorForm.id_persona, // este es el id_rol_persona que obtienes de la lista de coachs
       responsable: respon, // Este el id_persona, ya sea de coach o participante
-      participantes: [
-        participanteForm1.id_persona,
-        participanteForm2.id_persona,
-        participanteForm3.id_persona,
-      ],// id_persona de los participantes
+      participantes: listaID_Persona, // id_persona de los participantes
       id_institucion: values.INSTITUCION,
     };
     return datos;
@@ -834,49 +789,62 @@ export default function Participante() {
   const guardarEquipo = (values) => {
     const datos = datosGrupal(values);
     const duplicado = validarDuplicadoGrupal(values);
-    console.log("los datos que se recuperan del grupo son ", datos);
-    if (duplicado === true) {
-      message.error("Existe un equipo con el mismo nombre");
-    } else {
-      axios
-        .post("http://localhost:8000/api/guardar-equipo", datos)
-        .then((response) => {
-          message.success("El grupo se registró correctamente");
-          obtenerGrupos();
-          form.resetFields();
-          const datosEquipo = {
-            id_evento: idEVENTO,
-            id_equipo: response.data.id_equipo,
-          };
-          axios
-            .post("http://localhost:8000/api/inscribir-equipo", datosEquipo)
-            .then((response) => {
-              console.log(
-                "El grupo se registró correctamente con éxito al evento",
-                response.data
-              );
-              message.success("El equipo se registró correctamente al evento");
-              formGrupal.resetFields();
-              setEntrenadorForm(null);
-            })
-            .catch((error) => {
-              if (error.response) {
-                // El servidor respondió con un código de estado fuera del rango 2xx
-                const errores = error.response.data.errors;
-                for (let campo in errores) {
-                  message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
-                }
-              } else {
-                // Otros errores (problemas de red, etc.)
-                message.error(
-                  "Ocurrió un error al guardar el registro del equipo al EVENTO."
+    console.log("los datos a guardar del equipo son  ", datos);
+    if (listaParticipante.length !== 0) {
+      if (duplicado === true) {
+        message.error("Existe un equipo con el mismo nombre");
+      } else {
+        axios
+          .post("http://localhost:8000/api/guardar-equipo", datos)
+          .then((response) => {
+            message.success("El grupo se registró correctamente");
+            obtenerGrupos();
+            form.resetFields();
+            const datosEquipo = {
+              id_evento: idEVENTO,
+              id_equipo: response.data.id_equipo,
+            };
+            axios
+              .post("http://localhost:8000/api/inscribir-equipo", datosEquipo)
+              .then((response) => {
+                console.log(
+                  "El grupo se registró correctamente con éxito al evento",
+                  response.data
                 );
-              }
-            });
-        });
-      setVerModalGrupal(false);
-      setListaParticipante([]);
-      setNombreEntrenador("");
+                message.success(
+                  "El equipo se registró correctamente al evento"
+                );
+                formGrupal.resetFields();
+                setEntrenadorForm(null);
+                setListaParticipante([]);
+                setAlerta(null);
+                setAlertaParticipante1(null);
+                setBusquedaParticipante1("");
+                setBusqueda("");
+              })
+              .catch((error) => {
+                if (error.response) {
+                  // El servidor respondió con un código de estado fuera del rango 2xx
+                  const errores = error.response.data.errors;
+                  for (let campo in errores) {
+                    message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+                  }
+                } else {
+                  // Otros errores (problemas de red, etc.)
+                  message.error(
+                    "Ocurrió un error al guardar el registro del equipo al EVENTO."
+                  );
+                }
+              });
+          });
+        setVerModalGrupal(false);
+        setListaParticipante([]);
+        setNombreEntrenador("");
+      }
+    } else {
+      message.error(
+        `Tiene que agregar ${tamanioListaParticipantes} participantes`
+      );
     }
   };
   //obtener inscritos al evento
@@ -905,32 +873,14 @@ export default function Participante() {
       });
   };
 
-  //Buscar participantes
-  const onSearch = (value) => {
-    setSearchText(value);
-    filtrarDatos(value, ["nombre", "ci"]);
-  };
-
-  const filtrarDatos = (searchText, fieldNames) => {
-    const filtered = integrante.filter((item) =>
-      fieldNames.some((fieldName) =>
-        String(item[fieldName])
-          .toString()
-          .toLowerCase()
-          .includes(searchText.toLowerCase())
-      )
-    );
-    setDatoFiltrado(filtered);
-  };
-
   //Validar la lista de participantes añadidos
-  const validarLista = () => {
+  const validarLista = (participante) => {
     let resultado = false;
 
     for (let i = 0; i < listaParticipante.length; i++) {
       if (
-        listaParticipante[i].ci === searchText ||
-        listaParticipante[i].nombre === searchText
+        listaParticipante[i].ci === participante.ci ||
+        listaParticipante[i].nombre === participante.nombre
       ) {
         resultado = true;
         break;
@@ -938,33 +888,45 @@ export default function Participante() {
     }
     return resultado;
   };
+  const [participante, setParticipante] = useState([]);
+  const [tamanioListaParticipantes, setTamanioListaParticipantes] =
+    useState(null);
 
   // Añadir participante a la tabla
   const aniadirParticipante = () => {
-    const resultado = validarLista();
-    if (resultado === true) {
-      message.error("El participantes ya se encuentra añadido");
-    } else {
-      if (!searchText === true || searchText.trim() === "") {
-        message.error("Tiene que ingresar un CI de un participante");
+    const agregarParticipante = participante;
+    const resultado = validarLista(agregarParticipante);
+    if (agregarParticipante.length !== 0) {
+      if (resultado === true) {
+        message.error("El participante ya se encuentra añadido");
+        setParticipante([]);
       } else {
-        if (listaParticipante.length === 3) {
-          message.error("Máximo 3 participantes permitidos");
+        if (listaParticipante.length === tamanioListaParticipantes) {
+          message.error(
+            `Máximo ${tamanioListaParticipantes} participantes permitidos`
+          );
         } else {
-          const nuevoParticipante = { key: nextID, ...datoFiltrado[0] };
+          const nuevoParticipante = {
+            key: nextID,
+            nombre: agregarParticipante.nombre,
+            ci: agregarParticipante.ci,
+          };
 
           setListaParticipante((listaParticipante) => [
             ...listaParticipante,
             nuevoParticipante,
           ]);
-          setSearchText("");
-          setBuscarParticipante(false);
+          aniadorIDPersona(agregarParticipante.id_persona);
           message.success("Se añadió al participante");
-          aniadorIDPersona(datoFiltrado[0].id_persona);
+          setBusquedaParticipante1("");
+          setAlertaParticipante1(null);
+          setParticipante([]);
           setNextID(nextID + 1);
         }
       }
     }
+
+    console.log("Lista de participantes ", listaParticipante);
   };
 
   const aniadorIDPersona = (id) => {
@@ -1000,22 +962,6 @@ export default function Participante() {
       .catch((error) => {
         console.error(error);
       });
-  };
-
-  // Buscar entreandor
-  const onSearchEntrenador = (value) => {
-    setSearchEntrenador(value);
-    filtrarDatosEntrenador(value, "ci");
-  };
-
-  const filtrarDatosEntrenador = (searchText, fieldName) => {
-    const filtered = entrenador.filter((item) =>
-      String(item[fieldName])
-        .toString()
-        .toLowerCase()
-        .includes(searchText.toLowerCase())
-    );
-    setDatoFiltradoEntrenador(filtered);
   };
 
   //Añadir entrenador en el input
@@ -1114,6 +1060,7 @@ export default function Participante() {
           obtenerParticipantes();
           setVerModalParticipanteNuevo(false);
           obtenerParticipantesCI();
+          formNuevo.resetFields();
         })
         .catch((error) => {
           message.error("Ocurrió un error al guardar el registro.");
@@ -1139,7 +1086,6 @@ export default function Participante() {
 
       onOk() {
         confirmSaveNuevo(values);
-        formNuevo.resetFields();
       },
       onCancel() {},
     });
@@ -1244,8 +1190,13 @@ export default function Participante() {
   };
   const showModalidadEvento = (tipo, data) => {
     console.log("El tipo es ", data);
+    console.log(
+      "cantidad de participantes ",
+      data.caracteristicas.Cantidad_integrantes
+    );
     obtenerParticipantesEvento(data.id_evento);
-    console.log("IDEVENTO SHOW MODAL  ",data.id_evento);
+    console.log("IDEVENTO SHOW MODAL  ", data.id_evento);
+    setTamanioListaParticipantes(data.caracteristicas.Cantidad_integrantes);
     if (tipo === "Individual") {
       showModalTipoParticipante();
     } else {
@@ -1369,13 +1320,14 @@ export default function Participante() {
       if (participanteEnEvento) {
         setAlertaParticipante({
           type: "warning",
-          message: `¡Alerta! ${participanteEncontrado.nombre} ya está registrado en el evento.`,
+          message: `Ya está registrado en el evento.`,
         });
       } else {
         setAlertaParticipante({
           type: "success",
           message: `${participanteEncontrado.nombre}`,
         });
+        setParticipante(participanteEncontrado);
       }
     } else {
       setAlertaParticipante({
@@ -1459,7 +1411,7 @@ export default function Participante() {
                     </p>
                     <br />
                     <p>
-                      <h3>Participacion </h3>
+                      <h3>Participacion: </h3>
                       {item.caracteristicas.tipo_participacion}
                     </p>
                     <br />
@@ -1508,34 +1460,6 @@ export default function Participante() {
         </Row>
       </div>
 
-      {/*
-        <Row gutter={[16, 8]}>
-          <Col className="main-content" span={12}>
-            <Space direction="vertical" style={{ width: "80%" }}>
-              <Button
-                type="primary"
-                onClick={showModal}
-                block
-                style={{ background: "var(--primary-color)" }}
-              >
-                <span style={{ fontWeight: "bold" }}>Registro Individual</span>
-              </Button>
-            </Space>
-          </Col>
-          <Col className="main-content" span={12}>
-            <Space direction="vertical" style={{ width: "80%" }}>
-              <Button
-                type="primary"
-                onClick={showModalGrupal}
-                block
-                style={{ background: "var(--primary-color)" }}
-              >
-                <span style={{ fontWeight: "bold" }}>Registro Grupal</span>
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-      */}
       {/*Modal Elegir tipo*/}
       <Modal
         title={`Inscribirme al evento: ${tituloEvento}`}
@@ -1941,10 +1865,8 @@ export default function Participante() {
         maskClosable={false}
         keyboard={false}
         closable={false}
-        style={{
-          top: 40,
-        }}
-        width={600}
+        centered
+        width={800}
         footer={[
           <Form form={formGrupal} onFinish={registrarGrupo}>
             <Button
@@ -1968,221 +1890,114 @@ export default function Participante() {
           form={formGrupal}
           initialValues={nombreEntrenador}
           onFinish={registrarGrupo}
-          layout="horizontal"
+          layout="vertical"
         >
-          <Form.Item
-            label="Nombre del equipo"
-            name="EQUIPO"
-            style={{ margin: "3px" }}
-            rules={[
-              {
-                required: true,
-                message: "Por favor, ingrese el nombre del equipo",
-              },
-            ]}
-          >
-            <Input placeholder="Ingrese el nombre del equipo" maxLength={50} />
-          </Form.Item>
-          <div style={{ marginLeft: "15%" }}>
-            <Button type="link" onClick={handleAbrirModalParticipanteNuevo}>
-              Registrar Nuevo Participante
-            </Button>
-            <Button type="link" onClick={modalNuevoEntrenador}>
-              Registrar Nuevo Entrenador
-            </Button>
-          </div>
-          <Form.Item
-            label="Entrenador"
-            name="ENTRENADOR"
-            rules={[
-              {
-                required: estadoEntrenador,
-                message: "Por favor, añada a un entrenador",
-              },
-            ]}
-          >
-            <div>
-              <Input.Search
-                placeholder="Ingresa el carnet de identidad"
-                value={busqueda}
-                onChange={(event) =>
-                  handleInputChange(event, setBusqueda, setAlerta)
-                }
-                onSearch={() => handleBuscarEntrenador(busqueda, setAlerta)}
-                maxLength={8}
-              />
-              {alerta && (
-                <Alert
-                  message={alerta.message}
-                  type={alerta.type}
-                  showIcon
-                  closable
-                  onClose={() => setAlerta(null)}
-                  style={{ height: 28 }}
-                />
-              )}
-            </div>
-          </Form.Item>
-          {/* Repite la estructura para Participante 1 */}
-          <Form.Item
-            label="Participante 1:"
-            name="PARTICIPANTE1"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, añada a un participante",
-              },
-            ]}
-          >
-            <div>
-              <Input.Search
-                placeholder="Ingresa el carnet de identidad"
-                value={busquedaParticipante1}
-                onChange={(event) =>
-                  handleInputChangeParticipante(
-                    event,
-                    setBusquedaParticipante1,
-                    setAlertaParticipante1
-                  )
-                }
-                onSearch={() =>
-                  handleBuscarParticipante(
-                    busquedaParticipante1,
-                    setAlertaParticipante1,
-                    1
-                  )
-                }
-                maxLength={8}
-                minLength={8}
-              />
-              {alertaParticipante1 && (
-                <Alert
-                  message={alertaParticipante1.message}
-                  type={alertaParticipante1.type}
-                  showIcon
-                  style={{ height: 28 }}
-                />
-              )}
-            </div>
-          </Form.Item>
-
-          {/* Repite la estructura para Participante 2 */}
-          <Form.Item
-            label="Participante 2:"
-            name="PARTICIPANTE2"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, añada a un participante",
-              },
-            ]}
-          >
-            <div>
-              <Input.Search
-                placeholder="Ingresa el carnet de identidad"
-                value={busquedaParticipante2}
-                onChange={(event) =>
-                  handleInputChangeParticipante(
-                    event,
-                    setBusquedaParticipante2,
-                    setAlertaParticipante2
-                  )
-                }
-                onSearch={() =>
-                  handleBuscarParticipante(
-                    busquedaParticipante2,
-                    setAlertaParticipante2,
-                    2
-                  )
-                }
-                maxLength={8}
-                minLength={8}
-              />
-              {alertaParticipante2 && (
-                <Alert
-                  message={alertaParticipante2.message}
-                  type={alertaParticipante2.type}
-                  showIcon
-                  style={{ height: 25 }}
-                />
-              )}
-            </div>
-          </Form.Item>
-
-          {/* Repite la estructura para Participante 3 */}
-          <Form.Item
-            label="Participante 3:"
-            name="PARTICIPANTE3"
-            rules={[
-              {
-                required: true,
-                message: "Por favor, añada a un participante",
-              },
-            ]}
-          >
-            <div>
-              <Input.Search
-                placeholder="Ingresa el carnet de identidad"
-                value={busquedaParticipante3}
-                onChange={(event) =>
-                  handleInputChangeParticipante(
-                    event,
-                    setBusquedaParticipante3,
-                    setAlertaParticipante3
-                  )
-                }
-                onSearch={() =>
-                  handleBuscarParticipante(
-                    busquedaParticipante3,
-                    setAlertaParticipante3,
-                    3
-                  )
-                }
-                maxLength={8}
-                minLength={8}
-              />
-              {alertaParticipante3 && (
-                <Alert
-                  message={alertaParticipante3.message}
-                  type={alertaParticipante3.type}
-                  showIcon
-                  style={{ height: 28 }}
-                />
-              )}
-            </div>
-          </Form.Item>
-          <Form.Item label="Institución" name="INSTITUCION">
-            <Select
-              placeholder="Seleccione una institución."
-              options={instituciones}
-              onChange={onInstitutionChange}
-            />
-          </Form.Item>
-        </Form>
-        <div className="aniadir-participante">
-            <div>
-              <label>Participantes</label>
-            </div>
-            <div className="boton-aniadir-participante">
-              <label>Eliminar</label>
-              <Button
-                type="link"
-                onClick={eliminarParticipante}
-                className="icono-eliminar"
+          <div className="dosColumnas">
+            <div className="columnaUno">
+              <Form.Item
+                label="Nombre del equipo"
+                name="EQUIPO"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor, ingrese el nombre del equipo",
+                  },
+                ]}
               >
-                <DeleteOutlined />
+                <Input
+                  placeholder="Ingrese el nombre del equipo"
+                  maxLength={30}
+                />
+              </Form.Item>
+              <Form.Item label="Participante:" name="PARTICIPANTE1">
+                <div>
+                  <Input.Search
+                    placeholder="Ingresa el carnet de identidad"
+                    value={busquedaParticipante1}
+                    onChange={(event) =>
+                      handleInputChangeParticipante(
+                        event,
+                        setBusquedaParticipante1,
+                        setAlertaParticipante1
+                      )
+                    }
+                    onSearch={() =>
+                      handleBuscarParticipante(
+                        busquedaParticipante1,
+                        setAlertaParticipante1,
+                        1
+                      )
+                    }
+                    maxLength={8}
+                    minLength={8}
+                  />
+                  {alertaParticipante1 && (
+                    <Alert
+                      message={alertaParticipante1.message}
+                      type={alertaParticipante1.type}
+                      showIcon
+                      style={{ height: 28 }}
+                    />
+                  )}
+                </div>
+                <Button type="link" onClick={handleAbrirModalParticipanteNuevo}>
+                  Registrar Nuevo Participante
+                </Button>
+              </Form.Item>
+              <Button onClick={eliminarParticipante} className="icono-eliminar">
+                Quitar participante
               </Button>
 
-              <label>Añadir</label>
-              <Button
-                type="link"
-                onClick={aniadirPArticipante}
-                className="icono-aniadir"
-              >
-                <PlusOutlined />
+              <Button onClick={aniadirPArticipante} className="icono-aniadir">
+                Añadir participante
               </Button>
             </div>
+            <div>
+              <Form.Item label="Institución" name="INSTITUCION">
+                <Select
+                  placeholder="Seleccione una institución."
+                  options={instituciones}
+                  onChange={onInstitutionChange}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Entrenador"
+                name="ENTRENADOR"
+                rules={[
+                  {
+                    required: estadoEntrenador,
+                    message: "Por favor, añada a un entrenador",
+                  },
+                ]}
+              >
+                <div>
+                  <Input.Search
+                    placeholder="Ingresa el carnet de identidad"
+                    value={busqueda}
+                    onChange={(event) =>
+                      handleInputChange(event, setBusqueda, setAlerta)
+                    }
+                    onSearch={() => handleBuscarEntrenador(busqueda, setAlerta)}
+                    maxLength={8}
+                  />
+                  {alerta && (
+                    <Alert
+                      message={alerta.message}
+                      type={alerta.type}
+                      showIcon
+                      closable
+                      onClose={() => setAlerta(null)}
+                      style={{ height: 28 }}
+                    />
+                  )}
+                </div>
+                <Button type="link" onClick={modalNuevoEntrenador}>
+                  Registrar Nuevo Entrenador
+                </Button>
+              </Form.Item>
+            </div>
           </div>
+
           <Table
             className="tabla-participantes"
             dataSource={listaParticipante}
@@ -2193,14 +2008,17 @@ export default function Participante() {
             pagination={false}
             locale={{
               emptyText: (
-                <div style={{ padding: "30px", textAlign: "center" }}>
+                <div style={{ padding: "50px", textAlign: "center" }}>
                   No hay participantes añadidos.
                 </div>
               ),
             }}
           >
             <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
+            <Column title="CI" dataIndex="ci" key="ci" />
           </Table>
+          <p>Nro. participantes requerido: {tamanioListaParticipantes}</p>
+        </Form>
       </Modal>
 
       {/*modal para registrar nuevo participante*/}
@@ -2216,7 +2034,6 @@ export default function Participante() {
             >
               Cancelar
             </Button>
-            ,
             <Button
               type="primary"
               htmlType="submit"
