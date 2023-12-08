@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Usuario;
+use App\Models\Roles;
 use App\Models\Tareas;
 
 class UsuarioController extends Controller
@@ -52,5 +53,26 @@ class UsuarioController extends Controller
         });
 
         return response()->json($tareas);
+    }
+    public function obtenerRolesUsuario($idUsuario) {
+        // Encuentra el usuario y carga sus roles
+        $usuario = Usuario::with('roles')->findOrFail($idUsuario);
+
+        // Obtén todas los roles posibles
+        $todosLosRoles = Roles::all();
+
+        // Obtén las IDs de los roles del usuario
+        $rolesDelUsuario = $usuario->roles->pluck('id_roles')->all();
+
+        // Prepara el resultado final
+        $roles = $todosLosRoles->map(function ($rol) use ($rolesDelUsuario) {
+            return [
+                'id_roles' => $rol->id_roles,
+                'nombre_rol' => $rol->nombre_rol,
+                'asignado' => in_array($rol->id_roles, $rolesDelUsuario)
+            ];
+        });
+
+        return response()->json($roles);
     }
 }
