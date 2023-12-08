@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\UbicacionController;
 use App\Http\Controllers\Api\CodigosVerificacionController;
 use App\Http\Controllers\Api\TipoEventoController;
 use App\Http\Controllers\Api\InscripcionController;
+use App\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\RolesController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -58,3 +60,10 @@ Route::get('evento-con-detalles/{id}', [EventoController::class, 'tieneDetalles'
 Route::get('lista-participantes-institucion',[PersonaController::class, 'listParticipantesInstitucion']);
 Route::get('reporte-eventos', [EventoController::class, 'reporteEventos']);
 Route::get('lista-coach-institucion',[RolPersonaController::class, 'listaCoachInstitucion']);
+Route::get('lista-usuarios',[UsuarioController::class, 'listaUsuarios']);
+Route::get('lista-roles',[RolesController::class, 'listaRoles']);
+Route::get('lista-tareas',[RolesController::class, 'listaTareas']);
+Route::get('lista-roles-tareas',[RolesController::class, 'listaRolesTareas']);
+Route::post('roles-actualizar-tareas', [RolesController::class,'actualizarTareasRol']);
+Route::post('usuarios-actualizar-roles', [UsuarioController::class, 'asignarRoles']);
+
