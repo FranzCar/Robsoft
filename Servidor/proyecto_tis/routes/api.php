@@ -66,4 +66,5 @@ Route::get('lista-tareas',[RolesController::class, 'listaTareas']);
 Route::get('lista-roles-tareas',[RolesController::class, 'listaRolesTareas']);
 Route::post('roles-actualizar-tareas', [RolesController::class,'actualizarTareasRol']);
 Route::post('usuarios-actualizar-roles', [UsuarioController::class, 'asignarRoles']);
+Route::get('tareas_de_usuario/{id}',[UsuarioController::class, 'obtenerTareasUsuario']);
 
