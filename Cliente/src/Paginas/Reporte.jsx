@@ -199,7 +199,7 @@ export default function Reporte() {
     const datos = datosReporte(values);
     console.log("los datos del FORM son ", datos);
     axios
-      .get("http://localhost:8000/api/reporte-eventos", datos)
+      .get("http://localhost:8000/api/reporte-eventos", { params: datos })
       .then((response) => {
         setModalFormEvent(false);
         setListaReportes(response.data);
@@ -220,10 +220,11 @@ export default function Reporte() {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_tipo_evento,
           nombre: element.nombre_tipo_evento,
-          value: element.id_tipo_evento, // Aquí usamos el ID como valor
+          value: element.nombre_tipo_evento, // Aquí usamos el ID como valor
           label: element.nombre_tipo_evento, // Y el nombre como etiqueta
         }));
         setListaTipoEvento(listaConFormato);
+        console.log("lista Eventos, ", listaConFormato);
       })
       .catch((error) => {
         console.error(error);
@@ -329,10 +330,10 @@ export default function Reporte() {
                   key="Patrocinadores"
                   render={(Patrocinadores) => (
                     <>
-                      {Patrocinadores && Patrocinadores.length > 0 ? (
-                        Patrocinadores.map((tag) => (
-                          <Tag color="blue" key={tag}>
-                            {tag}
+                      {Patrocinadores ? (
+                        Patrocinadores.split(",").map((patrocinador, index) => (
+                          <Tag color="blue" key={index}>
+                            {patrocinador.trim()}
                           </Tag>
                         ))
                       ) : (
@@ -341,16 +342,42 @@ export default function Reporte() {
                     </>
                   )}
                 />
-
                 <Column
                   title="Organizadores"
-                  dataIndex="organizadores"
-                  key="organizadores"
+                  dataIndex="Organizadores"
+                  key="Organizadores"
+                  render={(Organizadores) => (
+                    <>
+                      {Organizadores ? (
+                        Organizadores.split(",").map((patrocinador, index) => (
+                          <Tag color="volcano" key={index}>
+                            {patrocinador.trim()}
+                          </Tag>
+                        ))
+                      ) : (
+                        <span>Sin Organizadores</span>
+                      )}
+                    </>
+                  )}
                 />
+
                 <Column
-                  title="Ubicacion"
-                  dataIndex="ubicacion"
-                  key="ubicacion"
+                  title="Ubicaciones"
+                  dataIndex="Ubicaciones"
+                  key="Ubicaciones"
+                  render={(Ubicaciones) => (
+                    <>
+                      {Ubicaciones ? (
+                        Ubicaciones.split(",").map((patrocinador, index) => (
+                          <Tag color="green" key={index}>
+                            {patrocinador.trim()}
+                          </Tag>
+                        ))
+                      ) : (
+                        <span>Sin Ubicaciones</span>
+                      )}
+                    </>
+                  )}
                 />
               </Table>
             )}
