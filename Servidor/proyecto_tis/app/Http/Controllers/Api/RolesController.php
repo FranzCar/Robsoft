@@ -36,19 +36,14 @@ class RolesController extends Controller
         return $rolesConTareas;
     }
     public function actualizarTareasRoles(Request $request) {
-        // Comenzamos una transacción
         DB::beginTransaction();
         try {
             foreach ($request->all() as $rolData) {
+                // Encuentra el rol y asegúrate de que existe
                 $rol = Roles::findOrFail($rolData['id_roles']);
     
-                // Eliminamos todas las tareas existentes para este rol
-                $rol->tareas()->detach();
-    
-                // Sincronizamos las tareas proporcionadas
-                foreach ($rolData['tareas'] as $idTarea) {
-                    $rol->tareas()->attach($idTarea);
-                }
+                // Sincroniza las tareas. Sync elimina todas las asociaciones previas y establece las nuevas.
+                $rol->tareas()->sync($rolData['tareas']);
             }
     
             // Confirmamos la transacción
@@ -60,5 +55,4 @@ class RolesController extends Controller
             return response()->json(['message' => 'Error al actualizar tareas: ' . $e->getMessage()], 500);
         }
     }
-    
 }
