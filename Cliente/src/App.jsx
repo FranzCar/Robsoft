@@ -148,6 +148,7 @@ function App() {
       setMostrarHome(true);
       setMostrarLogin(false);
       setMostrarAdministrador(true);
+      setMostrarReportes(true)
       setNombreUsuario(values.usuario);
       localStorage.setItem("usuario", values.usuario);
       localStorage.setItem("sesion", "root");
@@ -265,6 +266,7 @@ function App() {
                 <Route path="/editarEvento" element={<EditarEvento />} />
                 <Route path="/detalleEvento" element={<DetalleEvento />} />
                 <Route path="/actividades" element={<Actividades />} />
+                <Route path="/Reporte" element={<Reporte />} />
               </Routes>
             )}
             {mostrarReportes && (

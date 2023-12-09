@@ -268,7 +268,8 @@ export default function Menu({ administrador }) {
             pagination={false}
             centered
           >
-            <Column title="Rol" dataIndex="label" />
+            <Column title="Rol" dataIndex="nombre_rol
+" />
             <Column title="Asignar" render={(text, record) => <Checkbox />} />
           </Table>
         </Form>
