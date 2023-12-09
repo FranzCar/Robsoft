@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Roles;
 use App\Models\Tareas;
+use Illuminate\Support\Facades\DB;
 
 class RolesController extends Controller
 {
@@ -35,11 +36,29 @@ class RolesController extends Controller
         return $rolesConTareas;
     }
     public function actualizarTareasRoles(Request $request) {
-        foreach ($request->all() as $rolData) {
-            $rol = Roles::findOrFail($rolData['id_roles']);
-            $rol->tareas()->sync($rolData['tareas']);
-        }
+        // Comenzamos una transacción
+        DB::beginTransaction();
+        try {
+            foreach ($request->all() as $rolData) {
+                $rol = Roles::findOrFail($rolData['id_roles']);
     
-        return response()->json(['message' => 'Tareas de todos los roles actualizadas con éxito.']);
+                // Eliminamos todas las tareas existentes para este rol
+                $rol->tareas()->detach();
+    
+                // Sincronizamos las tareas proporcionadas
+                foreach ($rolData['tareas'] as $idTarea) {
+                    $rol->tareas()->attach($idTarea);
+                }
+            }
+    
+            // Confirmamos la transacción
+            DB::commit();
+            return response()->json(['message' => 'Tareas de todos los roles actualizadas con éxito.']);
+        } catch (\Exception $e) {
+            // Si algo sale mal, revertimos la transacción
+            DB::rollBack();
+            return response()->json(['message' => 'Error al actualizar tareas: ' . $e->getMessage()], 500);
+        }
     }
+    
 }

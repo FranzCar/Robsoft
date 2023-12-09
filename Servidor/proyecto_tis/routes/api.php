@@ -64,7 +64,7 @@ Route::get('lista-usuarios',[UsuarioController::class, 'listaUsuarios']);
 Route::get('lista-roles',[RolesController::class, 'listaRoles']);
 Route::get('lista-tareas',[RolesController::class, 'listaTareas']);
 Route::get('lista-roles-tareas',[RolesController::class, 'listaRolesTareas']);
-Route::post('roles-actualizar-tareas', [RolesController::class,'actualizarTareasRol']);
+Route::post('roles-actualizar-tareas', [RolesController::class,'actualizarTareasRoles']);
 Route::post('usuarios-actualizar-roles', [UsuarioController::class, 'asignarRoles']);
 Route::get('tareas_de_usuario/{id}',[UsuarioController::class, 'obtenerTareasUsuario']);
 Route::get('roles_de_usuario/{id}',[UsuarioController::class, 'obtenerRolesUsuario']);
