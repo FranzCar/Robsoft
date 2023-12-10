@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('id_usuario', true);
             $table->string('username', 50)->nullable();
             $table->string('password', 50)->nullable();
+            $table->string('api_token', 50)->nullable();
         });
     }
 

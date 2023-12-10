@@ -75,4 +75,27 @@ class UsuarioController extends Controller
 
         return response()->json($roles);
     }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        $user = Usuario::where('username', $username)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'El usuario no existe'], 404);
+        }
+
+        if ($user->password !== $password) {
+            return response()->json(['message' => 'Contraseña incorrecta'], 401);
+        }
+
+        return response()->json(['message' => 'Autenticación exitosa']);
+    }
 }
