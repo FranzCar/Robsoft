@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import {
   AppstoreOutlined,
   MailOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import {
   Table,
@@ -87,29 +86,7 @@ export default function Reporte() {
         "5"
       ),
     ]),
-    getItem("Generar Reporte", "sub4", <SettingOutlined />, [
-      getItem("Option 9", "9"),
-    ]),
   ];
-
-  const obtenerEventosConIncritos = () => {
-    axios
-      .get("http://localhost:8000/api/eventos-con-inscritos")
-      .then((response) => {
-        const listaConFormato = response.data.map((element) => ({
-          id: element.id_evento,
-          nombre_evento: element.TITULO,
-          value: element.TITULO,
-          label: element.TITULO,
-        }));
-
-        setListaEventos(listaConFormato);
-        console.log("Los eventos con inscritos son ", response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
 
   const [openKeys, setOpenKeys] = useState(["sub1"]);
   const onOpenChange = (keys) => {
@@ -173,6 +150,24 @@ export default function Reporte() {
         console.error(error);
       });
   };
+  const obtenerEventosConIncritos = () => {
+    axios
+      .get("http://localhost:8000/api/eventos-con-inscritos")
+      .then((response) => {
+        const listaConFormato = response.data.map((element) => ({
+          id: element.id_evento,
+          nombre_evento: element.TITULO,
+          value: element.TITULO,
+          label: element.TITULO,
+        }));
+
+        setListaEventos(listaConFormato);
+        console.log("Los eventos con inscritos son ", response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
   const datosReporte = (values) => {
     const fechaIni = values.FECHA_INICIO;
     const NUEVAFECHAINI = fechaIni.format("YYYY-MM-DD");
@@ -182,11 +177,11 @@ export default function Reporte() {
       fecha_inicio: NUEVAFECHAINI,
       fecha_fin: NUEVAFECHAFIN,
       tipo_evento: values.TIPO_EVENTO,
-      modalidad: values.MODALIDAD,
-      participacion: values.PARTICIPACION,
-      publico: values.DIRIGIDO_A,
-      ubicacion: values.UBICACION,
-      entrenador_obligatorio: values.ENTRENADOR,
+      modalidad: values.MODALIDAD ?? "",
+      participacion: values.PARTICIPACION ?? "",
+      publico: values.DIRIGIDO_A ?? "",
+      ubicacion: values.UBICACION ?? "",
+      entrenador_obligatorio: values.ENTRENADOR ?? true,
       incluye_organizadores: values.M1,
       incluye_patrocinadores: values.M2,
       incluye_ubicaciones: values.M3,
@@ -204,7 +199,6 @@ export default function Reporte() {
         setModalFormEvent(false);
         setListaReportes(response.data);
         console.log("los datos de los reportes son ", response.data);
-        formEvent.resetFields();
         setMostrarReportes(true);
         setMostrarParticipantes(false);
       })
@@ -247,90 +241,111 @@ export default function Reporte() {
         console.error(error);
       });
   };
+  const [mostrarPatrocinadores, setMostrarPatrocinadores] = useState(true);
+  const [mostrarOrganizadores, setMostrarOrganizadores] = useState(true);
+  const [mostrarUbicaciones, setMostrarUbicaciones] = useState(true);
 
   return (
     <div className="tabla-descripcion-editarEv">
       <p>REPORTES DE EVENTOS</p>
-      <div style={{ flex: "center" }}>
-        <Row gutter={[16, 1]}>
-          <Col className="main-content" span={5}>
-            <Menu
-              mode="inline"
-              openKeys={openKeys}
-              onOpenChange={onOpenChange}
-              style={{
-                marginTop: "20px",
-                width: "100%",
+      <Row>
+        <Col span={5}>
+          <Menu
+            mode="inline"
+            openKeys={openKeys}
+            onOpenChange={onOpenChange}
+            items={items}
+            style={{
+              borderRadius: "5%",
+              marginLeft: "10%",
+              marginRight: "10%",
+              background: "#ffffff",
+              marginTop: "5%",
+              width: "100%",
+            }}
+          />
+        </Col>
+        <Col
+          span={16}
+          style={{
+            borderRadius: "3%",
+            marginLeft: "4%",
+            marginRight: "1%",
+            marginTop: "1%",
+            background: "#ffffff",
+          }}
+        >
+          {mostrarParticipantes && (
+            <Table
+              scroll={{ y: 340 }}
+              dataSource={listaParticipantes}
+              pagination={false}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: "95px", textAlign: "center" }}>
+                    No hay participantes registrados.
+                  </div>
+                ),
               }}
-              items={items}
-            />
-          </Col>
-          <Col className="main-content" span={16}>
-            {mostrarParticipantes && (
-              <Table
-                className="tabla-reporte-participante"
-                scroll={{ y: 340 }}
-                dataSource={listaParticipantes}
-                pagination={false}
-                locale={{
-                  emptyText: (
-                    <div style={{ padding: "95px", textAlign: "center" }}>
-                      No hay participantes registrados.
-                    </div>
-                  ),
-                }}
-              >
-                <Column
-                  title="Nombre completo"
-                  dataIndex="nombre"
-                  key="nombre"
-                />
-                <Column
-                  title="Correo electrónico"
-                  dataIndex="correo_electronico"
-                  key="correo"
-                />
-                <Column title="Carnet de identidad" dataIndex="ci" key="ci" />
-                <Column title="Género" dataIndex="genero" key="genero" />
-              </Table>
-            )}
-            {mostrarReportes && (
-              <Table
-                className="tabla-reporte"
-                scroll={{ y: 340 }}
-                dataSource={listaReportes}
-                pagination={false}
-                locale={{
-                  emptyText: (
-                    <div style={{ padding: "95px", textAlign: "center" }}>
-                      No hay eventos registrados.
-                    </div>
-                  ),
-                }}
-              >
-                <Column title="Titulo" dataIndex="Titulo" key="Titulo" />
-                <Column
-                  title="Tipo"
-                  dataIndex="Tipo de evento"
-                  key="Tipo de evento"
-                />
-                <Column
-                  title="Modalidad"
-                  dataIndex="Modalidad"
-                  key="Modalidad"
-                />
-                <Column
-                  title="Participacion"
-                  dataIndex="Participacion"
-                  key="Participacion"
-                />
-                <Column
-                  title="Patrocinadores"
-                  dataIndex="Patrocinadores"
-                  key="Patrocinadores"
-                  render={(Patrocinadores) => (
-                    <>
-                      {Patrocinadores ? (
+            >
+              <Column title="Nombre completo" dataIndex="nombre" key="nombre" />
+              <Column
+                title="Correo electrónico"
+                dataIndex="correo_electronico"
+                key="correo"
+              />
+              <Column title="Carnet de identidad" dataIndex="ci" key="ci" />
+              <Column title="Género" dataIndex="genero" key="genero" />
+            </Table>
+          )}
+          {mostrarReportes && (
+            <Table
+              className="tabla-reporte"
+              scroll={{ y: 340 }}
+              dataSource={listaReportes}
+              pagination={false}
+              style={{ width: "100%" }}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: "95px", textAlign: "center" }}>
+                    No hay eventos registrados.
+                  </div>
+                ),
+              }}
+            >
+              <Column
+                title="Titulo"
+                dataIndex="Titulo"
+                key="Titulo"
+                width={160}
+              />
+              <Column
+                title="Tipo"
+                dataIndex="Tipo de evento"
+                key="Tipo de evento"
+                width={195}
+              />
+              <Column
+                title="Modalidad"
+                dataIndex="Modalidad"
+                key="Modalidad"
+                width={120}
+              />
+              <Column
+                title="Participacion"
+                dataIndex="Participacion"
+                key="Participacion"
+                width={120}
+              />
+              <Column
+                title="Patrocinadores"
+                dataIndex="Patrocinadores"
+                key="Patrocinadores"
+                width={185}
+                render={(Patrocinadores) => (
+                  <>
+                    {mostrarPatrocinadores ? (
+                      Patrocinadores ? (
                         Patrocinadores.split(",").map((patrocinador, index) => (
                           <Tag color="blue" key={index}>
                             {patrocinador.trim()}
@@ -338,53 +353,60 @@ export default function Reporte() {
                         ))
                       ) : (
                         <span>Sin patrocinadores</span>
-                      )}
-                    </>
-                  )}
-                />
-                <Column
-                  title="Organizadores"
-                  dataIndex="Organizadores"
-                  key="Organizadores"
-                  render={(Organizadores) => (
-                    <>
-                      {Organizadores ? (
-                        Organizadores.split(",").map((patrocinador, index) => (
-                          <Tag color="volcano" key={index}>
-                            {patrocinador.trim()}
+                      )
+                    ) : null}
+                  </>
+                )}
+              />
+
+              <Column
+                title="Organizadores"
+                dataIndex="Organizadores"
+                key="Organizadores"
+                width={150}
+                render={(Organizadores) => (
+                  <>
+                    {mostrarOrganizadores ? (
+                      Organizadores ? (
+                        Organizadores.split(",").map((organizador, index) => (
+                          <Tag color="blue" key={index}>
+                            {organizador.trim()}
                           </Tag>
                         ))
                       ) : (
-                        <span>Sin Organizadores</span>
-                      )}
-                    </>
-                  )}
-                />
+                        <span>Sin organizadores</span>
+                      )
+                    ) : null}
+                  </>
+                )}
+              />
 
-                <Column
-                  title="Ubicaciones"
-                  dataIndex="Ubicaciones"
-                  key="Ubicaciones"
-                  render={(Ubicaciones) => (
-                    <>
-                      {Ubicaciones ? (
-                        Ubicaciones.split(",").map((patrocinador, index) => (
-                          <Tag color="green" key={index}>
-                            {patrocinador.trim()}
+              <Column
+                title="Ubicaciones"
+                dataIndex="Ubicaciones"
+                key="Ubicaciones"
+                width={130}
+                render={(Ubicaciones) => (
+                  <>
+                    {mostrarUbicaciones ? (
+                      Ubicaciones ? (
+                        Ubicaciones.split(",").map((ubicacion, index) => (
+                          <Tag color="blue" key={index}>
+                            {ubicacion.trim()}
                           </Tag>
                         ))
                       ) : (
-                        <span>Sin Ubicaciones</span>
-                      )}
-                    </>
-                  )}
-                />
-              </Table>
-            )}
-          </Col>
-        </Row>
-      </div>
-
+                        <span>Sin ubicaciones</span>
+                      )
+                    ) : null}
+                  </>
+                )}
+              />
+            </Table>
+          )}
+        </Col>
+      </Row>
+      {/*Modal Formulario seleccionar evento, reporte participantes*/}
       <Modal
         title="Seleccionar un evento"
         centered
@@ -583,7 +605,7 @@ export default function Reporte() {
                 </Form.Item>
                 <Form.Item label="Entrenador" name="ENTRENADOR">
                   <Select
-                    placeholder="Selecione uno entrenador"
+                    placeholder="Seleccione si es requerido"
                     allowClear
                     options={[
                       {
@@ -608,27 +630,42 @@ export default function Reporte() {
                 <Form.Item
                   name="M1"
                   valuePropName="checked"
-                  initialValue={false}
+                  initialValue={true}
                 >
-                  <Checkbox>Mostrar patrocinadores</Checkbox>
+                  <Checkbox
+                    onChange={(e) => setMostrarPatrocinadores(e.target.checked)}
+                    defaultChecked={true}
+                  >
+                    Mostrar patrocinadores
+                  </Checkbox>
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item
                   name="M2"
                   valuePropName="checked"
-                  initialValue={false}
+                  initialValue={true}
                 >
-                  <Checkbox>Mostrar organizadores</Checkbox>
+                  <Checkbox
+                    onChange={(e) => setMostrarOrganizadores(e.target.checked)}
+                    defaultChecked={true}
+                  >
+                    Mostrar organizadores
+                  </Checkbox>
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item
                   name="M3"
                   valuePropName="checked"
-                  initialValue={false}
+                  initialValue={true}
                 >
-                  <Checkbox>Mostrar ubicacion</Checkbox>
+                  <Checkbox
+                    onChange={(e) => setMostrarUbicaciones(e.target.checked)}
+                    defaultChecked={true}
+                  >
+                    Mostrar ubicacion
+                  </Checkbox>
                 </Form.Item>
               </Col>
             </Row>
