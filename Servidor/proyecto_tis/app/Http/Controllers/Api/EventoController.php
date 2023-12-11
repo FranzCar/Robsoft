@@ -705,14 +705,16 @@ private function eliminarCodigosVerificacion($evento)
             });
         });
     }
-    if ($entrenador) {
-    $eventosQuery->whereHas('rolPersonaEnEvento', function ($query) use ($entrenador) {
-        $query->where('id_roles', 4) // Suponiendo que 4 es el ID del rol de entrenador
-              ->whereHas('persona', function ($subQuery) use ($entrenador) {
-                  $subQuery->where('nombre', $entrenador); // o 'id_persona' si 'entrenador' es un ID
-              });
-    });
-}
+    if (null !== $request->input('entrenador_obligatorio')) {
+        $entrenador = filter_var($request->input('entrenador_obligatorio'), FILTER_VALIDATE_BOOLEAN);
+        $eventosQuery->whereHas('caracteristicasBoolean', function ($query) use ($entrenador) {
+            $query->join('CARACTERISTICAS_EVENTO', 'CARACTERISTICAS_EVENTO.id_caracteristica_evento', '=', 'CARACTERISTICA_BOOLEAN_EVENTO.id_caracteristica_evento')
+                ->where('CARACTERISTICAS_EVENTO.nombre_caracteristica_evento', 'Coach_obligatorio')
+                ->where('CARACTERISTICA_BOOLEAN_EVENTO.valor_boolean_evento', $entrenador);
+        });
+    }
+    
+
 
     // Incluir relaciones según sea necesario
     if ($incluyeOrganizadores) {
@@ -730,23 +732,23 @@ private function eliminarCodigosVerificacion($evento)
     $reporte = [];
 
     foreach ($eventos as $evento) {
-        // Buscar la característica de 'modalidad'
-        $modalidadEvento = $evento->caracteristicasTexto->first(function ($caracteristicaTexto) {
-            return $caracteristicaTexto->caracteristicaEvento && $caracteristicaTexto->caracteristicaEvento->nombre_caracteristica_evento == 'modalidad';
-        });
-    
-        // Buscar la característica de 'tipo_participacion'
-        $participacionEvento = $evento->caracteristicasTexto->first(function ($caracteristicaTexto) {
-            return $caracteristicaTexto->caracteristicaEvento && $caracteristicaTexto->caracteristicaEvento->nombre_caracteristica_evento == 'tipo_participacion';
-        });
-    
-        $detalleEvento = [
-            'Titulo' => $evento->TITULO,
-            'Tipo de evento' => $evento->tipoEvento->nombre_tipo_evento,
-            'Modalidad' => $modalidadEvento ? $modalidadEvento->valor_texto_evento : 'No especificado',
-            'Participacion' => $participacionEvento ? $participacionEvento->valor_texto_evento : 'No especificado',
-        ];
-    
+    // Buscar la característica de 'modalidad'
+    $modalidadEvento = $evento->caracteristicasTexto->first(function ($caracteristicaTexto) {
+        return $caracteristicaTexto->caracteristicaEvento && $caracteristicaTexto->caracteristicaEvento->nombre_caracteristica_evento == 'modalidad';
+    });
+
+    // Buscar la característica de 'tipo_participacion'
+    $participacionEvento = $evento->caracteristicasTexto->first(function ($caracteristicaTexto) {
+        return $caracteristicaTexto->caracteristicaEvento && $caracteristicaTexto->caracteristicaEvento->nombre_caracteristica_evento == 'tipo_participacion';
+    });
+
+    $detalleEvento = [
+        'Titulo' => $evento->TITULO,
+        'Tipo de evento' => $evento->tipoEvento->nombre_tipo_evento,
+        'Modalidad' => $modalidadEvento ? $modalidadEvento->valor_texto_evento : 'No especificado',
+        'Participacion' => $participacionEvento ? $participacionEvento->valor_texto_evento : 'No especificado',
+    ];
+
 
         // Obtener detalles adicionales según solicitud
         if ($incluyeOrganizadores) {
