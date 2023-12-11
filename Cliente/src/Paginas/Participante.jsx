@@ -790,7 +790,7 @@ export default function Participante() {
     const datos = datosGrupal(values);
     const duplicado = validarDuplicadoGrupal(values);
     console.log("los datos a guardar del equipo son  ", datos);
-    if (listaParticipante.length !== 0) {
+    if (listaParticipante.length !== 0 && listaParticipante.length === tamanioListaParticipantes) {
       if (duplicado === true) {
         message.error("Existe un equipo con el mismo nombre");
       } else {
@@ -1258,6 +1258,7 @@ export default function Participante() {
         type: "success",
         message: `${entrenadorEncontrado.nombre}`,
       });
+      formGrupal.setFieldValue("ENTRENADOR",entrenadorEncontrado)
       setEntrenadorForm(entrenadorEncontrado);
     } else {
       setAlerta({

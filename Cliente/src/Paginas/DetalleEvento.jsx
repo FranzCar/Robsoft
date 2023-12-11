@@ -697,6 +697,9 @@ export default function DetalleEvento() {
         title={"Detalles del evento: " + tituloEvento}
         open={modalDetalles}
         onCancel={handleCancelDetalles}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
         centered
         width={1000}
         footer={[
@@ -742,6 +745,7 @@ export default function DetalleEvento() {
                 <Form.Item
                   label="Nro. integrantes"
                   name="integrantes"
+                  initialValue={2}
                   rules={[
                     {
                       required: estadoEntrenador,
@@ -832,7 +836,7 @@ export default function DetalleEvento() {
                     maxLength={3}
                   />
                 </Form.Item>
-                <Form.Item label="Cupos" name="cupos">
+                <Form.Item label="Cupos" name="cupos"  initialValue={20}>
                   <Slider min={20} max={100} />
                 </Form.Item>
                 <Form.Item label="Requisitos" name="requisitos">
@@ -898,6 +902,7 @@ export default function DetalleEvento() {
                 <Form.Item
                   label="Nro. integrantes"
                   name="integrantes"
+                  initialValue={2}
                   rules={[
                     {
                       required: estadoEntrenador,
@@ -988,7 +993,7 @@ export default function DetalleEvento() {
                     maxLength={3}
                   />
                 </Form.Item>
-                <Form.Item label="Cupos" name="cupos">
+                <Form.Item label="Cupos" name="cupos" initialValue={20}>
                   <Slider min={20} max={100} />
                 </Form.Item>
                 <Form.Item label="Requisitos" name="requisitos">
@@ -1054,6 +1059,7 @@ export default function DetalleEvento() {
                 <Form.Item
                   label="Nro. integrantes"
                   name="integrantes"
+                  initialValue={2}
                   rules={[
                     {
                       required: estadoEntrenador,
@@ -1161,7 +1167,7 @@ export default function DetalleEvento() {
                     maxLength={3}
                   />
                 </Form.Item>
-                <Form.Item label="Cupos" name="cupos">
+                <Form.Item label="Cupos" name="cupos" initialValue={20}>
                   <Slider min={20} max={100} />
                 </Form.Item>
                 <Form.Item label="Requisitos" name="requisitos">
@@ -1224,6 +1230,7 @@ export default function DetalleEvento() {
                 <Form.Item
                   label="Nro. integrantes"
                   name="integrantes"
+                  initialValue={2}
                   rules={[
                     {
                       required: estadoEntrenador,
@@ -1331,7 +1338,7 @@ export default function DetalleEvento() {
                     maxLength={3}
                   />
                 </Form.Item>
-                <Form.Item label="Cupos" name="cupos">
+                <Form.Item label="Cupos" name="cupos" initialValue={20}>
                   <Slider min={20} max={100} />
                 </Form.Item>
                 <Form.Item label="Requisitos" name="requisitos">
@@ -1475,6 +1482,7 @@ export default function DetalleEvento() {
                 <Form.Item
                   label="Nro. integrantes"
                   name="integrantes"
+                  initialValue={2}
                   rules={[
                     {
                       required: estadoEntrenador,
@@ -1597,7 +1605,7 @@ export default function DetalleEvento() {
                     maxLength={3}
                   />
                 </Form.Item>
-                <Form.Item label="Cupos" name="cupos">
+                <Form.Item label="Cupos" name="cupos" initialValue={20}>
                   <Slider min={20} max={100} />
                 </Form.Item>
                 <Form.Item label="Requisitos" name="requisitos">
@@ -1632,6 +1640,7 @@ export default function DetalleEvento() {
                 <Form.Item
                   label="Nro. integrantes"
                   name="integrantes"
+                  initialValue={2}
                   rules={[
                     {
                       required: estadoEntrenador,
@@ -1768,7 +1777,7 @@ export default function DetalleEvento() {
                     maxLength={3}
                   />
                 </Form.Item>
-                <Form.Item label="Cupos" name="cupos">
+                <Form.Item label="Cupos" name="cupos" initialValue={20}>
                   <Slider min={20} max={100} />
                 </Form.Item>
                 <Form.Item label="Requisitos" name="requisitos">
