@@ -1,9 +1,6 @@
 import "../App.css";
 import React, { useState, useEffect } from "react";
-import {
-  AppstoreOutlined,
-  MailOutlined,
-} from "@ant-design/icons";
+import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
 import {
   Table,
   Modal,
@@ -66,10 +63,11 @@ export default function Reporte() {
   const [listaReportes, setListaReportes] = useState([]);
 
   const openFormEvent = () => {
+    setMostrarPatrocinadores(false);
+    setMostrarOrganizadores(false);
+    setMostrarUbicaciones(false);
     setModalFormEvent(true);
-  };
-  const handleOkFormEvent = () => {
-    setModalFormEvent(false);
+    setMostrarReportes(false);
   };
   const handleCancelFormEvent = () => {
     formEvent.resetFields();
@@ -97,7 +95,7 @@ export default function Reporte() {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
     }
   };
-  //Validaciones
+
   //Restringir las fechas
   const disabledDate = (current) => {
     // Establecemos la fecha mínima como 1 de enero de 2023
@@ -182,9 +180,9 @@ export default function Reporte() {
       publico: values.DIRIGIDO_A ?? "",
       ubicacion: values.UBICACION ?? "",
       entrenador_obligatorio: values.ENTRENADOR ?? true,
-      incluye_organizadores: values.M1,
-      incluye_patrocinadores: values.M2,
-      incluye_ubicaciones: values.M3,
+      incluye_organizadores: values.M2 ? 1 : 0,
+      incluye_patrocinadores: values.M1 ? 1 : 0,
+      incluye_ubicaciones: values.M3 ? 1 : 0,
     };
 
     return datos;
@@ -192,15 +190,13 @@ export default function Reporte() {
 
   const onFinishFormEvent = (values) => {
     const datos = datosReporte(values);
-    console.log("los datos del FORM son ", datos);
     axios
       .get("http://localhost:8000/api/reporte-eventos", { params: datos })
       .then((response) => {
         setModalFormEvent(false);
+        formEvent.resetFields();
         setListaReportes(response.data);
-        console.log("los datos de los reportes son ", response.data);
         setMostrarReportes(true);
-        setMostrarParticipantes(false);
       })
       .catch((error) => {
         console.error(error);
@@ -241,9 +237,9 @@ export default function Reporte() {
         console.error(error);
       });
   };
-  const [mostrarPatrocinadores, setMostrarPatrocinadores] = useState(true);
-  const [mostrarOrganizadores, setMostrarOrganizadores] = useState(true);
-  const [mostrarUbicaciones, setMostrarUbicaciones] = useState(true);
+  const [mostrarPatrocinadores, setMostrarPatrocinadores] = useState(false);
+  const [mostrarOrganizadores, setMostrarOrganizadores] = useState(false);
+  const [mostrarUbicaciones, setMostrarUbicaciones] = useState(false);
 
   return (
     <div className="tabla-descripcion-editarEv">
@@ -337,15 +333,15 @@ export default function Reporte() {
                 key="Participacion"
                 width={120}
               />
-              <Column
-                title="Patrocinadores"
-                dataIndex="Patrocinadores"
-                key="Patrocinadores"
-                width={185}
-                render={(Patrocinadores) => (
-                  <>
-                    {mostrarPatrocinadores ? (
-                      Patrocinadores ? (
+              {mostrarPatrocinadores && (
+                <Column
+                  title="Patrocinadores"
+                  dataIndex="Patrocinadores"
+                  key="Patrocinadores"
+                  width={185}
+                  render={(Patrocinadores) => (
+                    <>
+                      {Patrocinadores ? (
                         Patrocinadores.split(",").map((patrocinador, index) => (
                           <Tag color="blue" key={index}>
                             {patrocinador.trim()}
@@ -353,21 +349,20 @@ export default function Reporte() {
                         ))
                       ) : (
                         <span>Sin patrocinadores</span>
-                      )
-                    ) : null}
-                  </>
-                )}
-              />
-
-              <Column
-                title="Organizadores"
-                dataIndex="Organizadores"
-                key="Organizadores"
-                width={150}
-                render={(Organizadores) => (
-                  <>
-                    {mostrarOrganizadores ? (
-                      Organizadores ? (
+                      )}
+                    </>
+                  )}
+                />
+              )}
+              {mostrarOrganizadores && (
+                <Column
+                  title="Organizadores"
+                  dataIndex="Organizadores"
+                  key="Organizadores"
+                  width={150}
+                  render={(Organizadores) => (
+                    <>
+                      {Organizadores ? (
                         Organizadores.split(",").map((organizador, index) => (
                           <Tag color="blue" key={index}>
                             {organizador.trim()}
@@ -375,21 +370,20 @@ export default function Reporte() {
                         ))
                       ) : (
                         <span>Sin organizadores</span>
-                      )
-                    ) : null}
-                  </>
-                )}
-              />
-
-              <Column
-                title="Ubicaciones"
-                dataIndex="Ubicaciones"
-                key="Ubicaciones"
-                width={130}
-                render={(Ubicaciones) => (
-                  <>
-                    {mostrarUbicaciones ? (
-                      Ubicaciones ? (
+                      )}
+                    </>
+                  )}
+                />
+              )}
+              {mostrarUbicaciones && (
+                <Column
+                  title="Ubicaciones"
+                  dataIndex="Ubicaciones"
+                  key="Ubicaciones"
+                  width={130}
+                  render={(Ubicaciones) => (
+                    <>
+                      {Ubicaciones ? (
                         Ubicaciones.split(",").map((ubicacion, index) => (
                           <Tag color="blue" key={index}>
                             {ubicacion.trim()}
@@ -397,11 +391,11 @@ export default function Reporte() {
                         ))
                       ) : (
                         <span>Sin ubicaciones</span>
-                      )
-                    ) : null}
-                  </>
-                )}
-              />
+                      )}
+                    </>
+                  )}
+                />
+              )}
             </Table>
           )}
         </Col>
@@ -441,7 +435,6 @@ export default function Reporte() {
         title="Generar reporte"
         centered
         open={modalFormEvent}
-        onOk={handleOkFormEvent}
         onCancel={handleCancelFormEvent}
         maskClosable={false}
         keyboard={false}
@@ -630,11 +623,11 @@ export default function Reporte() {
                 <Form.Item
                   name="M1"
                   valuePropName="checked"
-                  initialValue={true}
+                  initialValue={false}
                 >
                   <Checkbox
                     onChange={(e) => setMostrarPatrocinadores(e.target.checked)}
-                    defaultChecked={true}
+                    defaultChecked={false}
                   >
                     Mostrar patrocinadores
                   </Checkbox>
@@ -644,11 +637,11 @@ export default function Reporte() {
                 <Form.Item
                   name="M2"
                   valuePropName="checked"
-                  initialValue={true}
+                  initialValue={false}
                 >
                   <Checkbox
                     onChange={(e) => setMostrarOrganizadores(e.target.checked)}
-                    defaultChecked={true}
+                    defaultChecked={false}
                   >
                     Mostrar organizadores
                   </Checkbox>
@@ -658,13 +651,13 @@ export default function Reporte() {
                 <Form.Item
                   name="M3"
                   valuePropName="checked"
-                  initialValue={true}
+                  initialValue={false}
                 >
                   <Checkbox
                     onChange={(e) => setMostrarUbicaciones(e.target.checked)}
-                    defaultChecked={true}
+                    defaultChecked={false}
                   >
-                    Mostrar ubicacion
+                    Mostrar ubicaciones
                   </Checkbox>
                 </Form.Item>
               </Col>
