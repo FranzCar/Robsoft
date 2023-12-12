@@ -54,7 +54,7 @@ function App() {
   useEffect(() => {
     console.log("usuario: ", usuario);
     console.log("sesion: ", estadoCerrarSesion);
-    console.log ("inscripciones", estadoInscripcion)
+    console.log("inscripciones", estadoInscripcion);
     // sesionIniciado();
     menuInscripciones();
     menuGestionEventos();
@@ -64,14 +64,15 @@ function App() {
   const menuCerrarSesion = () => {
     if (estadoCerrarSesion === "true") {
       setMostrarHome(estadoCerrarSesion);
-      setMostrarAdministrador(!estadoCerrarSesion);
+      setMostrarAdministrador(estadoAdministrador);
       setMostrarGestionEventos(!estadoCerrarSesion);
       setMostrarIncripciones(!estadoCerrarSesion);
       setMostrarListaEventos(!estadoCerrarSesion);
       setMostrarLogin(!estadoCerrarSesion);
       setMostrarReportes(!estadoCerrarSesion);
-      setMostrarIncripciones(!estadoCerrarSesion)
+      setMostrarIncripciones(!estadoCerrarSesion);
     }
+    setMostrarAdministrador(estadoAdministrador);
   };
 
   const menuInscripciones = () => {
@@ -148,7 +149,7 @@ function App() {
       setMostrarHome(true);
       setMostrarLogin(false);
       setMostrarAdministrador(true);
-      setMostrarReportes(true)
+      setMostrarReportes(true);
       setNombreUsuario(values.usuario);
       localStorage.setItem("usuario", values.usuario);
       localStorage.setItem("sesion", "root");
@@ -159,13 +160,13 @@ function App() {
     ) {
       setMostrarHome(true);
       setMostrarLogin(false);
-      setMostrarIncripciones(true)
+      setMostrarIncripciones(true);
       setMostrarAdministrador(false);
-      setMostrarGestionEventos(false)
+      setMostrarGestionEventos(false);
       setNombreUsuario(values.usuario);
       localStorage.setItem("usuario", values.usuario);
-      localStorage.setItem("cerrarSesion", false)
-      localStorage.setItem("inscripciones", true)
+      localStorage.setItem("cerrarSesion", false);
+      localStorage.setItem("inscripciones", true);
       form.resetFields();
     } else if (values.usuario === "nuevo" && values.password === "nuevo") {
       // si tarea es igual a getion de eventos
@@ -188,12 +189,13 @@ function App() {
     setMostrarHome(true);
     setMostrarGestionEventos(false);
     setMostrarAdministrador(false);
-    setMostrarIncripciones(false)
+    setMostrarIncripciones(false);
     setNombreUsuario("");
     localStorage.setItem("sesion", false);
     localStorage.setItem("usuario", "");
     localStorage.setItem("inscripciones", false);
     localStorage.setItem("gestionEventos", false);
+    localStorage.setItem("administrador", false);
     localStorage.setItem("cerrarSesion", true);
   };
 
@@ -243,37 +245,25 @@ function App() {
 
             <Logos />
 
-            <Menu administrador={mostrarAdministrador} />
+            <Menu administrador={estadoAdministrador} />
           </Header>
           <Content className="content">
             <Routes>
               <Route path="/" element={<Inicio />} />
+
+              <Route path="/Participante" element={<Participante />} />
+
+              <Route path="/evento" element={<Evento />} />
+
+              <Route path="/crearEvento" element={<CrearEvento />} />
+              <Route path="/eliminarEvento" element={<EliminarEvento />} />
+              <Route path="/editarEvento" element={<EditarEvento />} />
+              <Route path="/detalleEvento" element={<DetalleEvento />} />
+              <Route path="/actividades" element={<Actividades />} />
+              <Route path="/Reporte" element={<Reporte />} />
+
+              <Route path="/Reporte" element={<Reporte />} />
             </Routes>
-            {(mostrarInscripciones && estadoInscripcion)  && (
-              <Routes>
-                <Route path="/Participante" element={<Participante />} />
-              </Routes>
-            )}
-            {mostrarListaEventos && (
-              <Routes>
-                <Route path="/evento" element={<Evento />} />
-              </Routes>
-            )}
-            {mostrarGestionEventos && (
-              <Routes>
-                <Route path="/crearEvento" element={<CrearEvento />} />
-                <Route path="/eliminarEvento" element={<EliminarEvento />} />
-                <Route path="/editarEvento" element={<EditarEvento />} />
-                <Route path="/detalleEvento" element={<DetalleEvento />} />
-                <Route path="/actividades" element={<Actividades />} />
-                <Route path="/Reporte" element={<Reporte />} />
-              </Routes>
-            )}
-            {mostrarReportes && (
-              <Routes>
-                <Route path="/Reporte" element={<Reporte />} />
-              </Routes>
-            )}
           </Content>
 
           <Footer className="footer">Universidad Mayor de San Simon</Footer>

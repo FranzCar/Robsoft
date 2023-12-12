@@ -130,6 +130,9 @@ export default function Actividades() {
   };
 
   const registrarActividad = (values) => {
+    const dato1 = form.getFieldValue("MODALIDAD_ETAPA")
+    const dato2 = form.getFieldValue("UBICACION_ETAPA")
+    console.log("datos ", dato1, " ", dato2)
     showConfirmActividad(values);
   };
 
@@ -142,17 +145,31 @@ export default function Actividades() {
     if (ubicacion === "Laboratorio 4") return 6;
   };
 
-  const guardarActividad = async (values, id) => {
+  const guardarActividad = (values, id) => {
     if (listaEtapas.length === 0) {
+      console.log("dato enciar vacio ", values)
       const fechaHoraInicio = fechaInicioBD + " " + "08:00";
       const fechaHoraFin = fechaFinBD + " " + "20:00";
+      let modalidad = form.getFieldValue("MODALIDAD_ETAPA")
+      let ubicacion = form.getFieldValue("UBICACION_ETAPA")
+      let id_ubic = null
+      let url = null
+      let modalidadEnviar = null
+
+      if (modalidad === 1){
+        modalidadEnviar = "En linea"
+        url = ubicacion
+      }else{
+        modalidadEnviar = "Presencial"
+        id_ubic = verificarUbicacion(ubicacion)
+      }
       const datosActividades = {
         nombre_etapa: tituloBD,
-        modalidad_ubicacion: "Presencial",
-        id_ubicacion: null,
+        modalidad_ubicacion: modalidadEnviar,
+        id_ubicacion: id_ubic,
         fecha_hora_inicio: fechaHoraInicio,
         fecha_hora_fin: fechaHoraFin,
-        url_etapa: null,
+        url_etapa: url,
       };
 
       axios
@@ -301,11 +318,11 @@ export default function Actividades() {
     if (listaEtapas.length === 0) {
       // Establecemos la fecha de inicio proveniente de la base de datos
       const minDate = new Date(fechaInicioBD);
-      minDate.setDate(minDate.getDate()+1);
+      minDate.setDate(minDate.getDate());
 
       // Establecemos la fecha de finalización proveniente de la base de datos
       const maxDate = new Date(fechaFinBD);
-      maxDate.setDate(maxDate.getDate()+2);
+      maxDate.setDate(maxDate.getDate()+1);
 
       // Permitimos fechas dentro del rango [minDate, maxDate]
       return current < minDate || current > maxDate;
@@ -357,11 +374,11 @@ export default function Actividades() {
 
     // Establecemos la fecha mínima como la fecha de inicio proveniente del campo de fecha inicio
     const minDate = new Date(fechaInicio);
-    minDate.setDate(minDate.getDate()+1);
+    minDate.setDate(minDate.getDate());
 
     // Establecemos la fecha máxima como la fecha almacenada en fechaFinBD
     const maxDate = new Date(fechaFinBD);
-    maxDate.setDate(maxDate.getDate() + 2);
+    maxDate.setDate(maxDate.getDate() + 1);
 
     // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
     return current < minDate || current > maxDate;
@@ -541,6 +558,7 @@ export default function Actividades() {
       form.resetFields();
       setMostrarInputURL(false);
       setMostrarUbicacion(false);
+      setFechaFin(null)
       setEstadoHoraInicio(false);
       setEstadoHoraFin(false);
     }
