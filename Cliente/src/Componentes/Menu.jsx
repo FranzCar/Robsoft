@@ -230,22 +230,21 @@ export default function Menu() {
   const mostrarTareas = () => {
     // Al abrir el modal, se asignan los valores de las tareas a sus respectivas listas
     asignarTareas();
-    
+
     // Se combina la lista después de asignar las tareas
     combinarListas();
-    
+
     // Se imprime la lista combinada en la consola para propósitos de depuración
     console.log("lista combinada ", listaCombinada);
-    
+
     // Si la lista combinada tiene una longitud igual a 0, se vuelve a llamar a la función combinarListas
     if (listaCombinada.length === 0) {
-        combinarListas();
+      combinarListas();
     } else {
-        // Si la lista combinada no es igual a 0, se establece mostrarModalTareas en true
-        setMostrarModalTareas(true);
+      // Si la lista combinada no es igual a 0, se establece mostrarModalTareas en true
+      setMostrarModalTareas(true);
     }
-};
-
+  };
 
   const onCancelTareas = () => {
     setMostrarModalTareas(false);
@@ -470,7 +469,7 @@ export default function Menu() {
       .then((response) => {
         message.success("Las tareas han sido modificadas correctamente");
         obtenerRolesConTareas();
-        combinarListas();
+        setListaCombinada([]);
 
         setMostrarModalTareas(false);
       })

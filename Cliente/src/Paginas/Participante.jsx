@@ -743,6 +743,7 @@ export default function Participante() {
         console.error(error);
       });
   };
+  
   const duplicadoCiEvento = () => {
     axios
       .get(`http://localhost:8000/api/inscritos-evento/${idEVENTO}`)
@@ -924,7 +925,6 @@ export default function Participante() {
       }
     }
   };
-
   //obtener inscritos al evento
   const obtenerParticipantesEvento = (id) => {
     console.log("idEvento: ", idEVENTO);
@@ -1336,7 +1336,7 @@ export default function Participante() {
         type: "success",
         message: `${entrenadorEncontrado.nombre}`,
       });
-      formGrupal.setFieldValue("ENTRENADOR", entrenadorEncontrado);
+      formGrupal.setFieldValue("ENTRENADOR",entrenadorEncontrado)
       setEntrenadorForm(entrenadorEncontrado);
     } else {
       setAlerta({
@@ -1385,16 +1385,6 @@ export default function Participante() {
     );
 
     if (participanteEncontrado) {
-      if (num === 1) {
-        setParticipanteForm1(participanteEncontrado);
-      }
-      if (num === 2) {
-        setParticipanteForm2(participanteEncontrado);
-      }
-      if (num === 3) {
-        setParticipanteForm3(participanteEncontrado);
-      }
-
       // Verificar si el participante ya está en la lista de participantes en el evento
       if (participanteEnEvento) {
         setAlertaParticipante({
