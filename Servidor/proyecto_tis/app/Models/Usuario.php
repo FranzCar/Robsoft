@@ -11,6 +11,9 @@ class Usuario extends Model
     protected $table = 'USUARIO';
     protected $primaryKey = 'id_usuario';
     public $incrementing = true;
+    protected $fillable = ['username', 'password', 'api_token'];
+
+    protected $hidden = ['password'];
     use HasFactory;
 
     public function roles() {
