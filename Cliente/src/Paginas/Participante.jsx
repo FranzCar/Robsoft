@@ -170,9 +170,11 @@ export default function Participante() {
   const showModalCodigo = (values) => {
     const datos = formatDatos(values);
     const duplicado = validarDuplicadoCI(values);
+    const correoDuplicado = validarDuplicadoCorreo(values);
     if (
       duplicado === false ||
       ciEncontrado === true
+    )
     {
       axios
         .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)

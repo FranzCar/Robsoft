@@ -1,6 +1,10 @@
 import "../App.css";
 import React, { useState, useEffect } from "react";
-import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
+import {
+  AppstoreOutlined,
+  MailOutlined,
+  ExclamationCircleFilled,
+} from "@ant-design/icons";
 import {
   Table,
   Modal,
@@ -31,6 +35,8 @@ function getItem(label, key, icon, children, type) {
 
 // submenu keys of first level
 const rootSubmenuKeys = ["sub1", "sub2", "sub4"];
+
+const { confirm } = Modal;
 
 export default function Reporte() {
   const [form] = Form.useForm();
@@ -71,8 +77,20 @@ export default function Reporte() {
     setMostrarParticipantes(false);
   };
   const handleCancelFormEvent = () => {
-    formEvent.resetFields();
-    setModalFormEvent(false);
+    confirm({
+      title: "¿Está seguro de que desea cancelar?",
+      icon: <ExclamationCircleFilled />,
+      content: "Se perdera el progreso realizado.",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+
+      onOk() {
+        formEvent.resetFields();
+        setModalFormEvent(false);
+      },
+      onCancel() {},
+    });
   };
 
   const items = [
