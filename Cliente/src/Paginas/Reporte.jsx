@@ -459,6 +459,7 @@ export default function Reporte() {
         onCancel={handleCancelFormEvent}
         maskClosable={false}
         keyboard={false}
+        closable={false}
         width={1000}
         footer={[
           <Form
