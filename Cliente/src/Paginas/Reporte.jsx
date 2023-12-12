@@ -68,6 +68,7 @@ export default function Reporte() {
     setMostrarUbicaciones(false);
     setModalFormEvent(true);
     setMostrarReportes(false);
+    setMostrarParticipantes(false);
   };
   const handleCancelFormEvent = () => {
     formEvent.resetFields();
@@ -190,9 +191,11 @@ export default function Reporte() {
 
   const onFinishFormEvent = (values) => {
     const datos = datosReporte(values);
+    console.log("FORM event ", datos);
     axios
       .get("http://localhost:8000/api/reporte-eventos", { params: datos })
       .then((response) => {
+        console.log("response data ", response.data);
         setModalFormEvent(false);
         formEvent.resetFields();
         setListaReportes(response.data);
@@ -498,7 +501,16 @@ export default function Reporte() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Fecha inicio" name="FECHA_INICIO">
+                <Form.Item
+                  label="Fecha inicio"
+                  name="FECHA_INICIO"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Seleccione la fecha inicio",
+                    },
+                  ]}
+                >
                   <DatePicker
                     style={{
                       width: "200px",
@@ -509,7 +521,16 @@ export default function Reporte() {
                   />
                 </Form.Item>
 
-                <Form.Item label="Fecha fin" name="FECHA_FIN">
+                <Form.Item
+                  label="Fecha fin"
+                  name="FECHA_FIN"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Seleccione la fecha fin",
+                    },
+                  ]}
+                >
                   <DatePicker
                     style={{
                       width: "200px",
@@ -610,6 +631,7 @@ export default function Reporte() {
                         label: "No obligatorio",
                       },
                     ]}
+                    defaultValue={true}
                   />
                 </Form.Item>
               </Col>
