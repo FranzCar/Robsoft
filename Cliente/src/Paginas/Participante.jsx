@@ -170,7 +170,10 @@ export default function Participante() {
   const showModalCodigo = (values) => {
     const datos = formatDatos(values);
     const duplicado = validarDuplicadoCI(values);
-    if (duplicado === false || ciEncontrado === true) {
+    if (
+      duplicado === false ||
+      ciEncontrado === true
+    {
       axios
         .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
         .then((response) => {
@@ -184,7 +187,9 @@ export default function Participante() {
       if (duplicado === true && ciEncontrado === false) {
         message.error("El carnet de identidad ya esta registrado.");
       }
-
+      if (correoDuplicado === true && ciEncontrado === false) {
+        message.error("El correo ya esta registrado.");
+      }
       setVisible(true);
     }
   };
@@ -784,10 +789,7 @@ export default function Participante() {
     const datos = datosGrupal(values);
     const duplicado = validarDuplicadoGrupal(values);
     console.log("los datos a guardar del equipo son  ", datos);
-    if (
-      listaParticipante.length !== 0 &&
-      listaParticipante.length === tamanioListaParticipantes
-    ) {
+    if (listaParticipante.length !== 0 && listaParticipante.length === tamanioListaParticipantes) {
       if (duplicado === true) {
         message.error("Existe un equipo con el mismo nombre");
       } else {
@@ -1045,7 +1047,11 @@ export default function Participante() {
   const confirmSaveNuevo = (values) => {
     const datos = datosParticipante(values);
     const duplicado = validarDuplicadoCI(values);
-    if (duplicado === false || ciEncontrado === true) {
+    const correoDuplicado = validarDuplicadoCorreo(values);
+    if (
+      (duplicado === false && correoDuplicado === false) ||
+      ciEncontrado === true
+    ) {
       axios
         .post("http://localhost:8000/api/guardar-participante", datos)
         .then((response) => {
@@ -1061,6 +1067,9 @@ export default function Participante() {
     } else {
       if (duplicado === true && ciEncontrado === false) {
         message.error("El carnet de identidad ya esta registrado.");
+      }
+      if (correoDuplicado === true && ciEncontrado === false) {
+        message.error("El correo ya esta registrado.");
       }
     }
   };
@@ -1248,7 +1257,7 @@ export default function Participante() {
         type: "success",
         message: `${entrenadorEncontrado.nombre}`,
       });
-      formGrupal.setFieldValue("ENTRENADOR", entrenadorEncontrado);
+      formGrupal.setFieldValue("ENTRENADOR",entrenadorEncontrado)
       setEntrenadorForm(entrenadorEncontrado);
     } else {
       setAlerta({
