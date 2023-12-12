@@ -172,9 +172,10 @@ export default function Participante() {
     const duplicado = validarDuplicadoCI(values);
     const correoDuplicado = validarDuplicadoCorreo(values);
     if (
-      (duplicado === false && correoDuplicado === false) ||
+      duplicado === false ||
       ciEncontrado === true
-    ) {
+    )
+    {
       axios
         .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
         .then((response) => {
@@ -2302,7 +2303,7 @@ export default function Participante() {
               htmlType="submit"
               className="boton-guardar-registro"
             >
-              {verificadoEntrenador ? "Registar" : "Enviar código"}
+              {verificadoEntrenador ? "Registrar" : "Enviar código"}
             </Button>
           </Form>,
         ]}

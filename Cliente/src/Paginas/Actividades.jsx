@@ -315,32 +315,21 @@ export default function Actividades() {
   };
 
   const disabledDate = (current) => {
+    let minDate, maxDate;
+  
     if (listaEtapas.length === 0) {
-      // Establecemos la fecha de inicio proveniente de la base de datos
-      const minDate = new Date(fechaInicioBD);
-      minDate.setDate(minDate.getDate()+1);
-
-      // Establecemos la fecha de finalización proveniente de la base de datos
-      const maxDate = new Date(fechaFinBD);
-      maxDate.setDate(maxDate.getDate()+2);
-
-      // Permitimos fechas dentro del rango [minDate, maxDate]
-      return current < minDate || current > maxDate;
+      // Si no hay etapas, las fechas disponibles van desde la fecha de inicio del evento
+      minDate = moment(fechaInicioBD, "YYYY-MM-DD");
+      maxDate = moment(fechaFinBD, "YYYY-MM-DD");
     } else {
-      const ultimaFechaLista =
-        listaEtapas[listaEtapas.length - 1].fecha_hora_fin;
-      const soloFecha = ultimaFechaLista.split(" ")[0];
-      // Establecemos la fecha de inicio proveniente de la base de datos
-      const minDate = new Date(soloFecha);
-      minDate.setDate(minDate.getDate() + 1);
-
-      // Establecemos la fecha de finalización proveniente de la base de datos
-      const maxDate = new Date(fechaFinBD);
-      maxDate.setDate(maxDate.getDate() + 1);
-
-      // Permitimos fechas dentro del rango [minDate, maxDate]
-      return current < minDate || current > maxDate;
+      // Si hay etapas, la fecha mínima es el día después de la última etapa
+      const ultimaFechaLista = listaEtapas[listaEtapas.length - 1].fecha_hora_fin;
+      minDate = moment(ultimaFechaLista, "YYYY-MM-DD").add(1, 'days');
+      maxDate = moment(fechaFinBD, "YYYY-MM-DD");
     }
+  
+    // Permitir fechas dentro del rango [minDate, maxDate] inclusive
+    return current.isBefore(minDate, 'day') || current.isAfter(maxDate, 'day');
   };
 
   const onChange2 = (value, dateString) => {
@@ -372,17 +361,14 @@ export default function Actividades() {
       return true;
     }
 
-    // Establecemos la fecha mínima como la fecha de inicio proveniente del campo de fecha inicio
-    const minDate = new Date(fechaInicio);
-    minDate.setDate(minDate.getDate()+1);
+    // Convertimos fechaInicio y fechaFinBD a objetos de Moment para la comparación
+  const minDate = moment(fechaInicio, "YYYY-MM-DD");
+  const maxDate = moment(fechaFinBD, "YYYY-MM-DD");
 
-    // Establecemos la fecha máxima como la fecha almacenada en fechaFinBD
-    const maxDate = new Date(fechaFinBD);
-    maxDate.setDate(maxDate.getDate() + 2);
-
-    // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
-    return current < minDate || current > maxDate;
-  };
+  // Comparamos si la fecha actual está antes de la fecha mínima o después de la fecha máxima
+  // El uso de 'day' como segundo argumento compara solo las fechas, sin tener en cuenta la hora
+  return current.isBefore(minDate, 'day') || current.isAfter(maxDate, 'day');
+};
 
   const disabledTimeInicio = (now) => {
     const currentHour = now.hour();
