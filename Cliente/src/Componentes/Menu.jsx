@@ -44,8 +44,9 @@ const items = [
   },
 ];
 
-export default function Menu({ administrador }) {
+export default function Menu() {
   const location = useLocation();
+  const administrador = true;
   const [formRoles] = Form.useForm();
   const [claseBotones, setClaseBotones] = useState("");
   const [mostrarModalRoles, setMostrarRoles] = useState(false);
@@ -59,7 +60,7 @@ export default function Menu({ administrador }) {
   const [listaRolesAsignados, setListaRolesAsignados] = useState([]);
   //Asigncion de tareas a los roles
   const [listaRolesTareas, setListaRolesTareas] = useState([]);
-  const [listaTareaIncripciones, setListaTareasIncripciones] = useState([]);
+  const [listaTareaIncripciones, setListaTareaIncripciones] = useState([]);
   const [listaTareaEventos, setListaTareaEventos] = useState([]);
   const [listaTareaGestion, setListaTareaGestion] = useState([]);
   const [listaTareaReportes, setListaTareaReportes] = useState([]);
@@ -71,8 +72,8 @@ export default function Menu({ administrador }) {
     obtenerListaUsuarios();
     ontenerListaRoles();
     obtenerRolesConTareas();
-    combinarListas();
-  }, [administrador]);
+    asignarTareas();
+  }, []);
 
   //Obtenemos las listas de las bases de datos
   const obtenerListaUsuarios = () => {
@@ -105,7 +106,6 @@ export default function Menu({ administrador }) {
       .then((response) => {
         console.log("Las tareas de los roles son", response.data);
         setListaRolesTareas(response.data);
-        asignarTareaIncripciones(response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -115,48 +115,51 @@ export default function Menu({ administrador }) {
   //Asignamos las tareas a sus listas correspondientes
 
   const asignarTareaIncripciones = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => {
-      const tareaAsignada = rol.tareas[0].id_tarea === 1;
-      return { asignado: tareaAsignada };
-    });
+    const nuevaLista = listaRolesTareas.map((rol) => ({
+      asignado: rol.tareas.some((tarea) => tarea.id_tarea === 1),
+    }));
 
-    setListaTareasIncripciones(nuevaLista);
+    setListaTareaIncripciones(nuevaLista);
   };
 
   const asignarTareaEventos = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => {
-      const tareaAsignada = rol.tareas[0].id_tarea === 2;
-      return { asignado: tareaAsignada };
-    });
+    const nuevaLista = listaRolesTareas.map((rol) => ({
+      asignado: rol.tareas.some((tarea) => tarea.id_tarea === 2),
+    }));
 
     setListaTareaEventos(nuevaLista);
   };
 
   const asignarTareaGestion = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => {
-      const tareaAsignada = rol.tareas[0].id_tarea === 3;
-      return { asignado: tareaAsignada };
-    });
+    const nuevaLista = listaRolesTareas.map((rol) => ({
+      asignado: rol.tareas.some((tarea) => tarea.id_tarea === 3),
+    }));
 
     setListaTareaGestion(nuevaLista);
   };
 
   const asignarTareaReportes = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => {
-      const tareaAsignada = rol.tareas[0].id_tarea === 4;
-      return { asignado: tareaAsignada };
-    });
+    const nuevaLista = listaRolesTareas.map((rol) => ({
+      asignado: rol.tareas.some((tarea) => tarea.id_tarea === 4),
+    }));
 
     setListaTareaReportes(nuevaLista);
   };
 
   const asignarTareaAdministracion = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => {
-      const tareaAsignada = rol.tareas[0].id_tarea === 5;
-      return { asignado: tareaAsignada };
-    });
+    const nuevaLista = listaRolesTareas.map((rol) => ({
+      asignado: rol.tareas.some((tarea) => tarea.id_tarea === 5),
+    }));
 
     setListaTareaAdministracion(nuevaLista);
+  };
+
+  const asignarTareas = () => {
+    asignarTareaIncripciones();
+    asignarTareaEventos();
+    asignarTareaGestion();
+    asignarTareaReportes();
+    asignarTareaAdministracion();
   };
 
   const combinarListas = () => {
@@ -168,6 +171,7 @@ export default function Menu({ administrador }) {
       // Crear un objeto para el elemento actual en listaRoles
       const combinedItem = {
         rol: rol.nombre_rol,
+        id_rol: rol.id_roles,
         asignados: [],
       };
 
@@ -224,14 +228,22 @@ export default function Menu({ administrador }) {
   };
 
   const mostrarTareas = () => {
-    //al abrir el modal se asigna los valores de las tareas a sus respectivas listas
-    asignarTareaIncripciones();
-    asignarTareaEventos();
-    asignarTareaGestion();
-    asignarTareaReportes();
-    asignarTareaAdministracion();
+    // Al abrir el modal, se asignan los valores de las tareas a sus respectivas listas
+    asignarTareas();
+
+    // Se combina la lista después de asignar las tareas
     combinarListas();
-    setMostrarModalTareas(true);
+
+    // Se imprime la lista combinada en la consola para propósitos de depuración
+    console.log("lista combinada ", listaCombinada);
+
+    // Si la lista combinada tiene una longitud igual a 0, se vuelve a llamar a la función combinarListas
+    if (listaCombinada.length === 0) {
+      combinarListas();
+    } else {
+      // Si la lista combinada no es igual a 0, se establece mostrarModalTareas en true
+      setMostrarModalTareas(true);
+    }
   };
 
   const onCancelTareas = () => {
@@ -302,8 +314,7 @@ export default function Menu({ administrador }) {
     confirm({
       title: "¿Está seguro de actualizar los roles?",
       icon: <ExclamationCircleFilled />,
-      content:
-        "Los nuevos roles se asignaran al usuario ",
+      content: "Los nuevos roles se asignaran al usuario ",
       okText: "Si",
       cancelText: "No",
       centered: "true",
@@ -314,7 +325,22 @@ export default function Menu({ administrador }) {
     });
   };
 
-  const showCancelRoles = (values) => {
+  const showConfirmTareas = (values) => {
+    confirm({
+      title: "¿Está seguro de actualizar las tareas?",
+      icon: <ExclamationCircleFilled />,
+      content: "Las nuevas tareas se asignarán a los roles ",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        guardarTareas();
+      },
+      onCancel() {},
+    });
+  };
+
+  const showCancelRoles = () => {
     confirm({
       title: "¿Está seguro de cancelar?",
       icon: <ExclamationCircleFilled />,
@@ -328,9 +354,25 @@ export default function Menu({ administrador }) {
     });
   };
 
+  const showCancelTareas = () => {
+    confirm({
+      title: "¿Está seguro de cancelar?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        onCancelTareas();
+      },
+      onCancel() {},
+    });
+  };
+
   const guardarRoles = () => {
     if (usuarioEncontrado.id_usuario === undefined) {
       message.error("Tiene que seleccionar un usuario");
+    } else if (checksSeleccionados.length === 0) {
+      message.error("El usuario debe tener almenos un rol");
     } else {
       const datos = {
         id_usuario: usuarioEncontrado.id_usuario,
@@ -393,19 +435,72 @@ export default function Menu({ administrador }) {
     });
   };
 
-  //Asignar los checks a las columnas correspondientes
-  const isRolAsignadoInscripciones = () => {};
-
   const guardarTareas = () => {
-    console.log("Lista de permisos inscripciones", listaTareaIncripciones);
-    console.log("lista de permisos eventos", listaTareaEventos);
-    console.log("lista de permisos gestion eventos", listaTareaGestion);
-    console.log("lista de permisos reportes", listaTareaReportes);
-    console.log("lista de permisos administracion", listaTareaAdministracion);
-    console.log("combinados ", listaCombinada);
+    const datos = [];
+
+    let id = 1;
+
+    for (let i = 0; i < listaCombinada.length; i++) {
+      let tareasAsignadas = [];
+
+      for (let j = 0; j < 5; j++) {
+        const tareaAsignada = listaCombinada[j].asignados[i].asignado;
+
+        if (tareaAsignada) {
+          tareasAsignadas.push(j + 1);
+        }
+      }
+
+      if (tareasAsignadas.length > 0) {
+        datos.push({
+          id_roles: id,
+          tareas: tareasAsignadas,
+        });
+      }
+
+      id++;
+
+      if (id > 7) {
+        id = 1;
+      }
+    }
+    axios
+      .post("http://localhost:8000/api/roles-actualizar-tareas", datos)
+      .then((response) => {
+        message.success("Las tareas han sido modificadas correctamente");
+        obtenerRolesConTareas();
+        setListaCombinada([]);
+
+        setMostrarModalTareas(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    console.log("Datos guardados:", datos);
   };
 
-  const mostrar = false;
+  const handleCheckChangeInscripciones = (index, isChecked, columna) => {
+    // Clona la lista para evitar mutar el estado directamente
+    const nuevaLista = listaCombinada.map((item, i) => {
+      if (i === columna) {
+        // Solo actualiza la primera fila
+        return {
+          ...item,
+          asignados: item.asignados.map((asignado, j) =>
+            j === index ? { ...asignado, asignado: isChecked } : asignado
+          ),
+        };
+      }
+      return item;
+    });
+
+    // Realiza cualquier otra operación que necesites con la nueva lista
+    // ...
+
+    // Actualiza el estado con la nueva lista
+    setListaCombinada(nuevaLista);
+  };
+
   return (
     <div className="header-acciones">
       <div className="parte-superior-menu" />
@@ -553,11 +648,11 @@ export default function Menu({ administrador }) {
       <Modal
         title="Asignar tareas"
         open={mostrarModalTareas}
-        onCancel={onCancelTareas}
+        onCancel={showCancelTareas}
         width={1000}
         footer={[
-          <Form form={formRoles} onFinish={guardarTareas}>
-            <Button onClick={onCancelTareas}>Cancelar</Button>
+          <Form form={formRoles} onFinish={showConfirmTareas}>
+            <Button onClick={showCancelTareas}>Cancelar</Button>
             <Button type="primary" htmlType="submit">
               Guardar
             </Button>
@@ -591,6 +686,9 @@ export default function Menu({ administrador }) {
                     checked={
                       listaCombinada[0]?.asignados[index]?.asignado || false
                     }
+                    onChange={(e) =>
+                      handleCheckChangeInscripciones(index, e.target.checked, 0)
+                    }
                   />
                 )}
               />
@@ -602,6 +700,9 @@ export default function Menu({ administrador }) {
                     checked={
                       listaCombinada[1]?.asignados[index]?.asignado || false
                     }
+                    onChange={(e) =>
+                      handleCheckChangeInscripciones(index, e.target.checked, 1)
+                    }
                   />
                 )}
               />
@@ -611,6 +712,9 @@ export default function Menu({ administrador }) {
                   <Checkbox
                     checked={
                       listaCombinada[2]?.asignados[index]?.asignado || false
+                    }
+                    onChange={(e) =>
+                      handleCheckChangeInscripciones(index, e.target.checked, 2)
                     }
                   />
                 )}
@@ -622,6 +726,9 @@ export default function Menu({ administrador }) {
                     checked={
                       listaCombinada[3]?.asignados[index]?.asignado || false
                     }
+                    onChange={(e) =>
+                      handleCheckChangeInscripciones(index, e.target.checked, 3)
+                    }
                   />
                 )}
               />
@@ -631,6 +738,9 @@ export default function Menu({ administrador }) {
                   <Checkbox
                     checked={
                       listaCombinada[4]?.asignados[index]?.asignado || false
+                    }
+                    onChange={(e) =>
+                      handleCheckChangeInscripciones(index, e.target.checked, 4)
                     }
                   />
                 )}

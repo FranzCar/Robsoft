@@ -743,6 +743,7 @@ export default function Participante() {
         console.error(error);
       });
   };
+  
   const duplicadoCiEvento = () => {
     axios
       .get(`http://localhost:8000/api/inscritos-evento/${idEVENTO}`)
@@ -788,64 +789,140 @@ export default function Participante() {
   };
 
   const guardarEquipo = (values) => {
-    const datos = datosGrupal(values);
-    const duplicado = validarDuplicadoGrupal(values);
-    console.log("los datos a guardar del equipo son  ", datos);
-    if (listaParticipante.length !== 0 && listaParticipante.length === tamanioListaParticipantes) {
-      if (duplicado === true) {
-        message.error("Existe un equipo con el mismo nombre");
+    console.log("error id persona ", entrenadorForm);
+    if (entrenadorForm.length === 0) {
+      if (listaParticipante.length === 0) {
+        message.error("Debe ingresar los participantes requeridos");
       } else {
-        axios
-          .post("http://localhost:8000/api/guardar-equipo", datos)
-          .then((response) => {
-            message.success("El grupo se registró correctamente");
-            obtenerGrupos();
-            form.resetFields();
-            const datosEquipo = {
-              id_evento: idEVENTO,
-              id_equipo: response.data.id_equipo,
-            };
+        const datos = datosGrupal(values);
+        const duplicado = validarDuplicadoGrupal(values);
+        console.log("los datos a guardar del equipo son  ", datos);
+        if (
+          listaParticipante.length !== 0 &&
+          listaParticipante.length === tamanioListaParticipantes
+        ) {
+          if (duplicado === true) {
+            message.error("Existe un equipo con el mismo nombre");
+          } else {
             axios
-              .post("http://localhost:8000/api/inscribir-equipo", datosEquipo)
+              .post("http://localhost:8000/api/guardar-equipo", datos)
               .then((response) => {
-                console.log(
-                  "El grupo se registró correctamente con éxito al evento",
-                  response.data
-                );
-                message.success(
-                  "El equipo se registró correctamente al evento"
-                );
-                formGrupal.resetFields();
-                setEntrenadorForm(null);
-                setListaParticipante([]);
-                setAlerta(null);
-                setAlertaParticipante1(null);
-                setBusquedaParticipante1("");
-                setBusqueda("");
-              })
-              .catch((error) => {
-                if (error.response) {
-                  // El servidor respondió con un código de estado fuera del rango 2xx
-                  const errores = error.response.data.errors;
-                  for (let campo in errores) {
-                    message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
-                  }
-                } else {
-                  // Otros errores (problemas de red, etc.)
-                  message.error(
-                    "Ocurrió un error al guardar el registro del equipo al EVENTO."
-                  );
-                }
+                message.success("El grupo se registró correctamente");
+                obtenerGrupos();
+                form.resetFields();
+                const datosEquipo = {
+                  id_evento: idEVENTO,
+                  id_equipo: response.data.id_equipo,
+                };
+                axios
+                  .post(
+                    "http://localhost:8000/api/inscribir-equipo",
+                    datosEquipo
+                  )
+                  .then((response) => {
+                    console.log(
+                      "El grupo se registró correctamente con éxito al evento",
+                      response.data
+                    );
+                    message.success(
+                      "El equipo se registró correctamente al evento"
+                    );
+                    formGrupal.resetFields();
+                    setEntrenadorForm(null);
+                    setListaParticipante([]);
+                    setAlerta(null);
+                    setAlertaParticipante1(null);
+                    setBusquedaParticipante1("");
+                    setBusqueda("");
+                  })
+                  .catch((error) => {
+                    if (error.response) {
+                      // El servidor respondió con un código de estado fuera del rango 2xx
+                      const errores = error.response.data.errors;
+                      for (let campo in errores) {
+                        message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+                      }
+                    } else {
+                      // Otros errores (problemas de red, etc.)
+                      message.error(
+                        "Ocurrió un error al guardar el registro del equipo al EVENTO."
+                      );
+                    }
+                  });
               });
-          });
-        setVerModalGrupal(false);
-        setListaParticipante([]);
-        setNombreEntrenador("");
+            setVerModalGrupal(false);
+            setListaParticipante([]);
+            setNombreEntrenador("");
+          }
+        } else {
+          message.error(
+            `Tiene que agregar ${tamanioListaParticipantes} participantes`
+          );
+        }
       }
     } else {
-      message.error(
-        `Tiene que agregar ${tamanioListaParticipantes} participantes`
-      );
+      const datos = datosGrupal(values);
+      const duplicado = validarDuplicadoGrupal(values);
+      console.log("los datos a guardar del equipo son  ", datos);
+      if (
+        listaParticipante.length !== 0 &&
+        listaParticipante.length === tamanioListaParticipantes
+      ) {
+        if (duplicado === true) {
+          message.error("Existe un equipo con el mismo nombre");
+        } else {
+          axios
+            .post("http://localhost:8000/api/guardar-equipo", datos)
+            .then((response) => {
+              message.success("El grupo se registró correctamente");
+              obtenerGrupos();
+              form.resetFields();
+              const datosEquipo = {
+                id_evento: idEVENTO,
+                id_equipo: response.data.id_equipo,
+              };
+              axios
+                .post("http://localhost:8000/api/inscribir-equipo", datosEquipo)
+                .then((response) => {
+                  console.log(
+                    "El grupo se registró correctamente con éxito al evento",
+                    response.data
+                  );
+                  message.success(
+                    "El equipo se registró correctamente al evento"
+                  );
+                  formGrupal.resetFields();
+                  setEntrenadorForm(null);
+                  setListaParticipante([]);
+                  setAlerta(null);
+                  setAlertaParticipante1(null);
+                  setBusquedaParticipante1("");
+                  setBusqueda("");
+                })
+                .catch((error) => {
+                  if (error.response) {
+                    // El servidor respondió con un código de estado fuera del rango 2xx
+                    const errores = error.response.data.errors;
+                    for (let campo in errores) {
+                      message.error(errores[campo][0]); // Mostramos solo el primer mensaje de error de cada campo
+                    }
+                  } else {
+                    // Otros errores (problemas de red, etc.)
+                    message.error(
+                      "Ocurrió un error al guardar el registro del equipo al EVENTO."
+                    );
+                  }
+                });
+            });
+          setVerModalGrupal(false);
+          setListaParticipante([]);
+          setNombreEntrenador("");
+        }
+      } else {
+        message.error(
+          `Tiene que agregar ${tamanioListaParticipantes} participantes`
+        );
+      }
     }
   };
   //obtener inscritos al evento
@@ -1308,16 +1385,6 @@ export default function Participante() {
     );
 
     if (participanteEncontrado) {
-      if (num === 1) {
-        setParticipanteForm1(participanteEncontrado);
-      }
-      if (num === 2) {
-        setParticipanteForm2(participanteEncontrado);
-      }
-      if (num === 3) {
-        setParticipanteForm3(participanteEncontrado);
-      }
-
       // Verificar si el participante ya está en la lista de participantes en el evento
       if (participanteEnEvento) {
         setAlertaParticipante({
