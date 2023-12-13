@@ -1,4 +1,5 @@
 import "../App.css";
+import { URL_API } from "../Servicios/const.js";
 import {
   Button,
   Table,
@@ -88,7 +89,7 @@ export default function EditarEvento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-modificables")
+      .get(`${URL_API}/eventos-modificables`)
       .then((response) => {
         setData(response.data);
         console.log("los datos de la base de daatos son ", response);
@@ -100,7 +101,7 @@ export default function EditarEvento() {
 
   const obtenerDatosEditar = () => {
     axios
-      .get("http://localhost:8000/api/eventos")
+      .get(`${URL_API}/eventos`)
       .then((response) => {
         setDataEditar(response.data);
       })
@@ -110,7 +111,7 @@ export default function EditarEvento() {
   };
   const obtenerListaOrganizadores = () => {
     axios
-      .get("http://localhost:8000/api/lista-organizadores")
+      .get(`${URL_API}/lista-organizadores`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_rol_persona,
@@ -129,7 +130,7 @@ export default function EditarEvento() {
 
   const obtenerListaPatrocinadores = () => {
     axios
-      .get("http://localhost:8000/api/lista-auspiciadores")
+      .get(`${URL_API}/lista-auspiciadores`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_auspiciador,
@@ -145,7 +146,7 @@ export default function EditarEvento() {
   };
   const obtenerListaTipoEventos = () => {
     axios
-      .get("http://localhost:8000/api/lista-tipo-eventos")
+      .get(`${URL_API}/lista-tipo-eventos`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_tipo_evento,
@@ -375,7 +376,7 @@ export default function EditarEvento() {
 
         // Luego, realizamos la solicitud PUT con los datos del evento.
         const response = await axios.put(
-          `http://localhost:8000/api/evento/${id}`,
+          `${URL_API}/evento/${id}`,
           datos
         );
 

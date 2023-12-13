@@ -1,4 +1,5 @@
 import "../App.css";
+import { URL_API } from "../Servicios/const.js";
 import { Button, Table, Space, Form, message, Modal } from "antd";
 import React, { useState, useEffect } from "react";
 import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons";
@@ -27,7 +28,7 @@ export default function EliminarEvento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-eliminables")
+      .get(`${URL_API}/eventos-eliminables`)
       .then((response) => {
         setData(response.data);
         console.log("los datos de la base de daatos son ", response);
@@ -40,7 +41,7 @@ export default function EliminarEvento() {
   //Eliminar evento
   function eliminarEvento(key, record) {
     axios
-      .delete(`http://localhost:8000/api/quitar-evento/${key}`)
+      .delete(`${URL_API}/quitar-evento/${key}`)
       .then((response) => {
         if (record.ESTADO === "Inscrito") {
           message.success(

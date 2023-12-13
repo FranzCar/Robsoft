@@ -1,5 +1,5 @@
 import "../App.css";
-
+import { URL_API } from "../Servicios/const.js";
 import {
   Button,
   Table,
@@ -189,7 +189,7 @@ export default function DetalleEvento() {
     console.log("Los datos a enviar a la base de datos son ", datos);
 
     axios
-      .post(`http://localhost:8000/api/detallar-evento/${id}`, datos)
+      .post(`${URL_API}/detallar-evento/${id}`, datos)
       .then((response) => {
         message.success("Los detalles del evento se guardaron correctamente");
         obtenerDatos();
@@ -248,7 +248,7 @@ export default function DetalleEvento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-modificables")
+      .get(`${URL_API}/eventos-modificables`)
       .then((response) => {
         setData(response.data);
       })
@@ -261,7 +261,7 @@ export default function DetalleEvento() {
   //Se agrega los forms a la segunda pestaña dependiendo del tipo de evento
   const showDetalle = (record) => {
     axios
-      .get(`http://localhost:8000/api/evento-con-detalles/${record.id_evento}`)
+      .get(`${URL_API}/evento-con-detalles/${record.id_evento}`)
       .then((response) => {
         const conDetalles = response.data.tieneDetalles;
 
@@ -552,7 +552,7 @@ export default function DetalleEvento() {
 
   const obtenerListaUbicaciones = () => {
     axios
-      .get("http://localhost:8000/api/lista-ubicaciones")
+      .get(`${URL_API}/lista-ubicaciones`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_ubicacion,
@@ -604,7 +604,7 @@ export default function DetalleEvento() {
 
   const obtenerListaFacilitadores = () => {
     axios
-      .get("http://localhost:8000/api/lista-facilitadores")
+      .get(`${URL_API}/lista-facilitadores`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_rol_persona,

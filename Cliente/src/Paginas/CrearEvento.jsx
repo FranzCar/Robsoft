@@ -1,4 +1,5 @@
 import "../App.css";
+import { URL_API } from "../Servicios/const.js";
 import {
   Button,
   Modal,
@@ -174,7 +175,7 @@ export default function CrearEvento() {
 
   const obtenerListaTipoEventos = () => {
     axios
-      .get("http://localhost:8000/api/lista-tipo-eventos")
+      .get(`${URL_API}/lista-tipo-eventos`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_tipo_evento,
@@ -191,7 +192,7 @@ export default function CrearEvento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-mostrar")
+      .get(`${URL_API}/eventos-mostrar`)
       .then((response) => {
         setData(response.data);
       })
@@ -274,7 +275,7 @@ export default function CrearEvento() {
     } else {
       console.log("Se guarda los datos en la BD");
       axios
-        .post("http://localhost:8000/api/guardar-evento", datos)
+        .post(`${URL_API}/guardar-evento`, datos)
         .then((response) => {
           console.log("Datos guardados con éxito", response.data);
           obtenerDatos();
@@ -347,7 +348,7 @@ export default function CrearEvento() {
   //3er sprint
   const obtenerListaOrganizadores = () => {
     axios
-      .get("http://localhost:8000/api/lista-organizadores")
+      .get(`${URL_API}/lista-organizadores`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_rol_persona,
@@ -366,7 +367,7 @@ export default function CrearEvento() {
 
   const obtenerListaPatrocinadores = () => {
     axios
-      .get("http://localhost:8000/api/lista-auspiciadores")
+      .get(`${URL_API}/lista-auspiciadores`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_auspiciador,

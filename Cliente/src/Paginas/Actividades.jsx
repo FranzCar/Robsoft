@@ -1,5 +1,5 @@
 import "../App.css";
-
+import { URL_API } from "../Servicios/const.js";
 import {
   Button,
   Table,
@@ -55,7 +55,7 @@ export default function Actividades() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-modificables")
+      .get(`${URL_API}/eventos-modificables`)
       .then((response) => {
         setData(response.data);
       })
@@ -66,7 +66,7 @@ export default function Actividades() {
 
   const obtenerListaUbicaciones = () => {
     axios
-      .get("http://localhost:8000/api/lista-ubicaciones")
+      .get(`${URL_API}/lista-ubicaciones`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_ubicacion,
@@ -105,7 +105,7 @@ export default function Actividades() {
 
   const formularioActividades = (record) => {
     axios
-      .get(`http://localhost:8000/api/evento-con-etapas/${record.id_evento}`)
+      .get(`${URL_API}/evento-con-etapas/${record.id_evento}`)
       .then((response) => {
         const conDetalles = response.data.tieneEtapas;
 
@@ -173,7 +173,7 @@ export default function Actividades() {
       };
 
       axios
-        .post(`http://localhost:8000/api/guardar-etapa/${id}`, datosActividades)
+        .post(`${URL_API}/guardar-etapa/${id}`, datosActividades)
         .then((response) => {
           message.success("La actividad del evento se guardó correctamente");
           form.resetFields();
@@ -207,7 +207,7 @@ export default function Actividades() {
           };
           axios
             .post(
-              `http://localhost:8000/api/guardar-etapa/${id}`,
+              `${URL_API}/guardar-etapa/${id}`,
               nuevosDatosEtapas
             )
             .then((response) => {
