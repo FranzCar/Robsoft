@@ -185,27 +185,28 @@ export default function Reporte() {
         console.error(error);
       });
   };
-  const datosReporte = (values) => {
-    const fechaIni = values.FECHA_INICIO;
-    const NUEVAFECHAINI = fechaIni.format("YYYY-MM-DD");
-    const fechaFin = values.FECHA_FIN;
-    const NUEVAFECHAFIN = fechaFin.format("YYYY-MM-DD");
-    const datos = {
-      fecha_inicio: NUEVAFECHAINI,
-      fecha_fin: NUEVAFECHAFIN,
-      tipo_evento: values.TIPO_EVENTO,
-      modalidad: values.MODALIDAD ?? "",
-      participacion: values.PARTICIPACION ?? "",
-      publico: values.DIRIGIDO_A ?? "",
-      ubicacion: values.UBICACION ?? "",
-      entrenador_obligatorio: values.ENTRENADOR ?? true,
-      incluye_organizadores: values.M2 ? 1 : 0,
-      incluye_patrocinadores: values.M1 ? 1 : 0,
-      incluye_ubicaciones: values.M3 ? 1 : 0,
-    };
-
-    return datos;
+ const datosReporte = (values) => {
+  const fechaIni = values.FECHA_INICIO;
+  const NUEVAFECHAINI = fechaIni ? fechaIni.format("YYYY-MM-DD") : "";
+  const fechaFin = values.FECHA_FIN;
+  const NUEVAFECHAFIN = fechaFin ? fechaFin.format("YYYY-MM-DD") : "";
+  const datos = {
+    fecha_inicio: NUEVAFECHAINI,
+    fecha_fin: NUEVAFECHAFIN,
+    tipo_evento: values.TIPO_EVENTO || "",
+    modalidad: values.MODALIDAD || "",
+    participacion: values.PARTICIPACION || "",
+    publico: values.DIRIGIDO_A || "",
+    ubicacion: values.UBICACION || "",
+    entrenador_obligatorio: values.ENTRENADOR ? 1 : 0,
+    incluye_organizadores: values.M2 ? 1 : 0,
+    incluye_patrocinadores: values.M1 ? 1 : 0,
+    incluye_ubicaciones: values.M3 ? 1 : 0,
   };
+
+  return datos;
+};
+
 
   const onFinishFormEvent = (values) => {
     const datos = datosReporte(values);
@@ -502,16 +503,7 @@ export default function Reporte() {
             </Row>
             <Row gutter={[16, 8]}>
               <Col span={12}>
-                <Form.Item
-                  label="Tipo de Evento"
-                  name="TIPO_EVENTO"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Seleccion un tipo de evento",
-                    },
-                  ]}
-                >
+                <Form.Item label="Tipo de Evento" name="TIPO_EVENTO">
                   <Select
                     placeholder="Selecione un evento"
                     allowClear
@@ -520,16 +512,7 @@ export default function Reporte() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item
-                  label="Fecha inicio"
-                  name="FECHA_INICIO"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Seleccione la fecha inicio",
-                    },
-                  ]}
-                >
+                <Form.Item label="Fecha inicio" name="FECHA_INICIO">
                   <DatePicker
                     style={{
                       width: "200px",
@@ -540,16 +523,7 @@ export default function Reporte() {
                   />
                 </Form.Item>
 
-                <Form.Item
-                  label="Fecha fin"
-                  name="FECHA_FIN"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Seleccione la fecha fin",
-                    },
-                  ]}
-                >
+                <Form.Item label="Fecha fin" name="FECHA_FIN">
                   <DatePicker
                     style={{
                       width: "200px",
@@ -650,7 +624,6 @@ export default function Reporte() {
                         label: "No obligatorio",
                       },
                     ]}
-                    defaultValue={true}
                   />
                 </Form.Item>
               </Col>
