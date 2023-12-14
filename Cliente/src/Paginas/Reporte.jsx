@@ -1,4 +1,5 @@
 import "../App.css";
+import { URL_API } from "../Servicios/const.js";
 import React, { useState, useEffect } from "react";
 import {
   AppstoreOutlined,
@@ -154,7 +155,7 @@ export default function Reporte() {
     }
     console.log("El id del evento es ", id_evento);
     axios
-      .get(`http://localhost:8000/api/inscritos-evento/${id_evento}`)
+      .get(`${URL_API}/inscritos-evento/${id_evento}`)
       .then((response) => {
         setModalEventos(false);
         form.resetFields();
@@ -169,7 +170,7 @@ export default function Reporte() {
   };
   const obtenerEventosConIncritos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-con-inscritos")
+      .get(`${URL_API}/eventos-con-inscritos`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_evento,
@@ -185,33 +186,34 @@ export default function Reporte() {
         console.error(error);
       });
   };
-  const datosReporte = (values) => {
-    const fechaIni = values.FECHA_INICIO;
-    const NUEVAFECHAINI = fechaIni.format("YYYY-MM-DD");
-    const fechaFin = values.FECHA_FIN;
-    const NUEVAFECHAFIN = fechaFin.format("YYYY-MM-DD");
-    const datos = {
-      fecha_inicio: NUEVAFECHAINI,
-      fecha_fin: NUEVAFECHAFIN,
-      tipo_evento: values.TIPO_EVENTO,
-      modalidad: values.MODALIDAD ?? "",
-      participacion: values.PARTICIPACION ?? "",
-      publico: values.DIRIGIDO_A ?? "",
-      ubicacion: values.UBICACION ?? "",
-      entrenador_obligatorio: values.ENTRENADOR ?? true,
-      incluye_organizadores: values.M2 ? 1 : 0,
-      incluye_patrocinadores: values.M1 ? 1 : 0,
-      incluye_ubicaciones: values.M3 ? 1 : 0,
-    };
-
-    return datos;
+ const datosReporte = (values) => {
+  const fechaIni = values.FECHA_INICIO;
+  const NUEVAFECHAINI = fechaIni ? fechaIni.format("YYYY-MM-DD") : "";
+  const fechaFin = values.FECHA_FIN;
+  const NUEVAFECHAFIN = fechaFin ? fechaFin.format("YYYY-MM-DD") : "";
+  const datos = {
+    fecha_inicio: NUEVAFECHAINI,
+    fecha_fin: NUEVAFECHAFIN,
+    tipo_evento: values.TIPO_EVENTO || "",
+    modalidad: values.MODALIDAD || "",
+    participacion: values.PARTICIPACION || "",
+    publico: values.DIRIGIDO_A || "",
+    ubicacion: values.UBICACION || "",
+    entrenador_obligatorio: values.ENTRENADOR ? true : false,
+    incluye_organizadores: values.M2 ? 1 : 0,
+    incluye_patrocinadores: values.M1 ? 1 : 0,
+    incluye_ubicaciones: values.M3 ? 1 : 0,
   };
+
+  return datos;
+};
+
 
   const onFinishFormEvent = (values) => {
     const datos = datosReporte(values);
     console.log("FORM event ", datos);
     axios
-      .get("http://localhost:8000/api/reporte-eventos", { params: datos })
+      .get(`${URL_API}/reporte-eventos`, { params: datos })
       .then((response) => {
         console.log("response data ", response.data);
         setModalFormEvent(false);
@@ -226,7 +228,7 @@ export default function Reporte() {
 
   const obtenerListaTipoEventos = () => {
     axios
-      .get("http://localhost:8000/api/lista-tipo-eventos")
+      .get(`${URL_API}/lista-tipo-eventos`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_tipo_evento,
@@ -243,7 +245,7 @@ export default function Reporte() {
   };
   const obtenerListaUbicaciones = () => {
     axios
-      .get("http://localhost:8000/api/lista-ubicaciones")
+      .get(`${URL_API}/lista-ubicaciones`)
       .then((response) => {
         const listaConFormato = response.data.map((element) => ({
           id: element.id_ubicacion,
@@ -502,16 +504,7 @@ export default function Reporte() {
             </Row>
             <Row gutter={[16, 8]}>
               <Col span={12}>
-                <Form.Item
-                  label="Tipo de Evento"
-                  name="TIPO_EVENTO"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Seleccion un tipo de evento",
-                    },
-                  ]}
-                >
+                <Form.Item label="Tipo de Evento" name="TIPO_EVENTO">
                   <Select
                     placeholder="Selecione un evento"
                     allowClear
@@ -520,16 +513,7 @@ export default function Reporte() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item
-                  label="Fecha inicio"
-                  name="FECHA_INICIO"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Seleccione la fecha inicio",
-                    },
-                  ]}
-                >
+                <Form.Item label="Fecha inicio" name="FECHA_INICIO">
                   <DatePicker
                     style={{
                       width: "200px",
@@ -540,16 +524,7 @@ export default function Reporte() {
                   />
                 </Form.Item>
 
-                <Form.Item
-                  label="Fecha fin"
-                  name="FECHA_FIN"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Seleccione la fecha fin",
-                    },
-                  ]}
-                >
+                <Form.Item label="Fecha fin" name="FECHA_FIN">
                   <DatePicker
                     style={{
                       width: "200px",
@@ -650,7 +625,6 @@ export default function Reporte() {
                         label: "No obligatorio",
                       },
                     ]}
-                    defaultValue={true}
                   />
                 </Form.Item>
               </Col>

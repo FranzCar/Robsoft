@@ -1,5 +1,5 @@
 import "../App.css";
-
+import { URL_API } from "../Servicios/const.js";
 import { Link, useLocation } from "react-router-dom";
 import {
   Dropdown,
@@ -77,7 +77,7 @@ export default function Menu() {
   //Obtenemos las listas de las bases de datos
   const obtenerListaUsuarios = () => {
     axios
-      .get("http://localhost:8000/api/lista-usuarios")
+      .get(`${URL_API}/lista-usuarios`)
       .then((response) => {
         console.log("Los usuarios son ", response.data);
         setListaUsuarios(response.data);
@@ -89,7 +89,7 @@ export default function Menu() {
 
   const ontenerListaRoles = () => {
     axios
-      .get("http://localhost:8000/api/lista-roles")
+      .get(`${URL_API}/lista-roles`)
       .then((response) => {
         console.log("Los roles son ", response.data);
         setListaRoles(response.data);
@@ -101,7 +101,7 @@ export default function Menu() {
 
   const obtenerRolesConTareas = () => {
     axios
-      .get("http://localhost:8000/api/lista-roles-tareas")
+      .get(`${URL_API}/lista-roles-tareas`)
       .then((response) => {
         console.log("Las tareas de los roles son", response.data);
         setListaRolesTareas(response.data);
@@ -266,7 +266,7 @@ export default function Menu() {
       setUsuarioEncontrado(usuarioEncontrado);
       axios
         .get(
-          `http://localhost:8000/api/roles_de_usuario/${usuarioEncontrado.id_usuario}`
+          `${URL_API}/roles_de_usuario/${usuarioEncontrado.id_usuario}`
         )
         .then((response) => {
           console.log("Los roles son ", response.data);
@@ -363,7 +363,7 @@ export default function Menu() {
       };
       console.log("Los datos a enviar son ", datos);
       axios
-        .post("http://localhost:8000/api/usuarios-actualizar-roles", datos)
+        .post(`${URL_API}/usuarios-actualizar-roles`, datos)
         .then((response) => {
           message.success("Los roles se asignaron correctamente");
           onCancelRol();

@@ -1,4 +1,5 @@
 import "../App.css";
+import { URL_API } from "../Servicios/const.js";
 import { Button, Table, Space, Modal, Form, Image } from "antd";
 import React, { useState, useEffect } from "react";
 import { InfoCircleOutlined } from "@ant-design/icons";
@@ -22,7 +23,7 @@ export default function Evento() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/eventos-mostrar")
+      .get(`${URL_API}/eventos-mostrar`)
       .then((response) => {
         setData(response.data);
         console.log("los datos ", response.data);

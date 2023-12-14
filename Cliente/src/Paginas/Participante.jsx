@@ -1,4 +1,5 @@
 import "../App.css";
+import { URL_API } from "../Servicios/const.js";
 import {
   Button,
   Space,
@@ -93,7 +94,7 @@ export default function Participante() {
 
   const obtenerDatos = () => {
     axios
-      .get("http://localhost:8000/api/lista-evento-detallado")
+      .get(`${URL_API}/lista-evento-detallado`)
       .then((response) => {
         setDatosEventos(response.data);
         console.log("Los datos ", response.data);
@@ -120,7 +121,7 @@ export default function Participante() {
   const verificarCodigo = (values) => {
     const datos = datosUuid(values);
     axios
-      .post("http://localhost:8000/api/confirmar-codigo-verificacion", datos)
+      .get(`${URL_API}/confirmar-codigo-verificacion`, datos)
       .then((response) => {
         setEnviarCodigo(false);
         setVerificado(true);
@@ -145,7 +146,7 @@ export default function Participante() {
   const verificarCodigoEntrenador = (values) => {
     const datos = datosUuidEntrenador(values);
     axios
-      .post("http://localhost:8000/api/confirmar-codigo-verificacion", datos)
+      .get(`${URL_API}/confirmar-codigo-verificacion`, datos)
       .then((response) => {
         setModalVerificarCodigoEntrenador(false);
         setEstadoRegistroEntrenador(true);
@@ -173,7 +174,7 @@ export default function Participante() {
     const correoDuplicado = validarDuplicadoCorreo(values);
     if (duplicado === false || ciEncontrado === true) {
       axios
-        .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
+        .get(`${URL_API}/enviar-codigo-verificacion`, datos)
         .then((response) => {
           setUuid(response.data);
         })
@@ -244,7 +245,7 @@ export default function Participante() {
   //Obtener instituciones
   const obtenerInstituciones = () => {
     axios
-      .get("http://localhost:8000/api/lista-instituciones")
+      .get(`${URL_API}/lista-instituciones`)
       .then((response) => {
         const lista = response.data.map((element) => ({
           value: element.id_institucion,
@@ -285,7 +286,7 @@ export default function Participante() {
   //Obtener participantes para validar
   const obtenerParticipantesCI = () => {
     axios
-      .get("http://localhost:8000/api/lista-participantes")
+      .get(`${URL_API}/lista-participantes`)
       .then((response) => {
         setData(response.data);
       })
@@ -579,7 +580,7 @@ export default function Participante() {
     const datos = datosParticipante(values);
     console.log("Se guarda los datos en la BD");
     axios
-      .post("http://localhost:8000/api/guardar-participante", datos)
+      .get(`${URL_API}/guardar-participante`, datos)
       .then((response) => {
         console.log("Datos guardados con éxito", response.data);
         const datosPer = {
@@ -588,7 +589,7 @@ export default function Participante() {
         };
         console.log("datos per . ", datosPer);
         axios
-          .post("http://localhost:8000/api/inscribir-individual", datosPer)
+          .get(`${URL_API}/inscribir-individual`, datosPer)
           .then((response) => {
             console.log("Datos guardados con éxito Evento", response.data);
             message.success(
@@ -719,7 +720,7 @@ export default function Participante() {
   //Obtener los equipos registrados
   const obtenerGrupos = () => {
     axios
-      .get("http://localhost:8000/api/lista-equipos")
+      .get(`${URL_API}/lista-equipos`)
       .then((response) => {
         setEquipos(response.data);
       })
@@ -730,7 +731,7 @@ export default function Participante() {
 
   const duplicadoCiEvento = () => {
     axios
-      .get(`http://localhost:8000/api/inscritos-evento/${idEVENTO}`)
+      .get(`${URL_API}/inscritos-evento/${idEVENTO}`)
       .then((response) => {
         setListaParticipantesEvento(response.data);
         console.log("lista participante evento: ", response.data);
@@ -793,7 +794,7 @@ export default function Participante() {
             message.error("Existe un equipo con el mismo nombre");
           } else {
             axios
-              .post("http://localhost:8000/api/guardar-equipo", datos)
+              .get(`${URL_API}/guardar-equipo`, datos)
               .then((response) => {
                 message.success("El grupo se registró correctamente");
                 obtenerGrupos();
@@ -804,7 +805,7 @@ export default function Participante() {
                 };
                 axios
                   .post(
-                    "http://localhost:8000/api/inscribir-equipo",
+                    `${URL_API}/inscribir-equipo`,
                     datosEquipo
                   )
                   .then((response) => {
@@ -861,7 +862,7 @@ export default function Participante() {
           message.error("Existe un equipo con el mismo nombre");
         } else {
           axios
-            .post("http://localhost:8000/api/guardar-equipo", datos)
+            .get(`${URL_API}/guardar-equipo`, datos)
             .then((response) => {
               message.success("El grupo se registró correctamente");
               obtenerGrupos();
@@ -871,7 +872,7 @@ export default function Participante() {
                 id_equipo: response.data.id_equipo,
               };
               axios
-                .post("http://localhost:8000/api/inscribir-equipo", datosEquipo)
+                .get(`${URL_API}/inscribir-equipo`, datosEquipo)
                 .then((response) => {
                   console.log(
                     "El grupo se registró correctamente con éxito al evento",
@@ -919,7 +920,7 @@ export default function Participante() {
     console.log("idEvento: ", idEVENTO);
     //Obtener participantes inscritos al evento para validar
     axios
-      .get(`http://localhost:8000/api/inscritos-evento/${id}`)
+      .get(`${URL_API}/inscritos-evento/${id}`)
       .then((response) => {
         console.log(response.data);
         setDataInscritos(response.data);
@@ -932,7 +933,7 @@ export default function Participante() {
   //Obtener participantes
   const obtenerParticipantes = () => {
     axios
-      .get("http://localhost:8000/api/lista-participantes")
+      .get(`${URL_API}/lista-participantes`)
       .then((response) => {
         setIntegrante(response.data);
       })
@@ -1022,7 +1023,7 @@ export default function Participante() {
   //Obtener informacion de los entrenadores
   const obtenerEntrenadores = () => {
     axios
-      .get("http://localhost:8000/api/lista-coach")
+      .get(`${URL_API}/lista-coach`)
       .then((response) => {
         setEntrenador(response.data);
         console.log("los entreandores son ", response.data);
@@ -1087,7 +1088,7 @@ export default function Participante() {
       ciEncontrado === true
     ) {
       axios
-        .post("http://localhost:8000/api/guardar-participante", datos)
+        .get(`${URL_API}/guardar-participante`, datos)
         .then((response) => {
           message.success("Se guardo correctamente");
           obtenerParticipantes();
@@ -1156,7 +1157,7 @@ export default function Participante() {
       id_tipo_per: 2,
     };
     axios
-      .post("http://localhost:8000/api/guardar-coach", datosGuardar)
+      .get(`${URL_API}/guardar-coach`, datosGuardar)
       .then((response) => {
         message.success("El entrenador se registró correctamente");
         setNombreEntrenador(values.NOMBRE_ENTRENADOR);
@@ -1197,7 +1198,7 @@ export default function Participante() {
     const duplicado = validarDuplicadoCIEntrenador(values);
     if (duplicado === false) {
       axios
-        .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
+        .get(`${URL_API}/enviar-codigo-verificacion`, datos)
         .then((response) => {
           setUuidEntrenador(response.data);
         })
