@@ -171,11 +171,7 @@ export default function Participante() {
     const datos = formatDatos(values);
     const duplicado = validarDuplicadoCI(values);
     const correoDuplicado = validarDuplicadoCorreo(values);
-    if (
-      duplicado === false ||
-      ciEncontrado === true
-    )
-    {
+    if (duplicado === false || ciEncontrado === true) {
       axios
         .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
         .then((response) => {
@@ -701,16 +697,8 @@ export default function Participante() {
   };
 
   //Modal para registro grupal
-  const handleCancelGrupal = () => {
-    form.resetFields();
-    setNombreEntrenador("");
-    setListaParticipante([]);
-    setListaID_Persona([]);
-    setVerModalGrupal(false);
-  };
 
   const showModalGrupal = (data) => {
-    duplicadoCiEvento();
     if (data.caracteristicas.Coach_obligatorio === 1) {
       setEstadoEntrenador(true);
     } else {
@@ -721,10 +709,6 @@ export default function Participante() {
 
   const aniadirPArticipante = () => {
     aniadirParticipante();
-  };
-
-  const handleCancelBuscador = () => {
-    setBuscarParticipante(false);
   };
 
   //Guardar datos del formulario grupal
@@ -743,7 +727,7 @@ export default function Participante() {
         console.error(error);
       });
   };
-  
+
   const duplicadoCiEvento = () => {
     axios
       .get(`http://localhost:8000/api/inscritos-evento/${idEVENTO}`)
@@ -758,15 +742,19 @@ export default function Participante() {
   const [respon, setRespon] = useState();
 
   const datosGrupal = (values) => {
-    if (entrenadorForm.id_persona) {
-      setRespon(entrenadorForm.id_persona);
+    if (entrenadorForm.length === 0) {
+      setRespon();
     } else {
-      setRespon(participanteForm1.id_persona);
+      if (entrenadorForm.id_persona) {
+        setRespon(entrenadorForm.id_persona);
+      } else {
+        setRespon(participanteForm1.id_persona);
+      }
     }
 
     const datos = {
       nombre_equipo: values.EQUIPO,
-      coach: entrenadorForm.id_persona, // este es el id_rol_persona que obtienes de la lista de coachs
+      coach: respon, // este es el id_rol_persona que obtienes de la lista de coachs
       responsable: respon, // Este el id_persona, ya sea de coach o participante
       participantes: listaID_Persona, // id_persona de los participantes
       id_institucion: values.INSTITUCION,
@@ -828,12 +816,13 @@ export default function Participante() {
                       "El equipo se registró correctamente al evento"
                     );
                     formGrupal.resetFields();
-                    setEntrenadorForm(null);
+                    setEntrenadorForm([]);
                     setListaParticipante([]);
                     setAlerta(null);
                     setAlertaParticipante1(null);
                     setBusquedaParticipante1("");
                     setBusqueda("");
+                    setRespon();
                   })
                   .catch((error) => {
                     if (error.response) {
@@ -892,7 +881,7 @@ export default function Participante() {
                     "El equipo se registró correctamente al evento"
                   );
                   formGrupal.resetFields();
-                  setEntrenadorForm(null);
+                  setEntrenadorForm([]);
                   setListaParticipante([]);
                   setAlerta(null);
                   setAlertaParticipante1(null);
@@ -934,6 +923,7 @@ export default function Participante() {
       .then((response) => {
         console.log(response.data);
         setDataInscritos(response.data);
+        setListaParticipantesEvento(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -1042,35 +1032,6 @@ export default function Participante() {
       });
   };
 
-  //Añadir entrenador en el input
-  const aniadirEntrenador = () => {
-    const regex = /^[0-9]+$/;
-
-    if (!searchEntrenador || searchEntrenador.trim() === "") {
-      message.error("Tiene que ingresar el CI del entrenador");
-    } else if (!regex.test(searchEntrenador)) {
-      message.error("El CI del entrenador debe contener solo números");
-    } else {
-      setNombreEntrenador(datoFiltradoEntrenador[0].nombre);
-      console.log(
-        "el id del entrenador ",
-        datoFiltradoEntrenador[0].id_persona
-      );
-      setBuscarEntrenador(false);
-      setSearchEntrenador("");
-      message.success("Se agregó al entrenador");
-    }
-  };
-
-  //
-  const validarEntrenador = (rule, value, callback) => {
-    // Realiza la validación personalizada aquí
-    if (!nombreEntrenador === true) {
-      callback("Por favor, añada un entrenador");
-    } else {
-    }
-  };
-
   //Registro nuevo participante
   const [verModalParticipanteNuevo, setVerModalParticipanteNuevo] =
     useState(false);
@@ -1080,12 +1041,6 @@ export default function Participante() {
     useState("");
   const [modalVerificarCodigoEntrenador, setModalVerificarCodigoEntrenador] =
     useState(false);
-
-  const datosParticipanteRegistro = (values) => {
-    const datos = {
-      nombre: values.Nombre,
-    };
-  };
 
   const handleAbrirModalParticipanteNuevo = () => {
     setVerModalParticipanteNuevo(true);
@@ -1225,7 +1180,7 @@ export default function Participante() {
     return datos;
   };
 
-  const validarDuplicadoCIEntreandor = (values) => {
+  const validarDuplicadoCIEntrenador = (values) => {
     const carnet = values.CI_ENTRENADOR;
     let resultado = false;
     for (let i = 0; i < entrenador.length; i++) {
@@ -1237,21 +1192,9 @@ export default function Participante() {
     return resultado;
   };
 
-  const validarDuplicadoCorreoEntrenador = (values) => {
-    const carnet = values.CORREO_ENTRENADOR;
-    let resultado = false;
-    for (let i = 0; i < entrenador.length; i++) {
-      if (entrenador[i].correo_electronico === carnet) {
-        resultado = true;
-        break;
-      }
-    }
-    return resultado;
-  };
-
   const showModalCodigoEntrenador = (values) => {
     const datos = formatoDatos(values);
-    const duplicado = validarDuplicadoCIEntreandor(values);
+    const duplicado = validarDuplicadoCIEntrenador(values);
     if (duplicado === false) {
       axios
         .post("http://localhost:8000/api/enviar-codigo-verificacion", datos)
@@ -1266,18 +1209,14 @@ export default function Participante() {
       message.error("El CI ya se encuentra registrado");
     }
   };
+
   const showModalidadEvento = (tipo, data) => {
-    console.log("El tipo es ", data);
-    console.log(
-      "cantidad de participantes ",
-      data.caracteristicas.Cantidad_integrantes
-    );
     obtenerParticipantesEvento(data.id_evento);
-    console.log("IDEVENTO SHOW MODAL  ", data.id_evento);
     setTamanioListaParticipantes(data.caracteristicas.Cantidad_integrantes);
     if (tipo === "Individual") {
       showModalTipoParticipante();
     } else {
+      obtenerParticipantesEvento(data.id_evento);
       showModalGrupal(data);
     }
   };
@@ -1296,12 +1235,6 @@ export default function Participante() {
         link.remove();
       })
       .catch((error) => console.error("Error durante la descarga:", error));
-  };
-
-  const [selectedCi, setSelectedCi] = useState(null);
-
-  const handleCiChange = (value) => {
-    setSelectedCi(value);
   };
 
   const modalNuevoEntrenador = () => {
@@ -1336,7 +1269,7 @@ export default function Participante() {
         type: "success",
         message: `${entrenadorEncontrado.nombre}`,
       });
-      formGrupal.setFieldValue("ENTRENADOR",entrenadorEncontrado)
+      formGrupal.setFieldValue("ENTRENADOR", entrenadorEncontrado);
       setEntrenadorForm(entrenadorEncontrado);
     } else {
       setAlerta({
@@ -1349,14 +1282,6 @@ export default function Participante() {
   const [busquedaParticipante1, setBusquedaParticipante1] = useState("");
   const [alertaParticipante1, setAlertaParticipante1] = useState(null);
   const [participanteForm1, setParticipanteForm1] = useState(null);
-
-  const [busquedaParticipante2, setBusquedaParticipante2] = useState("");
-  const [alertaParticipante2, setAlertaParticipante2] = useState(null);
-  const [participanteForm2, setParticipanteForm2] = useState(null);
-
-  const [busquedaParticipante3, setBusquedaParticipante3] = useState("");
-  const [alertaParticipante3, setAlertaParticipante3] = useState(null);
-  const [participanteForm3, setParticipanteForm3] = useState(null);
 
   const handleInputChangeParticipante = (
     event,

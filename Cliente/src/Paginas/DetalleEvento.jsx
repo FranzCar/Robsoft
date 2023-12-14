@@ -79,6 +79,15 @@ export default function DetalleEvento() {
   const [listaFacilitadores, setListaFacilitadores] = useState([]);
   const [estadoEntrenador, setEstadoEntrenador] = useState(false);
   const [tituloEvento, setTituloEvento] = useState(null);
+
+
+   //Obtener datos de la base de datos
+   useEffect(() => {
+    obtenerDatos();
+    obtenerListaUbicaciones();
+    obtenerListaFacilitadores();
+  }, []);
+  
   //Kevin
   const [form2] = Form.useForm();
   //Solo permitir numeros en los input
@@ -239,12 +248,6 @@ export default function DetalleEvento() {
     </div>
   );
 
-  //Obtener datos de la base de datos
-  useEffect(() => {
-    obtenerDatos();
-    obtenerListaUbicaciones();
-    obtenerListaFacilitadores();
-  }, []);
 
   const obtenerDatos = () => {
     axios

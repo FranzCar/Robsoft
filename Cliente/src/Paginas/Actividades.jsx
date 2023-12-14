@@ -183,6 +183,7 @@ export default function Actividades() {
           setMostrarUbicacion(false);
           setEstadoHoraInicio(false);
           setEstadoHoraFin(false);
+          obtenerDatos()
         })
         .catch((error) => {
           console.log(error);

@@ -13,25 +13,15 @@ import DetalleEvento from "./Paginas/DetalleEvento";
 import Actividades from "./Paginas/Actividades";
 import { Route, Routes } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Input,
-  Layout,
-  Form,
-  message,
-  Tabs,
-  Table,
-  Checkbox,
-} from "antd";
-import Column from "antd/es/table/Column";
+import { Button, Input, Layout, Form, message } from "antd";
+import axios from "axios";
 
 const { Header, Footer, Content } = Layout;
-const { TabPane } = Tabs;
 
 function App() {
   const [form] = Form.useForm();
-  const [mostrarHome, setMostrarHome] = useState("");
-  const [mostrarLogin, setMostrarLogin] = useState("");
+  const [mostrarHome, setMostrarHome] = useState(true);
+  const [mostrarLogin, setMostrarLogin] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState("");
   //Valores para mostrar las opciones del menu q se requiere
   const [mostrarInscripciones, setMostrarIncripciones] = useState("");
@@ -51,170 +41,45 @@ function App() {
   const estadoAdministrador = localStorage.getItem("administrador");
   const estadoCerrarSesion = localStorage.getItem("cerrarSesion");
 
-  useEffect(() => {
-    console.log("usuario: ", usuario);
-    console.log("sesion: ", estadoCerrarSesion);
-    console.log("inscripciones", estadoInscripcion);
-    // sesionIniciado();
-    menuInscripciones();
-    menuGestionEventos();
-    menuCerrarSesion();
-  }, []);
+  useEffect(() => {}, []);
 
-  const menuCerrarSesion = () => {
-    if (estadoCerrarSesion === "true") {
-      setMostrarHome(estadoCerrarSesion);
-      setMostrarAdministrador(estadoAdministrador);
-      setMostrarGestionEventos(!estadoCerrarSesion);
-      setMostrarIncripciones(!estadoCerrarSesion);
-      setMostrarListaEventos(!estadoCerrarSesion);
-      setMostrarLogin(!estadoCerrarSesion);
-      setMostrarReportes(!estadoCerrarSesion);
-      setMostrarIncripciones(!estadoCerrarSesion);
-    }
-    setMostrarAdministrador(estadoAdministrador);
-  };
-
-  const menuInscripciones = () => {
-    setMostrarHome(estadoInscripcion);
-    setMostrarLogin(!estadoInscripcion);
-    setMostrarIncripciones(estadoInscripcion);
-    setMostrarGestionEventos(!estadoInscripcion);
-  };
-
-  const menuGestionEventos = () => {
-    setMostrarGestionEventos(estadoGestionEventos);
-    setMostrarHome(estadoGestionEventos);
-    setMostrarLogin(!estadoGestionEventos);
-    setMostrarAdministrador(estadoGestionEventos);
-  };
-
-  // const sesionIniciado = () => {
-  //   console.log("iniciado ", iniciado);
-  //   switch (iniciado) {
-  //     case null:
-  //       setMostrarMenu(false);
-  //       setMostrarHome(true);
-  //       setMostrarLogin(false);
-  //       setMostrarAdministrador(false);
-  //       setNombreUsuario("");
-  //       break;
-  //     case "false":
-  //       setMostrarMenu(false);
-  //       setMostrarHome(true);
-  //       setMostrarLogin(false);
-  //       setMostrarAdministrador(false);
-  //       setNombreUsuario("");
-  //       break;
-  //     case "login":
-  //       setMostrarMenu(false);
-  //       setMostrarHome(false);
-  //       setMostrarLogin(true);
-  //       setMostrarAdministrador(false);
-  //       break;
-  //     case "root":
-  //       setMostrarHome(true);
-  //       setMostrarLogin(false);
-  //       setMostrarAdministrador(true);
-  //       break;
-  //     case "otro":
-  //       setMostrarMenu(true);
-  //       setMostrarHome(true);
-  //       setMostrarLogin(false);
-  //       setMostrarAdministrador(false);
-  //       break;
-  //     case "cerrarLogin":
-  //       setMostrarHome(true);
-  //       setMostrarLogin(false);
-  //       break;
-  //     default:
-  //       message.error("Error de designacion de roles");
-  //   }
-  // };
-
-  const handleLoginClick = (valor) => {
-    // Maneja la lógica relacionada con el clic en "Mostrar Login"
-    console.log("Se hizo clic en Mostrar Login. Valor recibido:", valor);
-    setMostrarGestionEventos(!valor);
-    setMostrarHome(!valor);
-    setMostrarLogin(valor);
-    setMostrarAdministrador(false);
-    localStorage.setItem("sesion", "login");
-  };
-
+  //Validar usuario y contraseña
   const validarUsuario = (values) => {
-    console.log("values usuario ", values);
-    if (values.usuario === "root" && values.password === "root") {
-      setMostrarGestionEventos(true);
-      setMostrarHome(true);
-      setMostrarLogin(false);
-      setMostrarAdministrador(true);
-      setMostrarReportes(true);
-      setNombreUsuario(values.usuario);
-      localStorage.setItem("usuario", values.usuario);
-      localStorage.setItem("sesion", "root");
-      form.resetFields();
-    } else if (
-      values.usuario === "humberto" &&
-      values.password === "humberto"
-    ) {
-      setMostrarHome(true);
-      setMostrarLogin(false);
-      setMostrarIncripciones(true);
-      setMostrarAdministrador(false);
-      setMostrarGestionEventos(false);
-      setNombreUsuario(values.usuario);
-      localStorage.setItem("usuario", values.usuario);
-      localStorage.setItem("cerrarSesion", false);
-      localStorage.setItem("inscripciones", true);
-      form.resetFields();
-    } else if (values.usuario === "nuevo" && values.password === "nuevo") {
-      // si tarea es igual a getion de eventos
-      setMostrarHome(true);
-      setMostrarAdministrador(true);
-      setMostrarIncripciones(true);
-      setMostrarGestionEventos(true);
-      setMostrarLogin(false);
-      localStorage.setItem("inscripciones", true);
-      localStorage.setItem("cerrarSesion", false);
-      localStorage.setItem("usuario", values.usuario);
-    } else {
-      message.error("El nombre de usuario o contraseña son incorrectos");
-    }
+    console.log("usuario: ", values);
+    const datos = {
+      username: values.usuario,
+      password: values.password,
+    };
+    console.log("enviar los datos ", datos);
+    axios
+      .post("http://localhost:8000/api/login-usuario", datos)
+      .then((response) => {
+        message.success(response.data.message);
+        setMostrarHome(true)
+        setMostrarLogin(false)
+        setNombreUsuario(datos.username)
+        form.resetFields()
+      })
+      .catch((error) => {
+        message.error(error.response.data.message);
+      });
   };
 
-  const cerrarSesion = (valor) => {
-    console.log("cerramos sesion");
-
-    setMostrarHome(true);
-    setMostrarGestionEventos(false);
-    setMostrarAdministrador(false);
-    setMostrarIncripciones(false);
-    setNombreUsuario("");
-    localStorage.setItem("sesion", false);
-    localStorage.setItem("usuario", "");
-    localStorage.setItem("inscripciones", false);
-    localStorage.setItem("gestionEventos", false);
-    localStorage.setItem("administrador", false);
-    localStorage.setItem("cerrarSesion", true);
-  };
-
+  //Salir de la vista de inicio de sesion
   const cerrarLogin = () => {
-    if (usuario === "root") {
-      setMostrarGestionEventos(true);
-      setMostrarHome(true);
-      setMostrarLogin(false);
-      setMostrarAdministrador(true);
-      localStorage.setItem("sesion", "root");
-      form.resetFields();
-    } else {
-      //buscamos si usuario === lista de usuarios, obtener las tareas que tienq e ir asignando, administrador
-      //tareas gestionar eventos = true, administrador = true
-    }
-    setMostrarHome(true);
     setMostrarLogin(false);
-    localStorage.setItem("sesion", "cerrarLogin");
+    setMostrarHome(true);
   };
+
+  // valores q se manda desde botones
+  const handleLoginClick = (valor) => {
+    console.log("el valor q pasa botones ", valor);
+    setMostrarLogin(valor);
+    setMostrarHome(!valor);
+  };
+
+  //
+  const cerrarSesion = () => {};
 
   return (
     <div>
@@ -239,7 +104,7 @@ function App() {
               <BotonesHeader
                 onLoginClick={handleLoginClick}
                 onClickCerrar={cerrarSesion}
-                usuario={usuario}
+                usuario={nombreUsuario}
               />
             </div>
 

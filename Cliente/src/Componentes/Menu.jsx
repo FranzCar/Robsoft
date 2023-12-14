@@ -72,7 +72,6 @@ export default function Menu() {
     obtenerListaUsuarios();
     ontenerListaRoles();
     obtenerRolesConTareas();
-    asignarTareas();
   }, []);
 
   //Obtenemos las listas de las bases de datos
@@ -106,6 +105,11 @@ export default function Menu() {
       .then((response) => {
         console.log("Las tareas de los roles son", response.data);
         setListaRolesTareas(response.data);
+        asignarTareaIncripciones(response.data);
+        asignarTareaEventos(response.data);
+        asignarTareaGestion(response.data);
+        asignarTareaReportes(response.data);
+        asignarTareaAdministracion(response.data);
       })
       .catch((error) => {
         console.log(error);
@@ -114,52 +118,45 @@ export default function Menu() {
 
   //Asignamos las tareas a sus listas correspondientes
 
-  const asignarTareaIncripciones = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => ({
+  const asignarTareaIncripciones = (lista) => {
+    console.log("se asignan las tareas de incripciones", lista);
+    const nuevaLista = lista.map((rol) => ({
       asignado: rol.tareas.some((tarea) => tarea.id_tarea === 1),
     }));
 
     setListaTareaIncripciones(nuevaLista);
   };
 
-  const asignarTareaEventos = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => ({
+  const asignarTareaEventos = (lista) => {
+    const nuevaLista = lista.map((rol) => ({
       asignado: rol.tareas.some((tarea) => tarea.id_tarea === 2),
     }));
 
     setListaTareaEventos(nuevaLista);
   };
 
-  const asignarTareaGestion = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => ({
+  const asignarTareaGestion = (lista) => {
+    const nuevaLista = lista.map((rol) => ({
       asignado: rol.tareas.some((tarea) => tarea.id_tarea === 3),
     }));
 
     setListaTareaGestion(nuevaLista);
   };
 
-  const asignarTareaReportes = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => ({
+  const asignarTareaReportes = (lista) => {
+    const nuevaLista = lista.map((rol) => ({
       asignado: rol.tareas.some((tarea) => tarea.id_tarea === 4),
     }));
 
     setListaTareaReportes(nuevaLista);
   };
 
-  const asignarTareaAdministracion = () => {
-    const nuevaLista = listaRolesTareas.map((rol) => ({
+  const asignarTareaAdministracion = (lista) => {
+    const nuevaLista = lista.map((rol) => ({
       asignado: rol.tareas.some((tarea) => tarea.id_tarea === 5),
     }));
 
     setListaTareaAdministracion(nuevaLista);
-  };
-
-  const asignarTareas = () => {
-    asignarTareaIncripciones();
-    asignarTareaEventos();
-    asignarTareaGestion();
-    asignarTareaReportes();
-    asignarTareaAdministracion();
   };
 
   const combinarListas = () => {
@@ -228,22 +225,8 @@ export default function Menu() {
   };
 
   const mostrarTareas = () => {
-    // Al abrir el modal, se asignan los valores de las tareas a sus respectivas listas
-    asignarTareas();
-
-    // Se combina la lista después de asignar las tareas
     combinarListas();
-
-    // Se imprime la lista combinada en la consola para propósitos de depuración
-    console.log("lista combinada ", listaCombinada);
-
-    // Si la lista combinada tiene una longitud igual a 0, se vuelve a llamar a la función combinarListas
-    if (listaCombinada.length === 0) {
-      combinarListas();
-    } else {
-      // Si la lista combinada no es igual a 0, se establece mostrarModalTareas en true
-      setMostrarModalTareas(true);
-    }
+    setMostrarModalTareas(true);
   };
 
   const onCancelTareas = () => {
@@ -464,19 +447,24 @@ export default function Menu() {
         id = 1;
       }
     }
-    axios
-      .post("http://localhost:8000/api/roles-actualizar-tareas", datos)
-      .then((response) => {
-        message.success("Las tareas han sido modificadas correctamente");
-        obtenerRolesConTareas();
-        setListaCombinada([]);
-
-        setMostrarModalTareas(false);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
     console.log("Datos guardados:", datos);
+   
+    if (datos.length !== 7) {
+      message.error("Cada rol debe tener por lomenos una tarea");
+    } else {
+      axios
+        .post("http://localhost:8000/api/roles-actualizar-tareas", datos)
+        .then((response) => {
+          message.success("Las tareas han sido modificadas correctamente");
+          obtenerRolesConTareas();
+          setListaCombinada([]);
+
+          setMostrarModalTareas(false);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   };
 
   const handleCheckChangeInscripciones = (index, isChecked, columna) => {
@@ -583,6 +571,10 @@ export default function Menu() {
         title="Asignar roles"
         open={mostrarModalRoles}
         onCancel={showCancelRoles}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
+        pagination={false}
         footer={[
           <Form form={formRoles} onFinish={showConfirmRoles}>
             <Button onClick={showCancelRoles}>Cancelar</Button>
@@ -615,9 +607,6 @@ export default function Menu() {
           <Table
             dataSource={listaRoles}
             scroll={{ y: 220 }}
-            maskClosable={false}
-            keyboard={false}
-            closable={false}
             pagination={false}
             centered
             locale={{
@@ -650,6 +639,10 @@ export default function Menu() {
         open={mostrarModalTareas}
         onCancel={showCancelTareas}
         width={1000}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
+        pagination={false}
         footer={[
           <Form form={formRoles} onFinish={showConfirmTareas}>
             <Button onClick={showCancelTareas}>Cancelar</Button>
@@ -684,11 +677,15 @@ export default function Menu() {
                 render={(text, record, index) => (
                   <Checkbox
                     checked={
-                      listaCombinada[0]?.asignados[index]?.asignado || false
+                      index === 0 ||
+                      listaCombinada[0]?.asignados[index]?.asignado ||
+                      false
                     }
                     onChange={(e) =>
+                      index !== 0 &&
                       handleCheckChangeInscripciones(index, e.target.checked, 0)
                     }
+                    disabled={index === 0}
                   />
                 )}
               />
@@ -703,6 +700,7 @@ export default function Menu() {
                     onChange={(e) =>
                       handleCheckChangeInscripciones(index, e.target.checked, 1)
                     }
+                    disabled={index === 0}
                   />
                 )}
               />
@@ -716,6 +714,7 @@ export default function Menu() {
                     onChange={(e) =>
                       handleCheckChangeInscripciones(index, e.target.checked, 2)
                     }
+                    disabled={index === 0}
                   />
                 )}
               />
@@ -729,6 +728,7 @@ export default function Menu() {
                     onChange={(e) =>
                       handleCheckChangeInscripciones(index, e.target.checked, 3)
                     }
+                    disabled={index === 0}
                   />
                 )}
               />
@@ -742,6 +742,7 @@ export default function Menu() {
                     onChange={(e) =>
                       handleCheckChangeInscripciones(index, e.target.checked, 4)
                     }
+                    disabled={index === 0}
                   />
                 )}
               />
