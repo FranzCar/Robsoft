@@ -103,6 +103,10 @@ export default function Reporte() {
         <Link onClick={seleccionarEvento}>Reportes de participantes</Link>,
         "5"
       ),
+      getItem(
+        <Link onClick={seleccionarEvento}>Reporte gráfico por genero</Link>,
+        "5"
+      ),
     ]),
   ];
 

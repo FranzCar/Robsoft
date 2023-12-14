@@ -121,7 +121,7 @@ export default function Participante() {
   const verificarCodigo = (values) => {
     const datos = datosUuid(values);
     axios
-      .get(`${URL_API}/confirmar-codigo-verificacion`, datos)
+      .post(`${URL_API}/confirmar-codigo-verificacion`, datos)
       .then((response) => {
         setEnviarCodigo(false);
         setVerificado(true);
@@ -174,7 +174,7 @@ export default function Participante() {
     const correoDuplicado = validarDuplicadoCorreo(values);
     if (duplicado === false || ciEncontrado === true) {
       axios
-        .get(`${URL_API}/enviar-codigo-verificacion`, datos)
+        .post(`${URL_API}/enviar-codigo-verificacion`, datos)
         .then((response) => {
           setUuid(response.data);
         })
@@ -580,7 +580,7 @@ export default function Participante() {
     const datos = datosParticipante(values);
     console.log("Se guarda los datos en la BD");
     axios
-      .get(`${URL_API}/guardar-participante`, datos)
+      .post(`${URL_API}/guardar-participante`, datos)
       .then((response) => {
         console.log("Datos guardados con éxito", response.data);
         const datosPer = {
@@ -589,7 +589,7 @@ export default function Participante() {
         };
         console.log("datos per . ", datosPer);
         axios
-          .get(`${URL_API}/inscribir-individual`, datosPer)
+          .post(`${URL_API}/inscribir-individual`, datosPer)
           .then((response) => {
             console.log("Datos guardados con éxito Evento", response.data);
             message.success(
@@ -872,7 +872,7 @@ export default function Participante() {
                 id_equipo: response.data.id_equipo,
               };
               axios
-                .get(`${URL_API}/inscribir-equipo`, datosEquipo)
+                .post(`${URL_API}/inscribir-equipo`, datosEquipo)
                 .then((response) => {
                   console.log(
                     "El grupo se registró correctamente con éxito al evento",

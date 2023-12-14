@@ -96,6 +96,6 @@ class UsuarioController extends Controller
             return response()->json(['message' => 'Contraseña incorrecta'], 401);
         }
 
-        return response()->json(['message' => 'Autenticación exitosa']);
+        return response()->json(['message' => 'Autenticación exitosa', 'id_usuario' => $user->id_usuario]);
     }
 }
