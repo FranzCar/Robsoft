@@ -794,7 +794,7 @@ export default function Participante() {
             message.error("Existe un equipo con el mismo nombre");
           } else {
             axios
-              .get(`${URL_API}/guardar-equipo`, datos)
+              .post(`${URL_API}/guardar-equipo`, datos)
               .then((response) => {
                 message.success("El grupo se registró correctamente");
                 obtenerGrupos();
