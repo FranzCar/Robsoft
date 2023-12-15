@@ -2,6 +2,15 @@ import "../App.css";
 import { URL_API } from "../Servicios/const.js";
 import React, { useState, useEffect } from "react";
 import {
+  PieChart,
+  Pie,
+  Sector,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
+import {
   AppstoreOutlined,
   MailOutlined,
   ExclamationCircleFilled,
@@ -45,15 +54,30 @@ export default function Reporte() {
   const [listaEventos, setListaEventos] = useState([]);
   const [listaParticipantes, setListaParticipantes] = useState([]);
 
+  const [tipoReporte, setTipoReporte] = useState(null);
+
+  const [modoVisualizacion, setModoVisualizacion] = useState("");
+
+  const [chartData, setChartData] = useState([]); // Este estado albergará los datos del gráfico
+
   useEffect(() => {
     obtenerEventosConIncritos();
     obtenerListaTipoEventos();
     obtenerListaUbicaciones();
   }, []);
 
-  const seleccionarEvento = () => {
+  const seleccionarEvento = (tipo) => {
+    setMostrarReportes(false);
+    // Limpiar el gráfico anterior si ya fue cargado
+    if (tipoReporte !== tipo) {
+      setChartData([]);
+    }
+
+    setTipoReporte(tipo);
+    setModoVisualizacion(tipo); // Actualiza el modo de visualización basado en el tipo seleccionado
     setModalEventos(true);
   };
+
   const handleOk = () => {
     setModalEventos(false);
   };
@@ -68,6 +92,41 @@ export default function Reporte() {
   const [mostrarParticipantes, setMostrarParticipantes] = useState(false);
   const [mostrarReportes, setMostrarReportes] = useState(false);
   const [listaReportes, setListaReportes] = useState([]);
+
+  // Colores para cada sección del gráfico
+  const COLORS = ["#0088FE", "#FFBB28", "#FF8042"];
+
+  // Renderizar etiquetas personalizadas
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    index,
+  }) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos((-midAngle * Math.PI) / 180);
+    const y = cy + radius * Math.sin((-midAngle * Math.PI) / 180);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
+  const cerrarModalYRestablecer = () => {
+    setModalEventos(false); // Esto cierra el modal de selección de eventos
+    form.resetFields(); // Esto limpia el formulario dentro del modal
+  };
 
   const openFormEvent = () => {
     setMostrarPatrocinadores(false);
@@ -100,12 +159,16 @@ export default function Reporte() {
     ]),
     getItem("Reporte de Eventos", "sub2", <AppstoreOutlined />, [
       getItem(
-        <Link onClick={seleccionarEvento}>Reportes de participantes</Link>,
+        <Link onClick={() => seleccionarEvento("participantes")}>
+          Reportes de participantes
+        </Link>,
         "5"
       ),
       getItem(
-        <Link onClick={seleccionarEvento}>Reporte gráfico por genero</Link>,
-        "5"
+        <Link onClick={() => seleccionarEvento("genero")}>
+          Reporte gráfico por género
+        </Link>,
+        "6"
       ),
     ]),
   ];
@@ -117,6 +180,10 @@ export default function Reporte() {
       setOpenKeys(keys);
     } else {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+      // Si cierras todos los submenús, asumimos que vas a cambiar de vista
+      // y limpiamos los datos del gráfico por si acaso
+      setChartData([]);
+      setModoVisualizacion(null); // o el estado por defecto que quieras para la visualización
     }
   };
 
@@ -155,22 +222,53 @@ export default function Reporte() {
     for (let i = 0; i < listaEventos.length; i++) {
       if (listaEventos[i].nombre_evento === nombre) {
         id_evento = listaEventos[i].id;
+        break;
       }
     }
+    if (!id_evento) {
+      console.error("No se encontró el evento");
+      // Aquí podrías manejar el error, por ejemplo, mostrando un mensaje al usuario
+      return;
+    }
+
     console.log("El id del evento es ", id_evento);
-    axios
-      .get(`${URL_API}/inscritos-evento/${id_evento}`)
-      .then((response) => {
-        setModalEventos(false);
-        form.resetFields();
-        setListaParticipantes(response.data);
-        console.log("los datos de los participantes son ", response);
-        setMostrarParticipantes(true);
-        setMostrarReportes(false);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+
+    if (tipoReporte === "participantes") {
+      // Carga el reporte de participantes
+      axios
+        .get(`${URL_API}/inscritos-evento/${id_evento}`)
+        .then((response) => {
+          setModalEventos(false);
+          form.resetFields();
+          setListaParticipantes(response.data);
+          console.log("los datos de los participantes son ", response);
+          setMostrarParticipantes(true);
+          setMostrarReportes(false);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      cerrarModalYRestablecer();
+    } else if (tipoReporte === "genero") {
+      // Aquí deberías obtener los datos para el reporte gráfico por género y luego mostrar el modal con el gráfico
+      axios
+        .get(`${URL_API}/participantes-por-genero/${id_evento}`)
+        .then((response) => {
+          // Transforma los datos para el gráfico
+          const datosGrafico = response.data.map((item) => ({
+            name: item.genero,
+            value: item.total,
+          }));
+          setChartData(datosGrafico);
+          cerrarModalYRestablecer();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+
+    // Restablecer el tipo de reporte para evitar comportamientos inesperados en futuras selecciones
+    setTipoReporte(null);
   };
   const obtenerEventosConIncritos = () => {
     axios
@@ -190,28 +288,27 @@ export default function Reporte() {
         console.error(error);
       });
   };
- const datosReporte = (values) => {
-  const fechaIni = values.FECHA_INICIO;
-  const NUEVAFECHAINI = fechaIni ? fechaIni.format("YYYY-MM-DD") : "";
-  const fechaFin = values.FECHA_FIN;
-  const NUEVAFECHAFIN = fechaFin ? fechaFin.format("YYYY-MM-DD") : "";
-  const datos = {
-    fecha_inicio: NUEVAFECHAINI,
-    fecha_fin: NUEVAFECHAFIN,
-    tipo_evento: values.TIPO_EVENTO || "",
-    modalidad: values.MODALIDAD || "",
-    participacion: values.PARTICIPACION || "",
-    publico: values.DIRIGIDO_A || "",
-    ubicacion: values.UBICACION || "",
-    entrenador_obligatorio: values.ENTRENADOR ? true : false,
-    incluye_organizadores: values.M2 ? 1 : 0,
-    incluye_patrocinadores: values.M1 ? 1 : 0,
-    incluye_ubicaciones: values.M3 ? 1 : 0,
+  const datosReporte = (values) => {
+    const fechaIni = values.FECHA_INICIO;
+    const NUEVAFECHAINI = fechaIni ? fechaIni.format("YYYY-MM-DD") : "";
+    const fechaFin = values.FECHA_FIN;
+    const NUEVAFECHAFIN = fechaFin ? fechaFin.format("YYYY-MM-DD") : "";
+    const datos = {
+      fecha_inicio: NUEVAFECHAINI,
+      fecha_fin: NUEVAFECHAFIN,
+      tipo_evento: values.TIPO_EVENTO || "",
+      modalidad: values.MODALIDAD || "",
+      participacion: values.PARTICIPACION || "",
+      publico: values.DIRIGIDO_A || "",
+      ubicacion: values.UBICACION || "",
+      entrenador_obligatorio: values.ENTRENADOR ? true : false,
+      incluye_organizadores: values.M2 ? 1 : 0,
+      incluye_patrocinadores: values.M1 ? 1 : 0,
+      incluye_ubicaciones: values.M3 ? 1 : 0,
+    };
+
+    return datos;
   };
-
-  return datos;
-};
-
 
   const onFinishFormEvent = (values) => {
     const datos = datosReporte(values);
@@ -269,6 +366,7 @@ export default function Reporte() {
   const [mostrarUbicaciones, setMostrarUbicaciones] = useState(false);
 
   return (
+    
     <div className="tabla-descripcion-editarEv">
       <p>REPORTES DE EVENTOS</p>
       <Row>
@@ -298,7 +396,7 @@ export default function Reporte() {
             background: "#ffffff",
           }}
         >
-          {mostrarParticipantes && (
+          {modoVisualizacion === "participantes" && (
             <Table
               scroll={{ y: 340 }}
               dataSource={listaParticipantes}
@@ -425,8 +523,44 @@ export default function Reporte() {
               )}
             </Table>
           )}
+          {modoVisualizacion === "genero" && (
+            <ResponsiveContainer width="100%" height={400}>
+              {" "}
+              {/* Ajusta el alto según sea necesario */}
+              <PieChart margin={{ top: 0, right: 30, left: 30, bottom: 0 }}>
+                <Pie
+                  data={chartData}
+                  cx="60%" // Ajusta la posición central del Pie en X
+                  cy="50%" // Ajusta la posición central del Pie en Y
+                  labelLine={false}
+                  label={renderCustomizedLabel}
+                  outerRadius={140} // Reduce el radio para hacer el Pie más pequeño
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend
+                  align="right" // Mantener a la derecha
+                  verticalAlign="middle" // Centrar verticalmente
+                  layout="vertical" // Los ítems de la leyenda se dispondrán verticalmente
+                  wrapperStyle={{
+                    paddingLeft: "00px", // Añadir espacio a la izquierda de la leyenda
+                    width: "30%", // Ajustar el ancho del contenedor de la leyenda si es necesario
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </Col>
       </Row>
+
       {/*Modal Formulario seleccionar evento, reporte participantes*/}
       <Modal
         title="Seleccionar un evento"

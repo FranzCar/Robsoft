@@ -69,3 +69,4 @@ Route::post('usuarios-actualizar-roles', [UsuarioController::class, 'asignarRole
 Route::get('tareas_de_usuario/{id}',[UsuarioController::class, 'obtenerTareasUsuario']);
 Route::get('roles_de_usuario/{id}',[UsuarioController::class, 'obtenerRolesUsuario']);
 Route::post('login-usuario', [UsuarioController::class,'login']);
+Route::get('participantes-por-genero/{id}', [EventoController::class, 'distribucionGenero']);

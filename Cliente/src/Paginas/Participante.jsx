@@ -146,7 +146,7 @@ export default function Participante() {
   const verificarCodigoEntrenador = (values) => {
     const datos = datosUuidEntrenador(values);
     axios
-      .get(`${URL_API}/confirmar-codigo-verificacion`, datos)
+      .post(`${URL_API}/confirmar-codigo-verificacion`, datos)
       .then((response) => {
         setModalVerificarCodigoEntrenador(false);
         setEstadoRegistroEntrenador(true);
@@ -862,7 +862,7 @@ export default function Participante() {
           message.error("Existe un equipo con el mismo nombre");
         } else {
           axios
-            .get(`${URL_API}/guardar-equipo`, datos)
+            .post(`${URL_API}/guardar-equipo`, datos)
             .then((response) => {
               message.success("El grupo se registró correctamente");
               obtenerGrupos();
@@ -1088,7 +1088,7 @@ export default function Participante() {
       ciEncontrado === true
     ) {
       axios
-        .get(`${URL_API}/guardar-participante`, datos)
+        .post(`${URL_API}/guardar-participante`, datos)
         .then((response) => {
           message.success("Se guardo correctamente");
           obtenerParticipantes();
@@ -1157,7 +1157,7 @@ export default function Participante() {
       id_tipo_per: 2,
     };
     axios
-      .get(`${URL_API}/guardar-coach`, datosGuardar)
+      .post(`${URL_API}/guardar-coach`, datosGuardar)
       .then((response) => {
         message.success("El entrenador se registró correctamente");
         setNombreEntrenador(values.NOMBRE_ENTRENADOR);
@@ -1198,7 +1198,7 @@ export default function Participante() {
     const duplicado = validarDuplicadoCIEntrenador(values);
     if (duplicado === false) {
       axios
-        .get(`${URL_API}/enviar-codigo-verificacion`, datos)
+        .post(`${URL_API}/enviar-codigo-verificacion`, datos)
         .then((response) => {
           setUuidEntrenador(response.data);
         })

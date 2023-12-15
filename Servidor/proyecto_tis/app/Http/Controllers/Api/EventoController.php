@@ -776,5 +776,28 @@ private function eliminarCodigosVerificacion($evento)
     return response()->json($reporte);
 }
 
+public function distribucionGenero($idEvento)
+{
+    $evento = Evento::find($idEvento);
+
+    if (!$evento) {
+        return response()->json(['error' => 'Evento no encontrado'], 404);
+    }
+
+    $distribucionGenero = DB::table('persona')
+        ->join('rol_persona', 'persona.id_persona', '=', 'rol_persona.id_persona')
+        ->join('roles', 'rol_persona.id_roles', '=', 'roles.id_roles')
+        ->join('inscripcion', 'rol_persona.id_rol_persona', '=', 'inscripcion.id_rol_persona')
+        ->join('evento', 'inscripcion.id_evento', '=', 'evento.id_evento')
+        ->where('evento.id_evento', $idEvento)
+        ->where('roles.id_roles', 6) // Filtrar solo participantes
+        ->select('persona.genero', DB::raw('count(*) as total'))
+        ->groupBy('persona.genero')
+        ->get();
+
+    return response()->json($distribucionGenero);
+}
+
+
 }
 
