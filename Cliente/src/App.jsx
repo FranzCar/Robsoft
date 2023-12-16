@@ -14,6 +14,7 @@ import Actividades from "./Paginas/Actividades";
 import { Route, Routes } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { Button, Input, Layout, Form, message } from "antd";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import axios from "axios";
 
 const { Header, Footer, Content } = Layout;
@@ -24,10 +25,10 @@ function App() {
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState("");
   //Valores para mostrar las opciones del menu q se requiere
-  const [mostrarInscripciones, setMostrarIncripciones] = useState("");
-  const [mostrarListaEventos, setMostrarListaEventos] = useState("");
+  const [mostrarInscripciones, setMostrarIncripciones] = useState(true);
+  const [mostrarListaEventos, setMostrarListaEventos] = useState(false);
   const [mostrarGestionEventos, setMostrarGestionEventos] = useState(false);
-  const [mostrarReportes, setMostrarReportes] = useState("");
+  const [mostrarReportes, setMostrarReportes] = useState(false);
   const [mostrarAdministrador, setMostrarAdministrador] = useState(false);
 
   const iniciado = localStorage.getItem("sesion");
@@ -41,28 +42,64 @@ function App() {
   const estadoAdministrador = localStorage.getItem("administrador");
   const estadoCerrarSesion = localStorage.getItem("cerrarSesion");
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    
+  }, []);
 
   //Validar usuario y contraseña
   const validarUsuario = (values) => {
-    console.log("usuario: ", values);
     const datos = {
       username: values.usuario,
       password: values.password,
     };
-    console.log("enviar los datos ", datos);
     axios
       .post("http://localhost:8000/api/login-usuario", datos)
       .then((response) => {
+        //Asignamos el id del usuario para obtener las tareas que tiene
+        axios
+          .get(
+            `http://localhost:8000/api/tareas_de_usuario/${response.data.id_usuario}`
+          )
+          .then((response) => {
+            asignarTareas(response.data);
+            setMostrarHome(true);
+            setMostrarLogin(false);
+            setNombreUsuario(datos.username);
+            if (datos.username === "root") {
+              localStorage.setItem("administrador", true);
+            }
+            form.resetFields();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
         message.success(response.data.message);
-        setMostrarHome(true)
-        setMostrarLogin(false)
-        setNombreUsuario(datos.username)
-        form.resetFields()
       })
       .catch((error) => {
         message.error(error.response.data.message);
       });
+  };
+
+  const asignarTareas = (lista) => {
+    for (let i = 0; i < lista.length; i++) {
+      switch (lista[i].id_tarea) {
+        case 1:
+          setMostrarIncripciones(lista[i].asignado);
+          break;
+        case 2:
+          setMostrarListaEventos(lista[i].asignado);
+          break;
+        case 3:
+          setMostrarGestionEventos(lista[i].asignado);
+          break;
+        case 4:
+          setMostrarReportes(lista[i].asignado);
+          break;
+        case 5:
+          setMostrarAdministrador(lista[i].asignado);
+          break;
+      }
+    }
   };
 
   //Salir de la vista de inicio de sesion
@@ -79,21 +116,35 @@ function App() {
   };
 
   //
-  const cerrarSesion = () => {};
+  const cerrarSesion = () => {
+    setNombreUsuario("");
+    setMostrarIncripciones(true);
+    setMostrarListaEventos(false);
+    setMostrarGestionEventos(false);
+    setMostrarReportes(false);
+    setMostrarAdministrador(false);
+    window.location.reload();
+  };
 
   return (
     <div>
       {mostrarLogin && (
-        <Content>
-          <Form form={form} onFinish={validarUsuario}>
+        <Content className="login">
+          <Form
+            form={form}
+            onFinish={validarUsuario}
+            className="formulario-login"
+          >
             <Form.Item name="usuario">
-              <Input placeholder="Nombre de usuario" />
+              <Input placeholder="Ingrese el nombre de usuario" />
             </Form.Item>
             <Form.Item name="password">
-              <Input placeholder="Contraseña" />
+              <Input.Password placeholder="Ingrese la contraseña" />
             </Form.Item>
             <Button htmlType="submit">Ingresar</Button>
-            <Button onClick={cerrarLogin}>Salir</Button>
+            <Button className="boton-salir-login" onClick={cerrarLogin}>
+              Salir
+            </Button>
           </Form>
         </Content>
       )}
@@ -110,25 +161,43 @@ function App() {
 
             <Logos />
 
-            <Menu administrador={estadoAdministrador} />
+            <Menu
+              inicio={true}
+              inscripciones={mostrarInscripciones}
+              listaEventos={mostrarListaEventos}
+              gestionEventos={mostrarGestionEventos}
+              reportes={mostrarReportes}
+              administrador={mostrarAdministrador}
+            />
           </Header>
           <Content className="content">
             <Routes>
               <Route path="/" element={<Inicio />} />
-
-              <Route path="/Participante" element={<Participante />} />
-
-              <Route path="/evento" element={<Evento />} />
-
-              <Route path="/crearEvento" element={<CrearEvento />} />
-              <Route path="/eliminarEvento" element={<EliminarEvento />} />
-              <Route path="/editarEvento" element={<EditarEvento />} />
-              <Route path="/detalleEvento" element={<DetalleEvento />} />
-              <Route path="/actividades" element={<Actividades />} />
-              <Route path="/Reporte" element={<Reporte />} />
-
-              <Route path="/Reporte" element={<Reporte />} />
             </Routes>
+            {mostrarInscripciones && (
+              <Routes>
+                <Route path="/Participante" element={<Participante />} />
+              </Routes>
+            )}
+            {mostrarListaEventos && (
+              <Routes>
+                <Route path="/evento" element={<Evento />} />
+              </Routes>
+            )}
+            {mostrarGestionEventos && (
+              <Routes>
+                <Route path="/crearEvento" element={<CrearEvento />} />
+                <Route path="/eliminarEvento" element={<EliminarEvento />} />
+                <Route path="/editarEvento" element={<EditarEvento />} />
+                <Route path="/detalleEvento" element={<DetalleEvento />} />
+                <Route path="/actividades" element={<Actividades />} />
+              </Routes>
+            )}
+            {mostrarReportes && (
+              <Routes>
+                <Route path="/Reporte" element={<Reporte />} />
+              </Routes>
+            )}
           </Content>
 
           <Footer className="footer">Universidad Mayor de San Simon</Footer>

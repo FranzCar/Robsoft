@@ -7,15 +7,18 @@ import {
   Form,
   Table,
   Input,
-  Select,
   Checkbox,
   Alert,
   Button,
   message,
+  Tooltip,
+  Space,
 } from "antd";
-import { SettingOutlined, ExclamationCircleFilled } from "@ant-design/icons";
+import {
+  ExclamationCircleFilled,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { Content } from "antd/es/layout/layout";
 import axios from "axios";
 
 const { Column } = Table;
@@ -44,9 +47,15 @@ const items = [
   },
 ];
 
-export default function Menu() {
+export default function Menu({
+  inicio,
+  inscripciones,
+  listaEventos,
+  gestionEventos,
+  reportes,
+  administrador,
+}) {
   const location = useLocation();
-  const administrador = true;
   const [formRoles] = Form.useForm();
   const [claseBotones, setClaseBotones] = useState("");
   const [mostrarModalRoles, setMostrarRoles] = useState(false);
@@ -68,7 +77,7 @@ export default function Menu() {
   const [listaCombinada, setListaCombinada] = useState([]);
 
   useEffect(() => {
-    verificarAdministrador();
+    mostrarMenu();
     obtenerListaUsuarios();
     ontenerListaRoles();
     obtenerRolesConTareas();
@@ -79,7 +88,6 @@ export default function Menu() {
     axios
       .get(`${URL_API}/lista-usuarios`)
       .then((response) => {
-        console.log("Los usuarios son ", response.data);
         setListaUsuarios(response.data);
       })
       .catch((error) => {
@@ -91,7 +99,6 @@ export default function Menu() {
     axios
       .get(`${URL_API}/lista-roles`)
       .then((response) => {
-        console.log("Los roles son ", response.data);
         setListaRoles(response.data);
       })
       .catch((error) => {
@@ -103,7 +110,6 @@ export default function Menu() {
     axios
       .get(`${URL_API}/lista-roles-tareas`)
       .then((response) => {
-        console.log("Las tareas de los roles son", response.data);
         setListaRolesTareas(response.data);
         asignarTareaIncripciones(response.data);
         asignarTareaEventos(response.data);
@@ -245,11 +251,32 @@ export default function Menu() {
   ];
 
   const verificarAdministrador = () => {
-    if (administrador) {
+    console.log("el valor de administrador es ", administrador);
+    if (administrador === true) {
       setClaseBotones("botones-inicio-con-administrador");
     } else {
       setClaseBotones("botones-inicio-sin-administrador");
     }
+  };
+
+  const mostrarMenu = () => {
+    let contador = 0;
+    const listaPrivilegios = [
+      { valor: inicio },
+      { valor: inscripciones },
+      { valor: listaEventos },
+      { valor: gestionEventos },
+      { valor: reportes },
+      { valor: administrador },
+    ];
+    for (let i = 0; i < listaPrivilegios.length; i++) {
+      if (listaPrivilegios[i].valor === true) {
+        contador++;
+      }
+    }
+    console.log("el contador es ", contador);
+    setClaseBotones(`botones-menu-columnas-${contador}`);
+    return contador;
   };
 
   const handleBuscarUsuario = (usuario, setAlertaUsuario) => {
@@ -265,9 +292,7 @@ export default function Menu() {
       });
       setUsuarioEncontrado(usuarioEncontrado);
       axios
-        .get(
-          `${URL_API}/roles_de_usuario/${usuarioEncontrado.id_usuario}`
-        )
+        .get(`${URL_API}/roles_de_usuario/${usuarioEncontrado.id_usuario}`)
         .then((response) => {
           console.log("Los roles son ", response.data);
           setListaRolesAsignados(response.data);
@@ -448,7 +473,7 @@ export default function Menu() {
       }
     }
     console.log("Datos guardados:", datos);
-   
+
     if (datos.length !== 7) {
       message.error("Cada rol debe tener por lomenos una tarea");
     } else {
@@ -495,57 +520,67 @@ export default function Menu() {
 
       <div className="titulos-menu">
         <div className={claseBotones}>
-          <Link
-            to="/"
-            className={`boton-inicio ${
-              location.pathname === "/" ? "activo" : ""
-            }`}
-          >
-            INICIO
-          </Link>
+          {inicio && (
+            <Link
+              to="/"
+              className={`boton-inicio ${
+                location.pathname === "/" ? "activo" : ""
+              }`}
+            >
+              INICIO
+            </Link>
+          )}
 
-          <Link
-            to="/Participante"
-            className={`boton-inicio ${
-              location.pathname === "/Participante" ? "activo" : ""
-            }`}
-          >
-            INSCRIPCIONES
-          </Link>
+          {inscripciones && (
+            <Link
+              to="/Participante"
+              className={`boton-inicio ${
+                location.pathname === "/Participante" ? "activo" : ""
+              }`}
+            >
+              INSCRIPCIONES
+            </Link>
+          )}
 
-          <Link
-            to="/Evento"
-            className={`boton-inicio ${
-              location.pathname === "/Evento" ? "activo" : ""
-            }`}
-          >
-            EVENTOS
-          </Link>
+          {listaEventos && (
+            <Link
+              to="/Evento"
+              className={`boton-inicio ${
+                location.pathname === "/Evento" ? "activo" : ""
+              }`}
+            >
+              EVENTOS
+            </Link>
+          )}
 
-          <Dropdown
-            menu={{
-              items: items.map((item) => ({
-                key: item.key,
-                label: item.label,
-              })),
-              selectable: true,
-            }}
-            placement="bottom"
-            arrow={{
-              pointAtCenter: true,
-            }}
-          >
-            <Link className="boton-administracion">GESTIÓN DE EVENTOS</Link>
-          </Dropdown>
+          {gestionEventos && (
+            <Dropdown
+              menu={{
+                items: items.map((item) => ({
+                  key: item.key,
+                  label: item.label,
+                })),
+                selectable: true,
+              }}
+              placement="bottom"
+              arrow={{
+                pointAtCenter: true,
+              }}
+            >
+              <Link className="boton-administracion">GESTIÓN DE EVENTOS</Link>
+            </Dropdown>
+          )}
 
-          <Link
-            to="/Reporte"
-            className={`boton-inicio ${
-              location.pathname === "/Reporte" ? "activo" : ""
-            }`}
-          >
-            REPORTES
-          </Link>
+          {reportes && (
+            <Link
+              to="/Reporte"
+              className={`boton-inicio ${
+                location.pathname === "/Reporte" ? "activo" : ""
+              }`}
+            >
+              REPORTES
+            </Link>
+          )}
           {administrador && (
             <Dropdown
               menu={{
@@ -575,6 +610,7 @@ export default function Menu() {
         keyboard={false}
         closable={false}
         pagination={false}
+        centered
         footer={[
           <Form form={formRoles} onFinish={showConfirmRoles}>
             <Button onClick={showCancelRoles}>Cancelar</Button>
@@ -609,6 +645,7 @@ export default function Menu() {
             scroll={{ y: 220 }}
             pagination={false}
             centered
+            bordered
             locale={{
               emptyText: (
                 <div style={{ padding: "70px", textAlign: "center" }}>
@@ -643,6 +680,7 @@ export default function Menu() {
         keyboard={false}
         closable={false}
         pagination={false}
+        centered
         footer={[
           <Form form={formRoles} onFinish={showConfirmTareas}>
             <Button onClick={showCancelTareas}>Cancelar</Button>
@@ -656,12 +694,12 @@ export default function Menu() {
           <Form.Item>
             <Table
               dataSource={listaCombinada}
-              scroll={{ y: 200 }}
+              scroll={{ y: 220 }}
               maskClosable={false}
               keyboard={false}
               closable={false}
               pagination={false}
-              centered
+              bordered
               locale={{
                 emptyText: (
                   <div style={{ padding: "40px", textAlign: "center" }}>
@@ -670,10 +708,31 @@ export default function Menu() {
                 ),
               }}
             >
-              <Column title="Roles" dataIndex="rol" />
               <Column
-                title="Inscripciones"
+                dataIndex="rol"
+                key="rol"
+                title={
+                  <Space size="middle">
+                    Roles
+                    <Tooltip title={`Información adicional para Roles`}>
+                      <QuestionCircleOutlined style={{ color: "#1890ff" }} />
+                    </Tooltip>
+                  </Space>
+                }
+              />
+              <Column
                 dataIndex="asignados"
+                key="inscripciones"
+                title={
+                  <Space size="middle">
+                    Inscripciones
+                    <Tooltip
+                      title={`Información adicional para la columna de inscripciones`}
+                    >
+                      <QuestionCircleOutlined style={{ color: "#1890ff" }} />
+                    </Tooltip>
+                  </Space>
+                }
                 render={(text, record, index) => (
                   <Checkbox
                     checked={
