@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Usuario;
 use App\Models\Roles;
 use App\Models\Tareas;
+use Illuminate\Support\Str;
 
 class UsuarioController extends Controller
 {
@@ -98,4 +99,43 @@ class UsuarioController extends Controller
 
         return response()->json(['message' => 'Autenticación exitosa', 'id_usuario' => $user->id_usuario]);
     }
+
+    public function crearUsuario(Request $request)
+{
+    try {
+        // Validar los datos de entrada
+        $validatedData = $request->validate([
+            'username' => 'required|unique:USUARIO,username', // Asegúrate de que el nombre de usuario sea único
+            'password' => 'required|min:6', // La contraseña debe tener al menos 6 caracteres
+            'id_roles' => 'required|exists:ROLES,id_roles' 
+        ]);
+
+        // Crear un nuevo usuario
+        $usuario = new Usuario();
+        $usuario->username = $validatedData['username'];
+        $usuario->password = $validatedData['password']; // Asignar la contraseña directamente sin encriptar
+        $usuario->api_token = Str::random(50); // Generar un token API aleatorio
+
+        // Guardar el usuario
+        $usuario->save();
+
+        // Asignar el rol al usuario
+        $usuario->roles()->attach($validatedData['id_roles']);
+
+        // Devolver una respuesta
+        return response()->json([
+            'message' => 'Usuario creado con éxito',
+            'id_usuario' => $usuario->id_usuario,
+            'api_token' => $usuario->api_token,
+            'id_roles' => $validatedData['id_roles']
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Devolver una respuesta de error en caso de fallar la validación
+        return response()->json(['errors' => $e->errors()], 422);
+    } catch (\Exception $e) {
+        // Manejar otras excepciones
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
 }

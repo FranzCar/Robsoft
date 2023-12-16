@@ -70,3 +70,4 @@ Route::get('tareas_de_usuario/{id}',[UsuarioController::class, 'obtenerTareasUsu
 Route::get('roles_de_usuario/{id}',[UsuarioController::class, 'obtenerRolesUsuario']);
 Route::post('login-usuario', [UsuarioController::class,'login']);
 Route::get('participantes-por-genero/{id}', [EventoController::class, 'distribucionGenero']);
+Route::post('crear-usuario',[UsuarioController::class, 'crearUsuario']);
