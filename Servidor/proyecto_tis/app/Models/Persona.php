@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 class Persona extends Model
 {
     public $timestamps = false;
-    protected $table = 'persona';
+    protected $table = 'PERSONA';
     protected $primaryKey = 'id_persona';
     public $incrementing = true;
     use HasFactory;

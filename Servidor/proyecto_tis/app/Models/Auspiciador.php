@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Auspiciador extends Model
 {
     public $timestamps = false;
-    protected $table = 'auspiciador';
+    protected $table = 'AUSPICIADOR';
     protected $primaryKey = 'id_auspiciador';
     use HasFactory;
 }

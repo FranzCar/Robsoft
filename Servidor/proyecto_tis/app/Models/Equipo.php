@@ -10,6 +10,6 @@ class Equipo extends Model
     protected $primaryKey = 'id_equipo';
     public $incrementing = true;
     public $timestamps = false;
-    protected $table = 'equipo';
+    protected $table = 'EQUIPO';
     use HasFactory;
 }

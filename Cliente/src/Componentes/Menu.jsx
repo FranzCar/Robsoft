@@ -554,7 +554,7 @@ export default function Menu({
       message.error("Cada rol debe tener por lomenos una tarea");
     } else {
       axios
-        .post("http://localhost:8000/api/roles-actualizar-tareas", datos)
+        .post(`${URL_API}/roles-actualizar-tareas`, datos)
         .then((response) => {
           message.success("Las tareas han sido modificadas correctamente");
           obtenerRolesConTareas();

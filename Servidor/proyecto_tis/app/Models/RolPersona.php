@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class RolPersona extends Model
 {
     public $timestamps = false;
-    protected $table = 'Rol_persona';
+    protected $table = 'ROL_PERSONA';
     protected $primaryKey = 'id_rol_persona';
     use HasFactory;
 

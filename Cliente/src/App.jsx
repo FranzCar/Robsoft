@@ -1,4 +1,5 @@
 import "./App.css";
+import { URL_API } from "./Servicios/const.js";
 import BotonesHeader from "./Componentes/BotonesHeader";
 import Logos from "./Componentes/Logos";
 import Menu from "./Componentes/Menu";
@@ -51,12 +52,12 @@ function App() {
       password: values.password,
     };
     axios
-      .post("http://localhost:8000/api/login-usuario", datos)
+      .post(`${URL_API}/login-usuario`, datos)
       .then((response) => {
         //Asignamos el id del usuario para obtener las tareas que tiene
         axios
           .get(
-            `http://localhost:8000/api/tareas_de_usuario/${response.data.id_usuario}`
+            `${URL_API}/tareas_de_usuario/${response.data.id_usuario}`
           )
           .then((response) => {
             asignarTareas(response.data);

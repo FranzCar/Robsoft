@@ -18,6 +18,6 @@ class Usuario extends Model
 
     public function roles() {
         // Esta es una relación de muchos a muchos, asumiendo que existe una tabla pivot 'usuario_roles'
-        return $this->belongsToMany(Roles::class, 'usuario_roles', 'id_usuario', 'id_roles');
+        return $this->belongsToMany(Roles::class, 'USUARIO_ROLES', 'id_usuario', 'id_roles');
     }
 }

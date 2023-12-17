@@ -9,7 +9,7 @@ class Evento extends Model
 {
     protected $primaryKey = 'id_evento';
     public $incrementing = true;
-    protected $table = 'evento';
+    protected $table = 'EVENTO';
     public $timestamps = false;
     use HasFactory;
 
@@ -68,7 +68,7 @@ class Evento extends Model
     public function caracteristicasTipoEvento()
     {
         return $this->hasManyThrough(
-            CaracteristicaEvento::class,
+            CaracteristicasEvento::class,
             CaracteristicasTipoEvento::class,
             'id_tipo_evento',
             'id_caracteristica_evento',
