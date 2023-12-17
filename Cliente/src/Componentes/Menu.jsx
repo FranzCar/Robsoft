@@ -13,6 +13,7 @@ import {
   message,
   Tooltip,
   Space,
+  Select,
 } from "antd";
 import {
   ExclamationCircleFilled,
@@ -57,11 +58,15 @@ export default function Menu({
 }) {
   const location = useLocation();
   const [formRoles] = Form.useForm();
+  const [formCrearUsuario] = Form.useForm();
   const [claseBotones, setClaseBotones] = useState("");
   const [mostrarModalRoles, setMostrarRoles] = useState(false);
   const [mostrarModalTareas, setMostrarModalTareas] = useState(false);
+  const [mostrarModalCrearUsuario, setMostrarModalCrearUsuario] =
+    useState(false);
   const [listaUsuarios, setListaUsuarios] = useState([]);
   const [listaRoles, setListaRoles] = useState([]);
+  const [listaRolesMostrar, setListaRolesMostrar] = useState([]);
   const [usuario, setUsuario] = useState("");
   const [alertaUsuario, setAlertaUsuario] = useState(null);
   const [usuarioEncontrado, setUsuarioEncontrado] = useState("");
@@ -75,6 +80,7 @@ export default function Menu({
   const [listaTareaReportes, setListaTareaReportes] = useState([]);
   const [listaTareaAdministracion, setListaTareaAdministracion] = useState([]);
   const [listaCombinada, setListaCombinada] = useState([]);
+  const [bloquearRoot, setBloquearRoot] = useState(false);
 
   useEffect(() => {
     mostrarMenu();
@@ -99,7 +105,9 @@ export default function Menu({
     axios
       .get(`${URL_API}/lista-roles`)
       .then((response) => {
+        console.log("la lista de roles es ", response.data);
         setListaRoles(response.data);
+        formatoListaRoles(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -122,8 +130,16 @@ export default function Menu({
       });
   };
 
-  //Asignamos las tareas a sus listas correspondientes
+  const formatoListaRoles = (lista) => {
+    setListaRolesMostrar(
+      lista.map((rol) => ({
+        value: rol.id_roles,
+        label: rol.nombre_rol,
+      }))
+    );
+  };
 
+  //Asignamos las tareas a sus listas correspondientes
   const asignarTareaIncripciones = (lista) => {
     console.log("se asignan las tareas de incripciones", lista);
     const nuevaLista = lista.map((rol) => ({
@@ -227,6 +243,7 @@ export default function Menu({
     setChecksSeleccionados([]);
     setListaRolesAsignados([]);
     setMostrarRoles(false);
+    setBloquearRoot(false);
     formRoles.resetFields();
   };
 
@@ -239,6 +256,10 @@ export default function Menu({
     setMostrarModalTareas(false);
   };
 
+  const mostrarModalUsuario = () => {
+    setMostrarModalCrearUsuario(true);
+  };
+
   const admin = [
     {
       key: "6",
@@ -248,16 +269,11 @@ export default function Menu({
       key: "7",
       label: <Link onClick={mostrarTareas}>ASIGNAR TAREAS</Link>,
     },
+    {
+      key: "8",
+      label: <Link onClick={mostrarModalUsuario}>CREAR USUARIO</Link>,
+    },
   ];
-
-  const verificarAdministrador = () => {
-    console.log("el valor de administrador es ", administrador);
-    if (administrador === true) {
-      setClaseBotones("botones-inicio-con-administrador");
-    } else {
-      setClaseBotones("botones-inicio-sin-administrador");
-    }
-  };
 
   const mostrarMenu = () => {
     let contador = 0;
@@ -348,6 +364,21 @@ export default function Menu({
     });
   };
 
+  const showConfirmRolesCrearUsuario = (values) => {
+    confirm({
+      title: "Confirmar creación de usuario",
+      icon: <ExclamationCircleFilled />,
+      content: "¿Está seguro de que desea crear el nuevo usuario?",
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        guardarUsuario(values);
+      },
+      onCancel() {},
+    });
+  };
+
   const showCancelRoles = () => {
     confirm({
       title: "¿Está seguro de cancelar?",
@@ -376,6 +407,20 @@ export default function Menu({
     });
   };
 
+  const showCancelCrearUsuario = () => {
+    confirm({
+      title: "¿Está seguro de cancelar?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Si",
+      cancelText: "No",
+      centered: "true",
+      onOk() {
+        setMostrarModalCrearUsuario(false);
+      },
+      onCancel() {},
+    });
+  };
+
   const guardarRoles = () => {
     if (usuarioEncontrado.id_usuario === undefined) {
       message.error("Tiene que seleccionar un usuario");
@@ -391,6 +436,7 @@ export default function Menu({
         .post(`${URL_API}/usuarios-actualizar-roles`, datos)
         .then((response) => {
           message.success("Los roles se asignaron correctamente");
+          setBloquearRoot(false);
           onCancelRol();
         })
         .catch((error) => {
@@ -399,11 +445,40 @@ export default function Menu({
     }
   };
 
-  const isRolAsignado = (idRol) => {
-    // Verifica si el rol está asignado en la lista de roles asignados
-    const rolAsignado = listaRolesAsignados.find(
-      (rol) => rol.id_roles === idRol
+  const guardarUsuario = (datos) => {
+    const usuariosMinusculas = listaUsuarios.map((usuario) =>
+      usuario.username.toLowerCase()
     );
+    const nuevoUsuarioMinusculas = datos.username.toLowerCase();
+
+    if (usuariosMinusculas.includes(nuevoUsuarioMinusculas)) {
+      message.error("El nombre de usuario ya existe. Por favor, elige otro.");
+    } else {
+      axios
+        .post(`${URL_API}/crear-usuario`, datos)
+        .then((response) => {
+          setMostrarModalCrearUsuario(false);
+          message.success("El usuario se creó correctamente");
+          formCrearUsuario.resetFields();
+        })
+        .catch((error) => {
+          message.error(error);
+        });
+    }
+  };
+
+  const isRolAsignado = (record) => {
+    // Si el nombre de rol es 'root', se bloquea el checkbox
+    if (usuario === "root") {
+      setBloquearRoot(true);
+    } else {
+      setBloquearRoot(false);
+    }
+
+    const rolAsignado = listaRolesAsignados.find(
+      (rol) => rol.id_roles === record.id_roles
+    );
+
     if (rolAsignado && rolAsignado.asignado === true) {
       // Verificar si el rol ya está en la lista antes de agregarlo
       if (!checksSeleccionados.includes(rolAsignado.id_roles)) {
@@ -414,12 +489,13 @@ export default function Menu({
       }
     } else {
       // Verificar si el rol está en la lista antes de intentar removerlo
-      if (checksSeleccionados.includes(idRol)) {
+      if (checksSeleccionados.includes(record.id_roles)) {
         setChecksSeleccionados((listaPrevia) =>
-          listaPrevia.filter((rolId) => rolId !== idRol)
+          listaPrevia.filter((rolId) => rolId !== record.id_roles)
         );
       }
     }
+
     return rolAsignado ? rolAsignado.asignado : false;
   };
 
@@ -657,12 +733,13 @@ export default function Menu({
             <Column title="Rol" dataIndex="nombre_rol" />
             <Column
               title="Asignar"
-              render={(text, record) => (
+              render={(text, record, index) => (
                 <Checkbox
-                  checked={isRolAsignado(record.id_roles)}
+                  checked={isRolAsignado(record)}
                   onChange={(e) =>
                     handleCheckChange(record.id_roles, e.target.checked)
                   }
+                  disabled={index === 0 && bloquearRoot}
                 />
               )}
             />
@@ -672,7 +749,7 @@ export default function Menu({
 
       {/* Modal para asignar las tareas a los roles */}
       <Modal
-        title="Asignar tareas"
+        title="Asignar módulos"
         open={mostrarModalTareas}
         onCancel={showCancelTareas}
         width={1000}
@@ -714,7 +791,7 @@ export default function Menu({
                 title={
                   <Space size="middle">
                     Roles
-                    <Tooltip title={`Información adicional para Roles`}>
+                    <Tooltip title={`Roles que tiene cada usuario`}>
                       <QuestionCircleOutlined style={{ color: "#1890ff" }} />
                     </Tooltip>
                   </Space>
@@ -727,7 +804,8 @@ export default function Menu({
                   <Space size="middle">
                     Inscripciones
                     <Tooltip
-                      title={`Información adicional para la columna de inscripciones`}
+                      title={`El usuario puede acceder a todos los eventos disponibles y, además,
+                      tiene la capacidad de inscribir a otras personas en dichos eventos, brindándole un control completo sobre la participación.`}
                     >
                       <QuestionCircleOutlined style={{ color: "#1890ff" }} />
                     </Tooltip>
@@ -750,7 +828,17 @@ export default function Menu({
               />
 
               <Column
-                title="Lista de eventos"
+                title={
+                  <Space size="middle">
+                    Lista de eventos
+                    <Tooltip
+                      title={`El usuario tiene la capacidad de acceder a información detallada de los eventos,
+                      permitiéndole obtener una visión completa de cada experiencia planificada.`}
+                    >
+                      <QuestionCircleOutlined style={{ color: "#1890ff" }} />
+                    </Tooltip>
+                  </Space>
+                }
                 render={(text, record, index) => (
                   <Checkbox
                     checked={
@@ -764,7 +852,16 @@ export default function Menu({
                 )}
               />
               <Column
-                title="Gestión de eventos"
+                title={
+                  <Space size="middle">
+                    Gestión de eventos
+                    <Tooltip
+                      title={`El usuario cuenta con la capacidad de crear, editar, eliminar, detallar y asignar actividades a eventos`}
+                    >
+                      <QuestionCircleOutlined style={{ color: "#1890ff" }} />
+                    </Tooltip>
+                  </Space>
+                }
                 render={(text, record, index) => (
                   <Checkbox
                     checked={
@@ -778,7 +875,17 @@ export default function Menu({
                 )}
               />
               <Column
-                title="Reportes"
+                title={
+                  <Space size="middle">
+                    Reportes
+                    <Tooltip
+                      title={`El usuario tendrá acceso a ver los reportes de cada evento, así como reportes generales y específicos,
+                      ofreciendo una visión completa de la información relacionada con los eventos.`}
+                    >
+                      <QuestionCircleOutlined style={{ color: "#1890ff" }} />
+                    </Tooltip>
+                  </Space>
+                }
                 render={(text, record, index) => (
                   <Checkbox
                     checked={
@@ -792,7 +899,17 @@ export default function Menu({
                 )}
               />
               <Column
-                title="Administración"
+                title={
+                  <Space size="middle">
+                    Administración
+                    <Tooltip
+                      title={`El usuario puede asignar roles, gestionar tareas y crear nuevos usuarios,
+                      teniendo así el control total sobre la organización y participación en el sistema.`}
+                    >
+                      <QuestionCircleOutlined style={{ color: "#1890ff" }} />
+                    </Tooltip>
+                  </Space>
+                }
                 render={(text, record, index) => (
                   <Checkbox
                     checked={
@@ -806,6 +923,91 @@ export default function Menu({
                 )}
               />
             </Table>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal para mostrar el formulario de creacion de usuario */}
+      <Modal
+        title="Crear usuario"
+        open={mostrarModalCrearUsuario}
+        onCancel={showCancelCrearUsuario}
+        maskClosable={false}
+        keyboard={false}
+        closable={false}
+        pagination={false}
+        width={450}
+        centered
+        footer={[
+          <Form form={formCrearUsuario} onFinish={showConfirmRolesCrearUsuario}>
+            <Button onClick={showCancelCrearUsuario}>Cancelar</Button>
+            <Button type="primary" htmlType="submit">
+              Guardar
+            </Button>
+          </Form>,
+        ]}
+      >
+        <Form form={formCrearUsuario} layout="vertical">
+          <Form.Item
+            label="Nombre de usuario"
+            name="username" // Agrega un nombre al campo para la validación
+            rules={[
+              {
+                required: true,
+                message: "Por favor, ingrese el nombre de usuario",
+              },
+              {
+                min: 4,
+                message: "El nombre de usuario debe tener mínimo 4 caracteres",
+              },
+              {
+                pattern: /^[^\s]+$/,
+                message: "No se permite espacios en blanco",
+              },
+            ]}
+          >
+            <Input
+              placeholder="Ingrese el nombre de usuario"
+              maxLength={30}
+              allowClear
+            />
+          </Form.Item>
+          <Form.Item
+            label="Contraseña"
+            name="password" // Agrega un nombre al campo para la validación
+            rules={[
+              { required: true, message: "Por favor, ingrese la contraseña" },
+              {
+                min: 6,
+                message: "La contraseña debe tener mínimo 6 caracteres",
+              },
+              {
+                pattern: /^[^\s]+$/,
+                message: "No se permite espacios en blanco",
+              },
+            ]}
+          >
+            <Input.Password
+              placeholder="Ingrese la contraseña"
+              maxLength={30}
+              minLength={6}
+              allowClear
+            />
+          </Form.Item>
+          <Form.Item
+            label="Rol"
+            name="id_roles" // Agrega un nombre al campo para la validación
+            rules={[
+              {
+                required: true,
+                message: "Por favor, selecciona el rol del usuario",
+              },
+            ]}
+          >
+            <Select
+              placeholder="Selecciona el rol del usuario"
+              options={listaRolesMostrar}
+            />
           </Form.Item>
         </Form>
       </Modal>

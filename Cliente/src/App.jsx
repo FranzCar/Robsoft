@@ -14,7 +14,7 @@ import Actividades from "./Paginas/Actividades";
 import { Route, Routes } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { Button, Input, Layout, Form, message } from "antd";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import IconoUsuario from "./Imagenes/icono-usuario3.png";
 import axios from "axios";
 
 const { Header, Footer, Content } = Layout;
@@ -42,9 +42,7 @@ function App() {
   const estadoAdministrador = localStorage.getItem("administrador");
   const estadoCerrarSesion = localStorage.getItem("cerrarSesion");
 
-  useEffect(() => {
-    
-  }, []);
+  useEffect(() => {}, []);
 
   //Validar usuario y contraseña
   const validarUsuario = (values) => {
@@ -135,16 +133,59 @@ function App() {
             onFinish={validarUsuario}
             className="formulario-login"
           >
-            <Form.Item name="usuario">
-              <Input placeholder="Ingrese el nombre de usuario" />
-            </Form.Item>
-            <Form.Item name="password">
-              <Input.Password placeholder="Ingrese la contraseña" />
-            </Form.Item>
-            <Button htmlType="submit">Ingresar</Button>
-            <Button className="boton-salir-login" onClick={cerrarLogin}>
-              Salir
-            </Button>
+            <img className="icono-usuario" src={IconoUsuario}></img>
+
+            <div className="campos-formulario">
+              <Form.Item
+                name="usuario"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor, ingrese el nombre de usuario",
+                  },
+                  {
+                    pattern: /^[^\s]+$/,
+                    message:
+                      "No se permite espacios en blanco",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Ingrese el nombre de usuario"
+                  maxLength={30}
+                  allowClear
+                />
+              </Form.Item>
+              <Form.Item
+                name="password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor, ingrese la contraseña",
+                  },
+                  {
+                    pattern: /^[^\s]+$/,
+                    message:
+                      "No se permite espacios en blanco",
+                  },
+                ]}
+              >
+                <Input.Password
+                  placeholder="Ingrese la contraseña"
+                  maxLength={30}
+                  allowClear
+                />
+              </Form.Item>
+
+              <div className="botones-login">
+                <Button className="boton-ingresar-login" htmlType="submit">
+                  Ingresar
+                </Button>
+                <Button className="boton-salir-login" onClick={cerrarLogin}>
+                  Atrás
+                </Button>
+              </div>
+            </div>
           </Form>
         </Content>
       )}
