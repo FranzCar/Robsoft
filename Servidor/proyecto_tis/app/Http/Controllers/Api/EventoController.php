@@ -784,19 +784,25 @@ public function distribucionGenero($idEvento)
         return response()->json(['error' => 'Evento no encontrado'], 404);
     }
 
-    $distribucionGenero = DB::table('persona')
-        ->join('rol_persona', 'persona.id_persona', '=', 'rol_persona.id_persona')
-        ->join('roles', 'rol_persona.id_roles', '=', 'roles.id_roles')
-        ->join('inscripcion', 'rol_persona.id_rol_persona', '=', 'inscripcion.id_rol_persona')
-        ->join('evento', 'inscripcion.id_evento', '=', 'evento.id_evento')
-        ->where('evento.id_evento', $idEvento)
-        ->where('roles.id_roles', 6) // Filtrar solo participantes
-        ->select('persona.genero', DB::raw('count(*) as total'))
-        ->groupBy('persona.genero')
+    $distribucionGenero = DB::table('PERSONA')
+        ->join('ROL_PERSONA', 'PERSONA.id_persona', '=', 'ROL_PERSONA.id_persona')
+        ->join('ROLES', 'ROL_PERSONA.id_roles', '=', 'ROLES.id_roles')
+        ->leftJoin('ROL_PERSONA_EQUIPO', 'ROL_PERSONA.id_rol_persona', '=', 'ROL_PERSONA_EQUIPO.id_rol_persona')
+        ->leftJoin('EQUIPO', 'ROL_PERSONA_EQUIPO.id_equipo', '=', 'EQUIPO.id_equipo')
+        ->leftJoin('INSCRIPCION', function($join) {
+            $join->on('ROL_PERSONA.id_rol_persona', '=', 'INSCRIPCION.id_rol_persona')
+                 ->orOn('EQUIPO.id_equipo', '=', 'INSCRIPCION.id_equipo');
+        })
+        ->join('EVENTO', 'INSCRIPCION.id_evento', '=', 'EVENTO.id_evento')
+        ->where('EVENTO.id_evento', $idEvento)
+        ->where('ROLES.id_roles', 6) // Filtrar solo participantes
+        ->select('PERSONA.genero', DB::raw('COUNT(DISTINCT PERSONA.id_persona) as total'))
+        ->groupBy('PERSONA.genero')
         ->get();
 
     return response()->json($distribucionGenero);
 }
+
 
 
 }
