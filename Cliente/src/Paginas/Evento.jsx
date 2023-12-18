@@ -93,7 +93,7 @@ export default function Evento() {
         />
         <Column
           align="center"
-          title="Informacion"
+          title="Información"
           key="accion"
           render={(record) => (
             <Space size="middle">

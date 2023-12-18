@@ -8,7 +8,7 @@ export default function Logos() {
             <div className='logo1'>
                 <img src={logoUMSS} className='logo-umss'></img>
             </div>
-            <div className='titulo' >SISTEMA DE COMPETENCIAS</div>
+            <div className='titulo' >SISTEMA DE COMPETENCIAS ICPC-UMSS</div>
             <div className='logo2'>
                 <img src={logoICPC} className='logo-icpc'></img>
             </div>

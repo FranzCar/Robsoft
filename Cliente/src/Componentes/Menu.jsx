@@ -749,7 +749,7 @@ export default function Menu({
 
       {/* Modal para asignar las tareas a los roles */}
       <Modal
-        title="Asignar módulos"
+        title="Asignar tareas"
         open={mostrarModalTareas}
         onCancel={showCancelTareas}
         width={1000}

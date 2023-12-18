@@ -696,7 +696,7 @@ export default function Reporte() {
                     ]}
                   />
                 </Form.Item>
-                <Form.Item label="Participacion" name="PARTICIPACION">
+                <Form.Item label="Participación" name="PARTICIPACION">
                   <Select
                     placeholder="Selecione un tipo de participacion "
                     allowClear
@@ -742,7 +742,7 @@ export default function Reporte() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Ubicacion" name="UBICACION">
+                <Form.Item label="Ubicación" name="UBICACION">
                   <Select
                     placeholder="Selecione una ubicacion"
                     allowClear
