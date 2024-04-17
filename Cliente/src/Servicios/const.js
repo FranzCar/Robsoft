@@ -1,1 +1,1 @@
-export const URL_API = "http://icpc.umss.esu.bo/api";
+export const URL_API = "http://localhost:8000/api";
