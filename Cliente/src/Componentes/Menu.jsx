@@ -105,7 +105,6 @@ export default function Menu({
     axios
       .get(`${URL_API}/lista-roles`)
       .then((response) => {
-        console.log("la lista de roles es ", response.data);
         setListaRoles(response.data);
         formatoListaRoles(response.data);
       })
@@ -141,7 +140,6 @@ export default function Menu({
 
   //Asignamos las tareas a sus listas correspondientes
   const asignarTareaIncripciones = (lista) => {
-    console.log("se asignan las tareas de incripciones", lista);
     const nuevaLista = lista.map((rol) => ({
       asignado: rol.tareas.some((tarea) => tarea.id_tarea === 1),
     }));
@@ -278,7 +276,6 @@ export default function Menu({
   const mostrarMenu = () => {
     let contador = 0;
     const listaPrivilegios = [
-      { valor: inicio },
       { valor: inscripciones },
       { valor: listaEventos },
       { valor: gestionEventos },
@@ -290,7 +287,6 @@ export default function Menu({
         contador++;
       }
     }
-    console.log("el contador es ", contador);
     setClaseBotones(`botones-menu-columnas-${contador}`);
     return contador;
   };
@@ -310,7 +306,6 @@ export default function Menu({
       axios
         .get(`${URL_API}/roles_de_usuario/${usuarioEncontrado.id_usuario}`)
         .then((response) => {
-          console.log("Los roles son ", response.data);
           setListaRolesAsignados(response.data);
         })
         .catch((error) => {
@@ -431,7 +426,6 @@ export default function Menu({
         id_usuario: usuarioEncontrado.id_usuario,
         roles: checksSeleccionados,
       };
-      console.log("Los datos a enviar son ", datos);
       axios
         .post(`${URL_API}/usuarios-actualizar-roles`, datos)
         .then((response) => {
@@ -548,7 +542,6 @@ export default function Menu({
         id = 1;
       }
     }
-    console.log("Datos guardados:", datos);
 
     if (datos.length !== 7) {
       message.error("Cada rol debe tener por lomenos una tarea");
@@ -596,22 +589,13 @@ export default function Menu({
 
       <div className="titulos-menu">
         <div className={claseBotones}>
-          {inicio && (
+          
+
+          {inscripciones && (
             <Link
               to="/"
               className={`boton-inicio ${
                 location.pathname === "/" ? "activo" : ""
-              }`}
-            >
-              INICIO
-            </Link>
-          )}
-
-          {inscripciones && (
-            <Link
-              to="/Participante"
-              className={`boton-inicio ${
-                location.pathname === "/Participante" ? "activo" : ""
               }`}
             >
               INSCRIPCIONES

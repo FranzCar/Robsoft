@@ -214,13 +214,9 @@ function App() {
           </Header>
           <Content className="content">
             <Routes>
-              <Route path="/" element={<Inicio />} />
+              <Route path="/" element={<Participante />} />
             </Routes>
-            {mostrarInscripciones && (
-              <Routes>
-                <Route path="/Participante" element={<Participante />} />
-              </Routes>
-            )}
+              
             {mostrarListaEventos && (
               <Routes>
                 <Route path="/evento" element={<Evento />} />
@@ -242,7 +238,7 @@ function App() {
             )}
           </Content>
 
-          <Footer className="footer">Universidad Mayor de San Simon</Footer>
+          <Footer className="footer">Universidad Mayor de San Simon © {new Date().getFullYear()}</Footer>
         </Layout>
       )}
     </div>

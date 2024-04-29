@@ -46,7 +46,6 @@ const getBase64 = (file) => {
   });
 };
 const onFinishFailed = (errorInfo) => {
-  console.log("Failed:", errorInfo);
 };
 
 export default function Participante() {
@@ -97,7 +96,6 @@ export default function Participante() {
       .get(`${URL_API}/lista-evento-detallado`)
       .then((response) => {
         setDatosEventos(response.data);
-        console.log("Los datos ", response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -310,14 +308,10 @@ export default function Participante() {
   };
   const validarDuplicadoCorreo = (values) => {
     const correo = values.CORREO;
-    console.log("correo validarCORR ", correo);
     let resultado = false;
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].correo_electronico === correo) {
-        console.log(
-          `Se encontró un objeto con campo Objetivo igual a "${correo}" en el índice ${i}.`
-        );
         resultado = true;
         break;
       }
@@ -495,7 +489,6 @@ export default function Participante() {
   };
   const onFinishCI = (values) => {
     obtenerParticipantesEvento();
-    console.log("idevento onFinish ", idEVENTO);
     buscarCi(values);
   };
   const onFinishCodigo = (values) => {
@@ -512,13 +505,10 @@ export default function Participante() {
     );
 
     if (participanteEncontrado) {
-      console.log(dataInscritos);
       const encontrado = dataInscritos.find(
         (elemento) => elemento.ci === carnet
       );
-      console.log("IF    en evento: ", encontrado);
       if (encontrado) {
-        console.log("participanteEvento", encontrado);
         message.success(
           "El carnet de identidad ya esta registrado en el Evento."
         );
@@ -578,20 +568,16 @@ export default function Participante() {
 
   const confirmSave = (values) => {
     const datos = datosParticipante(values);
-    console.log("Se guarda los datos en la BD");
     axios
       .post(`${URL_API}/guardar-participante`, datos)
       .then((response) => {
-        console.log("Datos guardados con éxito", response.data);
         const datosPer = {
           id_evento: idEVENTO,
           id_persona: response.data.id,
         };
-        console.log("datos per . ", datosPer);
         axios
           .post(`${URL_API}/inscribir-individual`, datosPer)
           .then((response) => {
-            console.log("Datos guardados con éxito Evento", response.data);
             message.success(
               "El participante se registró correctamente al evento"
             );
@@ -734,7 +720,6 @@ export default function Participante() {
       .get(`${URL_API}/inscritos-evento/${idEVENTO}`)
       .then((response) => {
         setListaParticipantesEvento(response.data);
-        console.log("lista participante evento: ", response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -778,14 +763,12 @@ export default function Participante() {
   };
 
   const guardarEquipo = (values) => {
-    console.log("error id persona ", entrenadorForm);
     if (entrenadorForm.length === 0) {
       if (listaParticipante.length === 0) {
         message.error("Debe ingresar los participantes requeridos");
       } else {
         const datos = datosGrupal(values);
         const duplicado = validarDuplicadoGrupal(values);
-        console.log("los datos a guardar del equipo son  ", datos);
         if (
           listaParticipante.length !== 0 &&
           listaParticipante.length === tamanioListaParticipantes
@@ -809,10 +792,6 @@ export default function Participante() {
                     datosEquipo
                   )
                   .then((response) => {
-                    console.log(
-                      "El grupo se registró correctamente con éxito al evento",
-                      response.data
-                    );
                     message.success(
                       "El equipo se registró correctamente al evento"
                     );
@@ -853,7 +832,6 @@ export default function Participante() {
     } else {
       const datos = datosGrupal(values);
       const duplicado = validarDuplicadoGrupal(values);
-      console.log("los datos a guardar del equipo son  ", datos);
       if (
         listaParticipante.length !== 0 &&
         listaParticipante.length === tamanioListaParticipantes
@@ -874,10 +852,7 @@ export default function Participante() {
               axios
                 .post(`${URL_API}/inscribir-equipo`, datosEquipo)
                 .then((response) => {
-                  console.log(
-                    "El grupo se registró correctamente con éxito al evento",
-                    response.data
-                  );
+                    
                   message.success(
                     "El equipo se registró correctamente al evento"
                   );
@@ -917,12 +892,10 @@ export default function Participante() {
   };
   //obtener inscritos al evento
   const obtenerParticipantesEvento = (id) => {
-    console.log("idEvento: ", idEVENTO);
     //Obtener participantes inscritos al evento para validar
     axios
       .get(`${URL_API}/inscritos-evento/${id}`)
       .then((response) => {
-        console.log(response.data);
         setDataInscritos(response.data);
         setListaParticipantesEvento(response.data);
       })
@@ -995,14 +968,12 @@ export default function Participante() {
       }
     }
 
-    console.log("Lista de participantes ", listaParticipante);
   };
 
   const aniadorIDPersona = (id) => {
     setListaID_Persona((listaID_Persona) => [...listaID_Persona, id]);
 
     // Muestra el contenido actualizado de la lista al final
-    console.log("El id de los participantes es", [...listaID_Persona, id]);
   };
 
   //Eliminar participantes de la tabla
@@ -1026,7 +997,6 @@ export default function Participante() {
       .get(`${URL_API}/lista-coach`)
       .then((response) => {
         setEntrenador(response.data);
-        console.log("los entreandores son ", response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -1045,7 +1015,6 @@ export default function Participante() {
 
   const handleAbrirModalParticipanteNuevo = () => {
     setVerModalParticipanteNuevo(true);
-    console.log("Modal abierto");
   };
 
   const handleCancelNuevoParticipante = () => {
@@ -1147,7 +1116,6 @@ export default function Participante() {
   };
 
   const guardarEntrenador = (values) => {
-    console.log("Los datos de dentrenador son ", values);
     const datosGuardar = {
       nombre: values.NOMBRE_ENTRENADOR,
       correo_electronico: values.CORREO_ENTRENADOR,
@@ -1166,7 +1134,6 @@ export default function Participante() {
         formNuevoEntrenador.resetFields();
         cerrarModalNuevoEntrenador(false);
         obtenerEntrenadores();
-        console.log("entrenadores nuevo: ", entrenador);
       })
       .catch((error) => {
         console.error(error);
@@ -1264,7 +1231,6 @@ export default function Participante() {
     const entrenadorEncontrado = entrenador.find(
       (entrenador) => entrenador.ci === busqueda
     );
-    console.log("ENTRENADOR ENCONTRADO: ", entrenadorEncontrado);
     if (entrenadorEncontrado) {
       setAlerta({
         type: "success",
@@ -1360,8 +1326,6 @@ export default function Participante() {
                       );
                       setTituloEvento(item.TITULO);
                       setIdEVENTO(item.id_evento);
-                      console.log("EVENTO ID    + = ", item.id_evento);
-                      console.log("EVENTO TITULO = ", item.TITULO);
                     }}
                   >
                     Inscribirse &#62;
