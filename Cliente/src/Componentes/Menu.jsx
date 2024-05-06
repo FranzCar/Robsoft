@@ -82,12 +82,66 @@ export default function Menu({
   const [listaCombinada, setListaCombinada] = useState([]);
   const [bloquearRoot, setBloquearRoot] = useState(false);
 
+  //Valores para mostrar las opciones del menu q se requiere
+  const [mostrarListaEventos, setMostrarListaEventos] = useState(false);
+  const [mostrarGestionEventos, setMostrarGestionEventos] = useState(false);
+  const [mostrarReportes, setMostrarReportes] = useState(false);
+  const [mostrarAdministrador, setMostrarAdministrador] = useState(false);
+
+  const asginarValoresMenu = () => {
+    if (localStorage.getItem("listaEventos") === "true") {
+      setMostrarListaEventos(true);
+      console.log("SI SE ASIGNA EL VALOR A LISTA EVENTOS", mostrarListaEventos);
+    } else if (localStorage.getItem("listaEventos") === "false") {
+      setMostrarListaEventos(false);
+    }
+    if (localStorage.getItem("gestionEventos") === "true") {
+      setMostrarGestionEventos(true);
+    } else if (localStorage.getItem("gestionEventos") === "false") {
+      setMostrarGestionEventos(false);
+    }
+    if (localStorage.getItem("reportes") === "true") {
+      setMostrarReportes(true);
+    } else if (localStorage.getItem("reportes") === "false") {
+      setMostrarReportes(false);
+    }
+    if (localStorage.getItem("administrador") === "true") {
+      setMostrarAdministrador(true);
+    } else if (localStorage.getItem("administrador") === "false") {
+      setMostrarAdministrador(false);
+    }
+  };
+
   useEffect(() => {
-    mostrarMenu();
+    asginarValoresMenu();
+    console.log("se asigno el valor de ", localStorage.getItem("listaEventos"));
     obtenerListaUsuarios();
     ontenerListaRoles();
     obtenerRolesConTareas();
+    mostrarMenu();
   }, []);
+
+  const mostrarMenu = () => {
+    let contador = 1;
+    const listaPrivilegios = [
+      { valor: mostrarListaEventos },
+      { valor: mostrarGestionEventos },
+      { valor: mostrarReportes },
+      { valor: mostrarAdministrador },
+    ];
+    for (let i = 0; i < listaPrivilegios.length; i++) {
+      console.log("VALOR DE LA LISTA ", listaPrivilegios[i]);
+      if (listaPrivilegios[i].valor === true) {
+        contador++;
+      }
+    }
+    console.log("contador es ", contador);
+    if (localStorage.getItem("administrador") === "true") {
+      setClaseBotones(`botones-menu-columnas-5`);
+    } else {
+      setClaseBotones(`botones-menu-columnas-1`);
+    }
+  };
 
   //Obtenemos las listas de las bases de datos
   const obtenerListaUsuarios = () => {
@@ -272,24 +326,6 @@ export default function Menu({
       label: <Link onClick={mostrarModalUsuario}>CREAR USUARIO</Link>,
     },
   ];
-
-  const mostrarMenu = () => {
-    let contador = 0;
-    const listaPrivilegios = [
-      { valor: inscripciones },
-      { valor: listaEventos },
-      { valor: gestionEventos },
-      { valor: reportes },
-      { valor: administrador },
-    ];
-    for (let i = 0; i < listaPrivilegios.length; i++) {
-      if (listaPrivilegios[i].valor === true) {
-        contador++;
-      }
-    }
-    setClaseBotones(`botones-menu-columnas-${contador}`);
-    return contador;
-  };
 
   const handleBuscarUsuario = (usuario, setAlertaUsuario) => {
     // Supongo que `listaUsuarios` es tu lista de usuarios
@@ -589,9 +625,7 @@ export default function Menu({
 
       <div className="titulos-menu">
         <div className={claseBotones}>
-          
-
-          {inscripciones && (
+          {true && (
             <Link
               to="/"
               className={`boton-inicio ${
@@ -602,7 +636,7 @@ export default function Menu({
             </Link>
           )}
 
-          {listaEventos && (
+          {mostrarListaEventos && (
             <Link
               to="/Evento"
               className={`boton-inicio ${
@@ -613,7 +647,7 @@ export default function Menu({
             </Link>
           )}
 
-          {gestionEventos && (
+          {mostrarGestionEventos && (
             <Dropdown
               menu={{
                 items: items.map((item) => ({
@@ -631,7 +665,7 @@ export default function Menu({
             </Dropdown>
           )}
 
-          {reportes && (
+          {mostrarReportes && (
             <Link
               to="/Reporte"
               className={`boton-inicio ${
@@ -641,7 +675,7 @@ export default function Menu({
               REPORTES
             </Link>
           )}
-          {administrador && (
+          {mostrarAdministrador && (
             <Dropdown
               menu={{
                 items: admin.map((item) => ({

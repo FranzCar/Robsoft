@@ -12,11 +12,12 @@ import EditarEvento from "./Paginas/EditarEvento";
 import Participante from "./Paginas/Participante";
 import DetalleEvento from "./Paginas/DetalleEvento";
 import Actividades from "./Paginas/Actividades";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { Button, Input, Layout, Form, message } from "antd";
 import IconoUsuario from "./Imagenes/icono-usuario3.png";
 import axios from "axios";
+import Login from "./Paginas/Login.jsx";
 
 const { Header, Footer, Content } = Layout;
 
@@ -36,14 +37,50 @@ function App() {
   const usuario = localStorage.getItem("usuario");
 
   //Estado de las tareas que se puedes realizar, almacenadas en localStorage. True o false
-  const estadoInscripcion = localStorage.getItem("inscripciones");
-  const estadoListaEventos = localStorage.getItem("listaEventos");
-  const estadoGestionEventos = localStorage.getItem("gestionEventos");
-  const estadoReportes = localStorage.getItem("reportes");
-  const estadoAdministrador = localStorage.getItem("administrador");
-  const estadoCerrarSesion = localStorage.getItem("cerrarSesion");
+  const estadoListaEventos = localStorage.getItem("listaEventos", true);
+  const estadoGestionEventos = localStorage.getItem("gestionEventos", false);
+  const estadoReportes = localStorage.getItem("reportes", false);
+  const estadoAdministrador = localStorage.getItem("administrador", false);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (localStorage.getItem("listaEventos") === "true") {
+      setMostrarListaEventos(true);
+    } else if (localStorage.getItem("listaEventos") === "false") {
+      setMostrarListaEventos(false);
+    }
+    if (localStorage.getItem("gestionEventos") === "true") {
+      setMostrarGestionEventos(true);
+    } else if (localStorage.getItem("gestionEventos") === "false") {
+      setMostrarGestionEventos(false);
+    }
+    if (localStorage.getItem("reportes") === "true") {
+      setMostrarReportes(true);
+    } else if (localStorage.getItem("reportes") === "false") {
+      setMostrarReportes(false);
+    }
+    if (localStorage.getItem("administrador") === "true") {
+      setMostrarAdministrador(true);
+    } else if (localStorage.getItem("administrador") === "false") {
+      setMostrarAdministrador(false);
+    }
+
+    // Verificar la URL actual y establecer mostrarContenido en consecuencia
+    console.log("inscripciones ", localStorage.getItem("inscripciones"));
+    console.log("listaEventos ", localStorage.getItem("listaEventos"));
+    console.log("gestionEventos ", localStorage.getItem("gestionEventos"));
+    console.log("reportes ", localStorage.getItem("reportes"));
+    console.log("administrador ", localStorage.getItem("administrador"));
+    if (location.pathname === "/adminUMSS") {
+      setMostrarContenido(false);
+    } else {
+      setMostrarContenido(true);
+    }
+
+    console.log(
+      "RESIVO EL VALOR DESDE LOGIN ",
+      localStorage.getItem("gestionEventos")
+    );
+  }, []);
 
   //Validar usuario y contraseña
   const validarUsuario = (values) => {
@@ -56,16 +93,14 @@ function App() {
       .then((response) => {
         //Asignamos el id del usuario para obtener las tareas que tiene
         axios
-          .get(
-            `${URL_API}/tareas_de_usuario/${response.data.id_usuario}`
-          )
+          .get(`${URL_API}/tareas_de_usuario/${response.data.id_usuario}`)
           .then((response) => {
             asignarTareas(response.data);
             setMostrarHome(true);
             setMostrarLogin(false);
             setNombreUsuario(datos.username);
             if (datos.username === "root") {
-              localStorage.setItem("administrador", true);
+              //localStorage.setItem("administrador", true);
             }
             form.resetFields();
           })
@@ -109,7 +144,6 @@ function App() {
 
   // valores q se manda desde botones
   const handleLoginClick = (valor) => {
-    console.log("el valor q pasa botones ", valor);
     setMostrarLogin(valor);
     setMostrarHome(!valor);
   };
@@ -122,123 +156,81 @@ function App() {
     setMostrarGestionEventos(false);
     setMostrarReportes(false);
     setMostrarAdministrador(false);
+    localStorage.setItem("inscripciones", true);
+    localStorage.setItem("listaEventos", false);
+    localStorage.setItem("gestionEventos", false);
+    localStorage.setItem("reportes", false);
+    localStorage.setItem("administrador", false);
     window.location.reload();
   };
 
+  //nueva version
+  const [mostrarContenido, setMostrarContenido] = useState(true);
+  const location = useLocation();
+
   return (
     <div>
-      {mostrarLogin && (
-        <Content className="login">
-          <Form
-            form={form}
-            onFinish={validarUsuario}
-            className="formulario-login"
-          >
-            <img className="icono-usuario" src={IconoUsuario}></img>
-
-            <div className="campos-formulario">
-              <Form.Item
-                name="usuario"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor, ingrese el nombre de usuario",
-                  },
-                  {
-                    pattern: /^[^\s]+$/,
-                    message:
-                      "No se permite espacios en blanco",
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Ingrese el nombre de usuario"
-                  maxLength={30}
-                  allowClear
-                />
-              </Form.Item>
-              <Form.Item
-                name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor, ingrese la contraseña",
-                  },
-                  {
-                    pattern: /^[^\s]+$/,
-                    message:
-                      "No se permite espacios en blanco",
-                  },
-                ]}
-              >
-                <Input.Password
-                  placeholder="Ingrese la contraseña"
-                  maxLength={30}
-                  allowClear
-                />
-              </Form.Item>
-
-              <div className="botones-login">
-                <Button className="boton-ingresar-login" htmlType="submit">
-                  Ingresar
-                </Button>
-                <Button className="boton-salir-login" onClick={cerrarLogin}>
-                  Atrás
-                </Button>
-              </div>
-            </div>
-          </Form>
-        </Content>
-      )}
       {mostrarHome && (
         <Layout className="principal">
-          <Header className="header">
-            <div className="header-botones">
-              <BotonesHeader
-                onLoginClick={handleLoginClick}
-                onClickCerrar={cerrarSesion}
-                usuario={nombreUsuario}
-              />
-            </div>
+          <Routes>
+            <Route path="/adminUMSS" element={<Login />} />
+          </Routes>
+          {mostrarContenido && (
+            <>
+              <Header className="header">
+                <div className="header-botones">
+                  <BotonesHeader
+                    onLoginClick={handleLoginClick}
+                    onClickCerrar={cerrarSesion}
+                    administrador={false}
+                    usuario={nombreUsuario}
+                  />
+                </div>
+                <Logos />
+                <Menu
+                  inicio={true}
+                  inscripciones={mostrarInscripciones}
+                  listaEventos={mostrarListaEventos}
+                  gestionEventos={mostrarGestionEventos}
+                  reportes={mostrarReportes}
+                  administrador={mostrarAdministrador}
+                />
+              </Header>
 
-            <Logos />
+              <Content className="content">
+                <Routes>
+                  <Route path="/" element={<Participante />} />
+                </Routes>
 
-            <Menu
-              inicio={true}
-              inscripciones={mostrarInscripciones}
-              listaEventos={mostrarListaEventos}
-              gestionEventos={mostrarGestionEventos}
-              reportes={mostrarReportes}
-              administrador={mostrarAdministrador}
-            />
-          </Header>
-          <Content className="content">
-            <Routes>
-              <Route path="/" element={<Participante />} />
-            </Routes>
-              
-            {mostrarListaEventos && (
-              <Routes>
-                <Route path="/evento" element={<Evento />} />
-              </Routes>
-            )}
-            {mostrarGestionEventos && (
-              <Routes>
-                <Route path="/crearEvento" element={<CrearEvento />} />
-                <Route path="/eliminarEvento" element={<EliminarEvento />} />
-                <Route path="/editarEvento" element={<EditarEvento />} />
-                <Route path="/detalleEvento" element={<DetalleEvento />} />
-                <Route path="/actividades" element={<Actividades />} />
-              </Routes>
-            )}
-            {mostrarReportes && (
-              <Routes>
-                <Route path="/Reporte" element={<Reporte />} />
-              </Routes>
-            )}
-          </Content>
+                {mostrarListaEventos && (
+                  <Routes>
+                    <Route path="/evento" element={<Evento />} />
+                  </Routes>
+                )}
+                {mostrarGestionEventos && (
+                  <Routes>
+                    <Route path="/crearEvento" element={<CrearEvento />} />
+                    <Route
+                      path="/eliminarEvento"
+                      element={<EliminarEvento />}
+                    />
+                    <Route path="/editarEvento" element={<EditarEvento />} />
+                    <Route path="/detalleEvento" element={<DetalleEvento />} />
+                    <Route path="/actividades" element={<Actividades />} />
+                  </Routes>
+                )}
+                {mostrarReportes && (
+                  <Routes>
+                    <Route path="/Reporte" element={<Reporte />} />
+                  </Routes>
+                )}
+              </Content>
 
-          <Footer className="footer">Universidad Mayor de San Simon © {new Date().getFullYear()}</Footer>
+              <Footer className="footer">
+                Universidad Mayor de San Simon © {new Date().getFullYear()}
+              </Footer>
+            </>
+          )}
         </Layout>
       )}
     </div>
