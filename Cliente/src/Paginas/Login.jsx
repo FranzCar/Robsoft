@@ -45,12 +45,13 @@ export default function Login() {
             console.error(error);
           });
         message.success(response.data.message);
-        window.location.href = "/";
+        console.log("/....")
         localStorage.setItem('inscripciones',"true")
         localStorage.setItem('listaEventos',"true")
         localStorage.setItem('gestionEventos',"true")
         localStorage.setItem('reportes',"true")
         localStorage.setItem('administrador',"true")
+        window.location.href = "/";
 
       })
       .catch((error) => {
