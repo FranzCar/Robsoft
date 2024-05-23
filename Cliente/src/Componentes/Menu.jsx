@@ -91,7 +91,6 @@ export default function Menu({
   const asginarValoresMenu = () => {
     if (localStorage.getItem("listaEventos") === "true") {
       setMostrarListaEventos(true);
-      console.log("SI SE ASIGNA EL VALOR A LISTA EVENTOS", mostrarListaEventos);
     } else if (localStorage.getItem("listaEventos") === "false") {
       setMostrarListaEventos(false);
     }
@@ -114,7 +113,6 @@ export default function Menu({
 
   useEffect(() => {
     asginarValoresMenu();
-    console.log("se asigno el valor de ", localStorage.getItem("listaEventos"));
     obtenerListaUsuarios();
     ontenerListaRoles();
     obtenerRolesConTareas();
@@ -130,12 +128,10 @@ export default function Menu({
       { valor: mostrarAdministrador },
     ];
     for (let i = 0; i < listaPrivilegios.length; i++) {
-      console.log("VALOR DE LA LISTA ", listaPrivilegios[i]);
       if (listaPrivilegios[i].valor === true) {
         contador++;
       }
     }
-    console.log("contador es ", contador);
     if (localStorage.getItem("administrador") === "true") {
       setClaseBotones(`botones-menu-columnas-5`);
     } else {

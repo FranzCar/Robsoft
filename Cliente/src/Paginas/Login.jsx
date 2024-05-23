@@ -46,12 +46,11 @@ export default function Login() {
           });
         message.success(response.data.message);
         window.location.href = "/";
-        localStorage.setItem('inscripciones',"true")
-        localStorage.setItem('listaEventos',"true")
-        localStorage.setItem('gestionEventos',"true")
-        localStorage.setItem('reportes',"true")
-        localStorage.setItem('administrador',"true")
-
+        localStorage.setItem("inscripciones", "true");
+        localStorage.setItem("listaEventos", "true");
+        localStorage.setItem("gestionEventos", "true");
+        localStorage.setItem("reportes", "true");
+        localStorage.setItem("administrador", "true");
       })
       .catch((error) => {
         message.error(error.response.data.message);
@@ -83,6 +82,10 @@ export default function Login() {
     localStorage.setItem("gestionEventos", mostrarGestionEventos);
     localStorage.setItem("reportes", mostrarReportes);
     localStorage.setItem("administrador", mostrarAdministrador);
+  };
+
+  const regresarInicio = () => {
+    localStorage.setItem('inicio',true)
   };
 
   return (
@@ -140,7 +143,12 @@ export default function Login() {
                 Ingresar
               </Button>
               <Link to="/">
-                <Button className="boton-salir-login">Atrás</Button>
+                <Button
+                  className="boton-salir-login"
+                  onClick={() => regresarInicio()}
+                >
+                  Atrás
+                </Button>
               </Link>
             </div>
           </div>

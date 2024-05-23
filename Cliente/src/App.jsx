@@ -63,23 +63,11 @@ function App() {
     } else if (localStorage.getItem("administrador") === "false") {
       setMostrarAdministrador(false);
     }
-
-    // Verificar la URL actual y establecer mostrarContenido en consecuencia
-    console.log("inscripciones ", localStorage.getItem("inscripciones"));
-    console.log("listaEventos ", localStorage.getItem("listaEventos"));
-    console.log("gestionEventos ", localStorage.getItem("gestionEventos"));
-    console.log("reportes ", localStorage.getItem("reportes"));
-    console.log("administrador ", localStorage.getItem("administrador"));
     if (location.pathname === "/adminUMSS") {
       setMostrarContenido(false);
     } else {
       setMostrarContenido(true);
     }
-
-    console.log(
-      "RESIVO EL VALOR DESDE LOGIN ",
-      localStorage.getItem("gestionEventos")
-    );
   }, []);
 
   //Validar usuario y contraseña

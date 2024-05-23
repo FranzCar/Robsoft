@@ -68,7 +68,7 @@
     width: auto;
     height: 100px;
     display: flex;
-    margin-left: 51%;
+    margin-left: 48%;
 }
 
 .titulo{
@@ -624,7 +624,7 @@ h3 {
 }
 .icono-usuario{
     opacity: 0.7;
-    height: 150px;
+    height: 250px;
     padding-top: 10%;
     padding-bottom: 8%;
     width: auto;
