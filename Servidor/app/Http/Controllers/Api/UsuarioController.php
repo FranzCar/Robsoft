@@ -8,9 +8,26 @@ use App\Models\Usuario;
 use App\Models\Roles;
 use App\Models\Tareas;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UsuarioController extends Controller
 {
+    public function obtenerTareasUsuario($id)
+    {
+        $tareas = Cache::remember("tareas_usuario_{$id}", 60, function () use ($id) {
+            // Consulta a la base de datos para obtener las tareas del usuario
+            return DB::table('usuario_roles')
+                ->join('roles', 'usuario_roles.rol_id', '=', 'roles.id')
+                ->join('roles_tareas', 'roles.id', '=', 'roles_tareas.rol_id')
+                ->join('tareas', 'roles_tareas.tarea_id', '=', 'tareas.id')
+                ->where('usuario_roles.usuario_id', $id)
+                ->pluck('tareas.nombre');
+        });
+
+        return response()->json($tareas);
+    }
+
     public function listaUsuarios() {
         $usuarios = Usuario::select('id_usuario', 'username')
                            ->orderBy('id_usuario', 'asc')
@@ -32,29 +49,6 @@ class UsuarioController extends Controller
         return response()->json(['message' => 'Roles asignados con éxito al usuario.']);
     }
 
-    public function obtenerTareasUsuario($idUsuario) {
-        // Encuentra el usuario y carga sus roles y las tareas de esos roles
-        $usuario = Usuario::with('roles.tareas')->findOrFail($idUsuario);
-
-        // Obtén todas las tareas posibles
-        $todasLasTareas = Tareas::all();
-
-        // Obtén las IDs de las tareas del usuario
-        $tareasDelUsuario = $usuario->roles->flatMap(function ($rol) {
-            return $rol->tareas->pluck('id_tarea');
-        })->unique();
-
-        // Prepara el resultado final
-        $tareas = $todasLasTareas->map(function ($tarea) use ($tareasDelUsuario) {
-            return [
-                'id_tarea' => $tarea->id_tarea,
-                'nombre_tarea' => $tarea->nombre_tarea,
-                'asignado' => $tareasDelUsuario->contains($tarea->id_tarea)
-            ];
-        });
-
-        return response()->json($tareas);
-    }
     public function obtenerRolesUsuario($idUsuario) {
         // Encuentra el usuario y carga sus roles
         $usuario = Usuario::with('roles')->findOrFail($idUsuario);
@@ -78,64 +72,70 @@ class UsuarioController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $request->validate([
-            'username' => 'required',
-            'password' => 'required'
-        ]);
-
-        $username = $request->input('username');
-        $password = $request->input('password');
-
-        $user = Usuario::where('username', $username)->first();
-
-        if (!$user) {
-            return response()->json(['message' => 'El usuario no existe'], 404);
-        }
-
-        if ($user->password !== $password) {
-            return response()->json(['message' => 'Contraseña incorrecta'], 401);
-        }
-
-        return response()->json(['message' => 'Autenticación exitosa', 'id_usuario' => $user->id_usuario]);
-    }
-
-    public function crearUsuario(Request $request)
 {
-    try {
-        // Validar los datos de entrada
-        $validatedData = $request->validate([
-            'username' => 'required|unique:USUARIO,username', // Asegúrate de que el nombre de usuario sea único
-            'password' => 'required|min:6', // La contraseña debe tener al menos 6 caracteres
-            'id_roles' => 'required|exists:ROLES,id_roles' 
-        ]);
+    \Log::info('Login request received', $request->all());
 
-        // Crear un nuevo usuario
-        $usuario = new Usuario();
-        $usuario->username = $validatedData['username'];
-        $usuario->password = $validatedData['password']; // Asignar la contraseña directamente sin encriptar
-        $usuario->api_token = Str::random(50); // Generar un token API aleatorio
+    $request->validate([
+        'username' => 'required',
+        'password' => 'required'
+    ]);
 
-        // Guardar el usuario
-        $usuario->save();
+    $credentials = $request->only('username', 'password');
 
-        // Asignar el rol al usuario
-        $usuario->roles()->attach($validatedData['id_roles']);
+    \Log::info('Attempting login for username', ['username' => $credentials['username']]);
 
-        // Devolver una respuesta
-        return response()->json([
-            'message' => 'Usuario creado con éxito',
-            'id_usuario' => $usuario->id_usuario,
-            'api_token' => $usuario->api_token,
-            'id_roles' => $validatedData['id_roles']
-        ]);
+    $authAttempt = Auth::attempt($credentials);
+    \Log::info('Auth attempt result', ['result' => $authAttempt]);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        // Devolver una respuesta de error en caso de fallar la validación
-        return response()->json(['errors' => $e->errors()], 422);
-    } catch (\Exception $e) {
-        // Manejar otras excepciones
-        return response()->json(['error' => $e->getMessage()], 500);
+    if ($authAttempt) {
+        $user = Auth::user();
+        \Log::info('Authentication successful', ['user_id' => $user->id_usuario]);
+
+        $token = $user->createToken('authToken')->accessToken;
+
+        return response()->json(['token' => $token, 'user' => $user]);
+    } else {
+        \Log::warning('Authentication failed', ['username' => $credentials['username']]);
+
+        return response()->json(['error' => 'Unauthorised'], 401);
     }
 }
+    public function crearUsuario(Request $request)
+    {
+        try {
+            // Validar los datos de entrada
+            $validatedData = $request->validate([
+                'username' => 'required|unique:usuario,username', // Asegúrate de que el nombre de usuario sea único
+                'password' => 'required|min:6', // La contraseña debe tener al menos 6 caracteres
+                'id_roles' => 'required|exists:roles,id_roles' 
+            ]);
+
+            // Crear un nuevo usuario
+            $usuario = new Usuario();
+            $usuario->username = $validatedData['username'];
+            $usuario->password = Hash::make($validatedData['password']); // Cifrar la contraseña
+            $usuario->api_token = Str::random(80); // Generar un token API aleatorio
+
+            // Guardar el usuario
+            $usuario->save();
+
+            // Asignar el rol al usuario
+            $usuario->roles()->attach($validatedData['id_roles']);
+
+            // Devolver una respuesta
+            return response()->json([
+                'message' => 'Usuario creado con éxito',
+                'id_usuario' => $usuario->id_usuario,
+                'api_token' => $usuario->api_token,
+                'id_roles' => $validatedData['id_roles']
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Devolver una respuesta de error en caso de fallar la validación
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            // Manejar otras excepciones
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

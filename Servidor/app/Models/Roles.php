@@ -13,8 +13,11 @@ class Roles extends Model
     public $incrementing = true;
     use HasFactory;
 
-    public function tareas()
-    {
-        return $this->belongsToMany(Tareas::class, 'ROLES_TAREAS', 'id_roles', 'id_tarea');
+    public function usuarios() {
+        return $this->belongsToMany(Usuario::class, 'usuario_roles', 'id_roles', 'id_usuario');
+    }
+
+    public function tareas() {
+        return $this->belongsToMany(Tareas::class, 'roles_tareas', 'id_roles', 'id_tarea');
     }
 }

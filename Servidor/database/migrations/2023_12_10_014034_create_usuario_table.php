@@ -15,9 +15,10 @@ return new class extends Migration
     {
         Schema::create('usuario', function (Blueprint $table) {
             $table->integer('id_usuario', true);
-            $table->string('username', 50)->nullable();
-            $table->string('password', 50)->nullable();
-            $table->string('api_token', 50)->nullable();
+            $table->string('username', 50)->nullable()->unique();
+            $table->string('password', 80)->nullable();
+            $table->string('api_token', 80)->nullable()->unique();
+            $table->timestamps();
         });
     }
 

@@ -12,4 +12,8 @@ class Tareas extends Model
     protected $primaryKey = 'id_tarea';
     public $incrementing = true;
     use HasFactory;
+    
+    public function roles() {
+        return $this->belongsToMany(Roles::class, 'roles_tareas', 'id_tarea', 'id_roles');
+    }
 }
