@@ -47,7 +47,7 @@ Route::middleware(['auth:api', 'check_tarea'])->group(function () {
     Route::get('lista-roles',[RolesController::class, 'listaRoles'])->name('lista-roles');
     Route::post('roles-actualizar-tareas', [RolesController::class, 'actualizarTareas'])->name('roles-actualizar-tareas');
     Route::post('usuarios-actualizar-roles', [UsuarioController::class, 'asignarRol'])->name('usuarios-actualizar-roles');
-    Route::get('lista-tareas',[TareaController::class, 'listaTareas'])->name('lista-tareas');
+    Route::get('lista-tareas',[RolesController::class, 'listaTareas'])->name('lista-tareas');
     Route::get('lista-roles-tareas',[RolesController::class, 'listaRolesTareas'])->name('lista-roles-tareas');
     Route::post('crear-usuario', [UsuarioController::class, 'crearUsuario'])->name('crear-usuario');
     Route::get('tareas_de_usuario/{id}', [UsuarioController::class, 'tareasDeUsuario'])->name('tareas_de_usuario');
