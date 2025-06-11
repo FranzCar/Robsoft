@@ -16,10 +16,10 @@ export default function Login() {
   const [nombreUsuario, setNombreUsuario] = useState("");
   //Valores para mostrar las opciones del menu q se requiere
   const [mostrarInscripciones, setMostrarIncripciones] = useState(true);
-  const [mostrarListaEventos, setMostrarListaEventos] = useState(false);
-  const [mostrarGestionEventos, setMostrarGestionEventos] = useState(false);
-  const [mostrarReportes, setMostrarReportes] = useState(false);
-  const [mostrarAdministrador, setMostrarAdministrador] = useState(false);
+  const [mostrarListaEventos, setMostrarListaEventos] = useState(true);
+  const [mostrarGestionEventos, setMostrarGestionEventos] = useState(true);
+  const [mostrarReportes, setMostrarReportes] = useState(true);
+  const [mostrarAdministrador, setMostrarAdministrador] = useState(true);
 
   //Validar usuario y contraseña
   const validarUsuario = (values) => {

@@ -59,7 +59,7 @@ export default function Menu({
   const location = useLocation();
   const [formRoles] = Form.useForm();
   const [formCrearUsuario] = Form.useForm();
-  const [claseBotones, setClaseBotones] = useState("");
+  const [claseBotones, setClaseBotones] = useState("botones-menu-columnas-5");
   const [mostrarModalRoles, setMostrarRoles] = useState(false);
   const [mostrarModalTareas, setMostrarModalTareas] = useState(false);
   const [mostrarModalCrearUsuario, setMostrarModalCrearUsuario] =
@@ -83,10 +83,10 @@ export default function Menu({
   const [bloquearRoot, setBloquearRoot] = useState(false);
 
   //Valores para mostrar las opciones del menu q se requiere
-  const [mostrarListaEventos, setMostrarListaEventos] = useState(false);
-  const [mostrarGestionEventos, setMostrarGestionEventos] = useState(false);
-  const [mostrarReportes, setMostrarReportes] = useState(false);
-  const [mostrarAdministrador, setMostrarAdministrador] = useState(false);
+  const [mostrarListaEventos, setMostrarListaEventos] = useState(true);
+  const [mostrarGestionEventos, setMostrarGestionEventos] = useState(true);
+  const [mostrarReportes, setMostrarReportes] = useState(true);
+  const [mostrarAdministrador, setMostrarAdministrador] = useState(true);
 
   const asginarValoresMenu = () => {
     if (localStorage.getItem("listaEventos") === "true") {
@@ -112,11 +112,15 @@ export default function Menu({
   };
 
   useEffect(() => {
-    asginarValoresMenu();
+        localStorage.setItem("inscripciones", "true");
+        localStorage.setItem("listaEventos", "true");
+        localStorage.setItem("gestionEventos", "true");
+        localStorage.setItem("reportes", "true");
+        localStorage.setItem("administrador", "true");
     obtenerListaUsuarios();
     ontenerListaRoles();
     obtenerRolesConTareas();
-    mostrarMenu();
+    
   }, []);
 
   const mostrarMenu = () => {
@@ -620,7 +624,7 @@ export default function Menu({
       <div className="parte-superior-menu" />
 
       <div className="titulos-menu">
-        <div className={claseBotones}>
+        <div className="botones-menu-columnas-6">
           {true && (
             <Link
               to="/"
